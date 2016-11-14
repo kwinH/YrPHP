@@ -1090,6 +1090,7 @@ class Model
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
+
         $NData = '';
 
         foreach ($data as $k => $v) {
@@ -1099,7 +1100,7 @@ class Model
         $NData = trim($NData, ',');
 
 
-        $this->sql = "UPDATE `" . $this->escapeTableName . "` SET " . $NData . " " . $where . " " . $limit . "";
+        $this->sql = "UPDATE " . $this->escapeTableName . " SET " . $NData . " " . $where . " " . $limit . "";
 
 
         $re = $this->query($this->sql)->result();

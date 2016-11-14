@@ -4,7 +4,7 @@
  * User: Kwin
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://GitHubhub.com/quinnfox/yrphp
+ * GitHub:https://github.com/kwinH/YrPHP
  */
 return [
     'urlType' => 2, // URL访问模式,可选参数0、1、2、3,代表以下四种模式：

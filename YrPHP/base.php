@@ -5,7 +5,7 @@
  * User: Nathan
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://GitHubhub.com/quinnfox/yrphp
+ * GitHub:https://github.com/kwinH/YrPHP
  */
 use YrPHP\Core\Debug;
 use YrPHP\Libs\File;

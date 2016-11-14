@@ -4,7 +4,7 @@
  * User: Kwin
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://GitHubhub.com/quinnfox/yrphp
+ * GitHub:https://github.com/kwinH/YrPHP
  */
 namespace YrPHP\Libs;
 class Curl

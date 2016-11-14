@@ -4,7 +4,7 @@
  * User: Kwin
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://GitHubhub.com/quinnfox/yrphp
+ * GitHub:https://github.com/kwinH/YrPHP
  */
 namespace YrPHP\Core;
 
@@ -1081,6 +1081,9 @@ class Model
 
         if ($data === false) return false;
 
+        $filed = array_keys($data);
+        $data = $this->setDataPreProcessFill($filed, array_values($data));
+
         if (!empty($where))
             $this->where($where);
 
@@ -1090,7 +1093,7 @@ class Model
         $NData = '';
 
         foreach ($data as $k => $v) {
-            $NData .= '`' . $k . "`='" . $v . "',";
+            $NData .= '`' . $filed[$k] . "`='" . $v . "',";
         }
 
         $NData = trim($NData, ',');

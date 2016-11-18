@@ -4,7 +4,7 @@
  * User: Kwin
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://github.com/kwinH/YrPHP
+ * GitHub:https://GitHubhub.com/quinnfox/yrphp
  */
 return [
     'urlType' => 2, // URL访问模式,可选参数0、1、2、3,代表以下四种模式：
@@ -21,7 +21,7 @@ return [
 
     /* -----------错误处理----------------------------------*/
     'logRecord' => true,   // 默认错误记录日志
-    'logDir' => APP_PATH . 'runtime/logs/', // 日志记录目录
+    'logDir' => APP_PATH . 'Runtime/Logs/', // 日志记录目录
 
 
     'ctrBaseNamespace' => 'Controllers',//默认的控制器层名称
@@ -37,9 +37,9 @@ return [
      * 将不理会配置中的该参数，找到模板目录下的index.php文件
      */
     'templateExt' => 'html',
-    'setCompileDir' => APP_PATH . "runtime/compile_tpl/", //设置模板被编译成PHP文件后的文件位置
+    'setCompileDir' => APP_PATH . "Runtime/CompileTpl/", //设置模板被编译成PHP文件后的文件位置
     'caching' => 0, //缓存(静态化)开关 1开启，0为关闭
-    'setCacheDir' => APP_PATH . "runtime/cache/", //设置缓存的目录
+    'setCacheDir' => APP_PATH . "Runtime/Cache/", //设置缓存的目录
     'cacheLifetime' => 60 * 60 * 24 * 7, //设置缓存的时间
     'leftDelimiter' => "{", //模板文件中使用的“左”分隔符号
     'rightDelimiter' => "}", //模板文件中使用的“右”分隔符号
@@ -54,7 +54,7 @@ return [
     'dbCacheTime' => 0, //数据缓存时间0表示永久
     'dbCacheType' => 'file', //数据缓存类型 file|memcache|memcached|redis
     //单个item大于1M的数据存memcache和读取速度比file
-    'dbCachePath' => APP_PATH . 'runtime/data/',//数据缓存文件地址(仅对file有效)
+    'dbCachePath' => APP_PATH . 'Runtime/Data/',//数据缓存文件地址(仅对file有效)
     'dbCacheExt' => 'php',//生成的缓存文件后缀(仅对file有效)
 
     'memcache' => '127.0.0.1:11211',//string|array多个用数组传递 array('127.0.0.1:11211','127.0.0.1:1121')
@@ -64,7 +64,7 @@ return [
     /*--------------------以下是session配置---------------------------------------*/
     'sessionPrefix' => '',
     'sessionExpire' => 7200,//有效期时长
-    'sessionSavePath' => APP_PATH . "runtime/session/",
+    'sessionSavePath' => APP_PATH . "Runtime/Session/",
     'sessionName' => 'YrPHP',
     'sessionDomain' => '',//设置域，默认为当前域名
 

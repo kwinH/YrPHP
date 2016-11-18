@@ -5,10 +5,11 @@
  * User: Nathan
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://github.com/kwinH/YrPHP
+ * GitHub:https://GitHubhub.com/quinnfox/yrphp
  */
-use YrPHP\Core\Debug;
-use YrPHP\Libs\File;
+use YrPHP\Debug;
+use YrPHP\File;
+use YrPHP\Structure;
 
 class Entry
 {
@@ -17,32 +18,17 @@ class Entry
     static function init()
     {
         define('STARTTIME', microtime(true));
-     //   ini_set('memory_limit', -1);
+        //   ini_set('memory_limit', -1);
         set_time_limit(0);
         //PHP程序所有需要的路径，都使用绝对路径
         define("BASE_PATH", str_replace("\\", "/", dirname(__FILE__)) . '/'); //框架的路径
         define("ROOT_PATH", dirname(BASE_PATH) . '/'); //项目的根路径，也就是框架所在的目录
         define("APP_PATH", ROOT_PATH . rtrim(APP, '/') . '/'); //用户项目的应用绝对路径
-        define("LIB_PATH", APP_PATH . 'Libs' . '/'); //用户项目的应用绝对路径
-        define("CORE_PATH", BASE_PATH . 'Core/'); //框架核心类库
-
-        /**
-         * 注册自动加载函数
-         * 也可以使用一个匿名函数
-         * spl_autoload_register(function(){});
-         */
-        spl_autoload_register('self::autoLoadClass');
 
 
-        require CORE_PATH . "Debug.php";
-        //包含系统公共函数
-        require BASE_PATH . "Common/functions.php";
+        require ROOT_PATH . 'vendor/autoload.php';
 
-        //包含自定义公共函数
-        $commonPath = File::search(APP_PATH . 'Common', '.php');
-        foreach ($commonPath as $v) {
-            require $v;
-        }
+        if (!file_exists(APP)) Structure::run();
 
     }
 
@@ -57,9 +43,9 @@ class Entry
             $configPath = APP_PATH . "Config/config_" . APP_MODE . ".php";
         }
 
-        if (file_exists($configPath)) {
+        if (file_exists($configPath))
             C(require $configPath);
-        }
+
 
         header("Content-Type:" . C('contentType') . ";charset=" . C('charset')); //设置系统的输出字符为utf-8
         date_default_timezone_set(C('timezone')); //设置时区（默认中国）
@@ -94,78 +80,37 @@ class Entry
 
 
         //错误信息是否显示
-        if (DEBUG) {
+        if (DEBUG)
             ini_set("display_errors", 1); //显示错误到屏幕
-        } else {
+        else
             ini_set("display_errors", 0); //隐藏而不显示
-        }
+
 
         if (isset($_GET['Lang'])) {
             session('Lang', 'en');
         } else {
-            if (!session('Lang')) {
-                session('Lang', 'en');
-            }
+
+            if (!session('Lang')) session('Lang', 'en');
+
         }
 
         if (isset($_GET['country'])) {
             session('country', strtoupper($_GET['country']));
         } else {
-            if (!session('country')) {
 
+            if (!session('country'))
                 session('country', reset(explode(',', $_SERVER["HTTP_ACCEPT_LANGUAGE"])));
-            }
 
         }
 
         $langPath = APP_PATH . 'Lang/lang_' . session('Lang') . '.php';
-        if (file_exists($langPath)) {
+
+        if (file_exists($langPath))
             getLang(require $langPath);
-        }
+
 
         csrfToken();
-        session('_old_input',$_POST);
-    }
-
-
-    /*
-    /设置包含目录（类所在的全部目录）,  PATH_SEPARATOR 分隔符号 Linux(:) Windows(;)
-    $include_path=get_include_path();                         //原基目录
-    $include_path.=PATH_SEPARATOR.ROOT_PATH;       //框架中基类所在的目录
-    //设置include包含文件所在的所有目录
-    set_include_path($include_path);
-    */
-    static function autoLoadClass($className)
-    {
-        Debug::start();
-        $classList = array();
-        if (isset($classList[$className])) {
-            $classPath = $classList[$className];
-        } else {
-            $classPath = "";
-
-            $classMap = require APP_PATH . "Config/classMap.php";
-
-            if (isset($classMap[$className])) {
-                $classPath = $classMap[$className];
-
-            } else if (false !== strpos($className, '\\')) {
-
-                $path = explode('\\', $className);
-                $className = array_pop($path);
-                $pathCount = count($path) - 1;
-                $classPath = implode('/', $path) . '/' . $className . '.php';
-                $classPath = ROOT_PATH . $classPath;
-                if (!file_exists($classPath))
-                    return false;
-
-            }
-        }
-
-        if (file_exists($classPath)) requireCache($classPath);
-
-        Debug::stop();
-        Debug::addMsg(array('path' => $classPath, 'time' => Debug::spent()), 1);
+        session('_old_input', $_POST);
     }
 
 
@@ -215,27 +160,6 @@ class Entry
         return true;
     }
 
-    /**
-     * loadClass($className [, mixed $parameter [, mixed $... ]])
-     * @param $className 需要得到单例对象的类名
-     * @param $parameter $args 0个或者更多的参数，做为类实例化的参数。
-     * @return  static
-     */
-    static function loadClass()
-    {
-
-        //取得所有参数
-        $arguments = func_get_args();
-        //弹出第一个参数，这是类名，剩下的都是要传给实例化类的构造函数的参数了
-        $className = array_shift($arguments);
-        $key = trim($className, '\\');
-
-        if (!isset(self::$instanceList[$key])) {
-            $class = new ReflectionClass($className);
-            self::$instanceList[$key] = $class->newInstanceArgs($arguments);
-        }
-        return self::$instanceList[$key];
-    }
 
     static function run()
     {
@@ -243,9 +167,9 @@ class Entry
         self::init();
         self::loadConf();
 
-        $url = loadClass('YrPHP\Core\Uri')->rsegment();
+        $url = loadClass('YrPHP\Uri')->rsegment();
 
-        $ctrBasePath = C('ctrBasePath');
+        $ctrBaseNamespace = APP_PATH . C('ctrBaseNamespace') . '/';
 
         //默认控制器文件
         $defaultCtl = C('defaultCtl');
@@ -271,12 +195,14 @@ class Entry
             $action = empty($_GET[C('actTrigger')]) ? $defaultAct : strtolower($_GET[C('actTrigger')]);
 
         } else {
+
             //(PATHINFO 模式)
 
             foreach ($url as $k => $v) {
-                //    $v = strtolower($v);
-                if (is_dir($ctrBasePath . $v)) {
-                    $ctrBasePath .= empty($v) ? '' : $v . '/';
+                $v = ucfirst(strtolower($v));
+
+                if (is_dir($ctrBaseNamespace . $v)) {
+                    $ctrBaseNamespace .= empty($v) ? '' : $v . '/';
                     $classObj .= '\\' . $v;
                 } else {
                     $className = ucfirst(strtolower($v));
@@ -297,7 +223,7 @@ class Entry
 
         $nowAction = $className . '/' . $action;
 
-        $classPath = $ctrBasePath . $className . '.class.php';
+        $classPath = $ctrBaseNamespace . $className . '.class.php';
 
         C(array(
             'classPath' => $classPath,

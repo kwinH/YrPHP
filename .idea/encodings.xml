@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/YrPHP/Core/Structure.php" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/YrPHP/Lang/lang_en.php" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/YrPHP/Libs/Validate.php" charset="UTF-8" />
-  </component>
-</project>

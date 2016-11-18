@@ -1,5 +1,5 @@
 <?php
-namespace YrPHP\Libs\Crypt;
+namespace YrPHP\Crypt;
 class DES3
 {
     public $key;

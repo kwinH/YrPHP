@@ -1,5 +1,5 @@
 <?php
-namespace YrPHP\Libs;
+namespace YrPHP;
 /*~ class.phpmailer.php
 .---------------------------------------------------------------------------.
 |  Software: PHPMailer - PHP email class                                    |

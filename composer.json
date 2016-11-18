@@ -1,0 +1,17 @@
+{
+    "require": {
+
+    },
+
+  "autoload": {
+    "classmap": [
+      "YrPHP"
+    ],
+    "psr-4": {
+      "App\\": "App/"
+    },
+    "files": [
+      "YrPHP/Common/functions.php"
+    ]
+  }
+}

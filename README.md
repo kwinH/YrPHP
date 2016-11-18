@@ -108,7 +108,7 @@ example.com/file/.../file(n)/class/function/ID
 >`* @return string`
 >`*/`
 
-##解析URL (YrPHP\Core\Uri类)
+##解析URL (YrPHP\Uri类)
 **分析`http://example.com/index.php/news/index/id`**
 
 
@@ -245,7 +245,7 @@ class Test extends Controller
 
 等同于使用：
 ```php
-class Test extends \core\Controller
+class Test extends \Controller
 ```
 ##规则
 1. 文件名必须是：***类名***.class.php
@@ -624,12 +624,12 @@ return [
 > 模型类并非必须定义，只有当存在独立的业务逻辑或者属性的时候才需要定义。
 > 文件名为**模型名.class.php**  UserModel的文件名为**UserModel.class.php**
 
-模型类通常需要继承系统的YrPHP\Core\Model类或其子类，下面是一个Model\UserModel类的定义：
+模型类通常需要继承系统的YrPHP\Model类或其子类，下面是一个Model\UserModel类的定义：
 
 ```php
 <?php
 namespace App\Model;
-use YrPHP\Core\Model;
+use YrPHP\Model;
 
 class UserModel extends Model
 {
@@ -662,7 +662,7 @@ M('YrPHP\Model\UserModel');//实例化UserModel模型
 
 ```php
 namespace App\Model;
-use YrPHP\Core\Model;
+use YrPHP\Model;
 class UserModel extends Model
 {
     public function __construct()
@@ -693,7 +693,7 @@ class UserModel extends Model
 ```php
 <?php
 namespace App\Model;
-use YrPHP\Core\Model;
+use YrPHP\Model;
 class UserModel extends Model
 {
 
@@ -759,7 +759,7 @@ $this->update(array 数据，array 条件，[表名]，[是否自动添加前缀
 ```php
 <?php
 namespace App\Model;
-use YrPHP\Core\Model;
+use YrPHP\Model;
 class UserModel extends Model
 {
 
@@ -1199,7 +1199,7 @@ $users = M()->connection('foo')->select(...);
 <?PHP
 namespace App\Models;
 
-use YrPHP\Core\Model;
+use YrPHP\Model;
 
 class User extends Model
 {
@@ -1241,7 +1241,7 @@ $firstName = $user->first_name;
 
 namespace App\Models;
 
-use YrPHP\Core\Model;
+use YrPHP\Model;
 
 class User extends Model
 {
@@ -1438,7 +1438,7 @@ function myUnSerialize($txt = ''){}
 
 ```php
 <?php
-namespace App\core;
+namespace App;
 
 class MyController extends Controller
 {
@@ -1462,7 +1462,7 @@ Test.class.php的文件
     <?php
     namespace App\Controllers;
 
-	use YrPHP\Core\Controller;
+	use YrPHP\Controller;
 
     class Test extends MyController
     {
@@ -1487,7 +1487,7 @@ Test.class.php的文件
 
 ```php
     <?php
-    namespace App\Libs;
+    namespace App;
 
     class MyPage
     {
@@ -1508,7 +1508,7 @@ Test.class.php的文件
     <?php
      namespace App\Controllers;
 
-	use YrPHP\Core\Controller;
+	use YrPHP\Controller;
 
     class Test extends MyController
     {
@@ -1519,7 +1519,7 @@ Test.class.php的文件
 
         function  index()
         {
-         $class = loadClass('App\Libs\MyPage');
+         $class = loadClass('App\MyPage');
          $class->index();
         }
 ```
@@ -1546,7 +1546,7 @@ Test.class.php的文件
 ####加密解密
 ```PHP
 <?PHP
-  $crypt = loadClass('YrPHP\Libs\Crypt');
+  $crypt = loadClass('YrPHP\Crypt');
   $crypt->encrypt($str);//加密数据
   $crypt->decrypt($str);//解密数据
 ```
@@ -1562,14 +1562,14 @@ Test.class.php的文件
 * @param  boolean $overWrite 该参数控制是否覆盖原文件
 * @return  boolean
 */
-YrPHP\Libs\File::createFile($aimUrl, $overWrite = false);
+YrPHP\File::createFile($aimUrl, $overWrite = false);
 
 /**
  * 递归删除文件夹或文件
  * @param  string $aimDir 文件地址
  * @return  boolean
  */
-YrPHP\Libs\File::rm($aimDir);
+YrPHP\File::rm($aimDir);
 
 /**
  * 建立文件夹
@@ -1577,7 +1577,7 @@ YrPHP\Libs\File::rm($aimDir);
  * @param  int    $mode 权限
  * @return  viod
  */
-YrPHP\Libs\File::mkDir($aimUrl, $mode = 0777);
+YrPHP\File::mkDir($aimUrl, $mode = 0777);
 
 /**
  * 移动文件夹或文件
@@ -1586,7 +1586,7 @@ YrPHP\Libs\File::mkDir($aimUrl, $mode = 0777);
  * @param  boolean $overWrite 该参数控制是否覆盖原文件
  * @return  boolean
  */
-YrPHP\Libs\File::mv($oldDir, $aimDir, $overWrite = false)；
+YrPHP\File::mv($oldDir, $aimDir, $overWrite = false)；
 
 /**
  * 复制文件或则文件夹
@@ -1595,7 +1595,7 @@ YrPHP\Libs\File::mv($oldDir, $aimDir, $overWrite = false)；
  * @param  boolean $overWrite 该参数控制是否覆盖原文件
  * @return  boolean
  */
-YrPHP\Libs\File::cp($oldDir, $aimDir, $overWrite = false)；
+YrPHP\File::cp($oldDir, $aimDir, $overWrite = false)；
 
 /**
  * 修改文件名
@@ -1603,28 +1603,28 @@ YrPHP\Libs\File::cp($oldDir, $aimDir, $overWrite = false)；
  *$name 修改后的文件路径及文件名
  * @return    boolean
  */
-YrPHP\Libs\File::rename($path, $name)；
+YrPHP\File::rename($path, $name)；
 
 /**
  * 将字符串写入文件
  * @param  string $filename 文件路径
  * @param  boolean $str 待写入的字符数据
  */
-YrPHP\Libs\File::vi($filename, $str);
+YrPHP\File::vi($filename, $str);
 
 /**
  * 将整个文件内容读出到一个字符串中
  * @param  string $filename 文件路径
  * @return string
  */
-YrPHP\Libs\File::readsFile($filename);
+YrPHP\File::readsFile($filename);
 
 /**
  * 将文件内容读出到一个数组中
  * @param  string $filename 文件名
  * @return array
  */
-YrPHP\Libs\File::readFile2array($filename);
+YrPHP\File::readFile2array($filename);
 
 /**
  * 根据关键词列出目录下所有文件
@@ -1634,7 +1634,7 @@ YrPHP\Libs\File::readFile2array($filename);
  * @return    array    所有满足条件的文件
  * 返回一个索引为结果集列名的数组
  */
-YrPHP\Libs\File::dirList($path, $key = '', $list = array())；
+YrPHP\File::dirList($path, $key = '', $list = array())；
 
 /**
  * 根据关键词列出目录下所有文件
@@ -1645,14 +1645,14 @@ YrPHP\Libs\File::dirList($path, $key = '', $list = array())；
  * @return    array    所有满足条件的文件
  * 返回一个索引为结果集列名和以0开始的列号的数组
  */
-YrPHP\Libs\File::search($path, $key = '', $list = array())；
+YrPHP\File::search($path, $key = '', $list = array())；
 
 /**
  * 获取文件名后缀
  * @param    string $filename 文件路径
  * @return    string
  */
-YrPHP\Libs\File::fileExt($filename)；
+YrPHP\File::fileExt($filename)；
 
 /**
  * 获得文件相关信息
@@ -1664,20 +1664,20 @@ YrPHP\Libs\File::fileExt($filename)；
  * 字节数)、atime(上次访问时间（Unix 时间戳）)、ctime(上次改变时间（Unix 时间戳）)、blksize(文件系统 IO
  * 的块大小)、blocks(所占据块的数目)。
  */
-YrPHP\Libs\File::getFileInfo($filename);
+YrPHP\File::getFileInfo($filename);
 
 /**
  * 统计目录大小
  * @param    string $dirname 目录
  * @return    string      比特B
  */
-YrPHP\Libs\File::getDirSize($dirname)；
+YrPHP\File::getDirSize($dirname)；
 
 /**
  * 将字节转换成Kb或者Mb...
  * @param $size为字节大小
  */
-YrPHP\Libs\File::bitSize($size)；
+YrPHP\File::bitSize($size)；
 
 /**
  * 返回当前目录层级下所有文件及目录列表
@@ -1690,7 +1690,7 @@ array (
 )
 
  */
-YrPHP\Libs\File::dirNodeTree($dir);
+YrPHP\File::dirNodeTree($dir);
 
 /**
  * 递归循环目录列表，并返回关系层级
@@ -1716,7 +1716,7 @@ YrPHP\Libs\File::dirNodeTree($dir);
   ),
   ）
  */
-YrPHP\Libs\File::dirTree($dir, $parentid = 0, $dirs = array())；
+YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
 ```
 
 ##文件上传类 Uoload
@@ -1762,11 +1762,11 @@ YrPHP\Libs\File::dirTree($dir, $parentid = 0, $dirs = array())；
  'allowedTypes'=>array('jpg','png')
  );
  //参数配置可以在实例化时就传入
-        $up = loadClass('YrPHP\\libs\Upload',$config);
+        $up = loadClass('YrPHP\\Upload',$config);
         $re = $up->upload('file123');
 
  //参数配置也可以在init方法中传入
-        $up = loadClass('YrPHP\\libs\Upload');
+        $up = loadClass('YrPHP\\Upload');
         $re = $up->init($config)->upload('file123');
 ```
 
@@ -1778,7 +1778,7 @@ YrPHP\Libs\File::dirTree($dir, $parentid = 0, $dirs = array())；
 /**
 缩略图
 **/
-$img = loadClass('YrPHP\Libs\Image','D:/test.jpg');//实例化 并打开test.jpg图片，也可以用open方法打开图片
+$img = loadClass('YrPHP\Image','D:/test.jpg');//实例化 并打开test.jpg图片，也可以用open方法打开图片
 
 /**
 * 获得图片的基本信息
@@ -1813,7 +1813,7 @@ $img->down($downFileName = null, $type = null);
 ```
 ####水印
 ```php
-$img = loadClass('YrPHP\Libs\Image');//实例化
+$img = loadClass('YrPHP\Image');//实例化
 $img->open('D:/test.jpg');//并打开test.jpg图片
 
 /**
@@ -1831,7 +1831,7 @@ $img->text($water = array(), $position = 0);
 //其他 显示 下载 保存同上
 /*************************************************************/
 
-$img = loadClass('YrPHP\Libs\Image','D:/test.jpg');//实例化 并打开test.jpg图片
+$img = loadClass('YrPHP\Image','D:/test.jpg');//实例化 并打开test.jpg图片
 
 
 /**
@@ -1851,7 +1851,7 @@ $img->watermark($water, $position = 0, $alpha = 100, $waterConf = array())；
 ```
 ####剪辑
 ```php
-$img = loadClass('YrPHP\Libs\Image','D:/test.jpg');//实例化 并打开test.jpg图片
+$img = loadClass('YrPHP\Image','D:/test.jpg');//实例化 并打开test.jpg图片
 
 /**
 * 裁剪图像
@@ -1874,7 +1874,7 @@ $img->cut($w, $h, $position = 1, $width = null, $height = null);
 
 ```php
 //GET请求
-$curl = loadClass('YrPHP\Libs\Curl');
+$curl = loadClass('YrPHP\Curl');
 
 //设置需要获取的URL地址
 $curl = $curl->setUrl($url . 'https://api.weixin.qq.com/sns/oauth2/access_token');
@@ -1896,7 +1896,7 @@ $curl = $curl->get('appid=' . $AppID . '&secret=' . $AppSecret . '&code=' . $cod
 
 ```php
 //POST请求
-$curl = loadClass('YrPHP\Libs\Curl');
+$curl = loadClass('YrPHP\Curl');
 
 //设置需要获取的URL地址
 $curl = $curl->setUrl($url . 'https://127.0.0.1/test.php');
@@ -1920,7 +1920,7 @@ $curl = $curl->post(array('name' => 'test', 'sex'=>1,'birth'=>'20101010'))；
 //获取Cookie模拟登陆
 $cookie_file = tempnam('./temp','cookie');
 
-$curl = loadClass('YrPHP\Libs\Curl');
+$curl = loadClass('YrPHP\Curl');
 
 //设置需要获取的URL地址
 $curl = $curl->setUrl($url . 'https://127.0.0.1/login.php');
@@ -1972,7 +1972,7 @@ $headers['Referer'] = 'http://www.baidu.com';
 $headers['CLIENT-IP'] = '202.103.229.40';
 $headers['X-FORWARDED-FOR'] = '202.103.229.40';
 
-$curl = loadClass('YrPHP\Libs\Curl');
+$curl = loadClass('YrPHP\Curl');
 
 //设置需要获取的URL地址
 $curl = $curl->setUrl($url . 'https://127.0.0.1/login.php');
@@ -2019,7 +2019,7 @@ $conf= array(
  * @param bool $pixel 是否显示干扰点
  */
 //参数可以在实例化时传入 也可以调用init方法初始化时调用
-loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = true, $pixel = true);
+loadClass('YrPHP\VerifyCode',$conf)->show($code = 'verify', $line = true, $pixel = true);
 ```
 
 ##分页类
@@ -2075,7 +2075,7 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
         );
 
         //实例化分页类 参数也可以通过init方法初始化
-        $page = loadClass('YrPHP\Libs\page', $config);
+        $page = loadClass('YrPHP\page', $config);
         //输出分页的html
         echo $page->show();
 ```
@@ -2092,8 +2092,8 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @param string $val
          * @return bool
          */
-        YrPHP\Libs\Validate::equal(20, 10);//false
-        YrPHP\Libs\Validate::equal(20, 20);//true
+        YrPHP\Validate::equal(20, 10);//false
+        YrPHP\Validate::equal(20, 20);//true
         /**
          * 当两个不值相等时 return true
          * @param string $data
@@ -2101,16 +2101,16 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @return bool
          */
 
-        YrPHP\Libs\Validate::notEqual(20, 10);//true
-        YrPHP\Libs\Validate::notEqual(20, 20);//false
+        YrPHP\Validate::notEqual(20, 10);//true
+        YrPHP\Validate::notEqual(20, 20);//false
         /**
          * 当存在指定范围时return true
          * @param string $data
          * @param array|string $range
          * @return bool
          */
-        YrPHP\Libs\Validate::in(2, '2,8');//true
-        YrPHP\Libs\Validate::in(10, array(2, 8));//false
+        YrPHP\Validate::in(2, '2,8');//true
+        YrPHP\Validate::in(10, array(2, 8));//false
 
         /**
          * 当不存在指定范围时return true
@@ -2118,8 +2118,8 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @param array|string $range
          * @return bool
          */
-        YrPHP\Libs\Validate::notIn(2, '2,8');//false
-        YrPHP\Libs\Validate::notIn(10, array(2, 8));//true
+        YrPHP\Validate::notIn(2, '2,8');//false
+        YrPHP\Validate::notIn(10, array(2, 8));//true
 
 
         /**
@@ -2128,8 +2128,8 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @param array|string $range
          * @return bool
          */
-        YrPHP\Libs\Validate::between(10, '10,20');//true
-        YrPHP\Libs\Validate::between(10, array(20, 15));//false
+        YrPHP\Validate::between(10, '10,20');//true
+        YrPHP\Validate::between(10, array(20, 15));//false
 
 
         /**
@@ -2138,8 +2138,8 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @param array|string $range
          * @return bool
          */
-        YrPHP\Libs\Validate::notBetween(10, '10,20');//false
-        YrPHP\Libs\Validate::notBetween(10, array(20, 15));//true
+        YrPHP\Validate::notBetween(10, '10,20');//false
+        YrPHP\Validate::notBetween(10, array(20, 15));//true
 
 
         /**
@@ -2149,7 +2149,7 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @param $val 值
          * @return bool
          */
-        YrPHP\Libs\Validate::unique($tableName, $field, $val);
+        YrPHP\Validate::unique($tableName, $field, $val);
 
         /**
          * 当字符长度存在指定范围时return true
@@ -2159,39 +2159,39 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * length('abc',3); strlen('abc') ==3
          * length('abc',array(5,3))==length('abc',array(3,5)) => strlen('abc') >=3 && strlen('abc') <=5
          */
-        YrPHP\Libs\Validate::length($data = '', $range = '');
+        YrPHP\Validate::length($data = '', $range = '');
 
 
         /**
          * Email格式验证
          * @param    string $value 需要验证的值
          */
-        YrPHP\Libs\Validate::email('5463@qq.com');//true
+        YrPHP\Validate::email('5463@qq.com');//true
 
         /**
          * URL格式验证
          * @param    string $value 需要验证的值
          */
-        YrPHP\Libs\Validate::url('https://www.baidu.com');//true
+        YrPHP\Validate::url('https://www.baidu.com');//true
 
         /**
          * 数字格式验证
          * @param    string $value 需要验证的值
          */
-        YrPHP\Libs\Validate::number(100); //true;
+        YrPHP\Validate::number(100); //true;
 
         /**
          * 使用自定义的正则表达式进行验证
          * @param    string $value 需要验证的值
          * @param    string $rules 正则表达式
          */
-        YrPHP\Libs\Validate::regex($value, $rules);
+        YrPHP\Validate::regex($value, $rules);
 
         /**
          * 判断是否为手机号码
          * @param    string $value 手机号码
          */
-        YrPHP\Libs\Validate::phone($value = '');
+        YrPHP\Validate::phone($value = '');
 
         /**
          * 判断验证码的确与否
@@ -2199,7 +2199,7 @@ loadClass('YrPHP\Libs\VerifyCode',$conf)->show($code = 'verify', $line = tr
          * @param string $code session中的key 默认'verify'
          * @return bool
          */
-        YrPHP\Libs\Validate::verifyCode($value, $code);
+        YrPHP\Validate::verifyCode($value, $code);
 ```
 ##购物车类   Cart
 ```php
@@ -2211,7 +2211,7 @@ $conf = array(
 'key'=>'cartContents',//保存在session或者cookie中的key
 );
 //实例化购物车类 配置参数也可以通过init方法初始化
-$cart = loadClass('YrPHP\Libs\Cart',$conf);
+$cart = loadClass('YrPHP\Cart',$conf);
 
 //添加一个产品到购物车
 /**

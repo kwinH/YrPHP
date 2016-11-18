@@ -4,9 +4,9 @@
  * User: Kwin
  * QQ: 284843370
  * Email: kwinwong@hotmail.com
- * GitHub: https://github.com/kwinH/YrPHP
+ * GitHub: https://GitHubhub.com/quinnfox/yrphp
  */
-namespace YrPHP\Libs;
+namespace YrPHP;
 
 
 class Page
@@ -80,7 +80,7 @@ class Page
 
         if (isset($this->urlParam[$this->p])) unset($this->urlParam[$this->p]);
 
-        $this->url = empty($this->url) ? getUrl(loadClass('YrPHP\Core\Uri')->getPath()) : $this->url;
+        $this->url = empty($this->url) ? getUrl(loadClass('YrPHP\Uri')->getPath()) : $this->url;
         $this->url .= '?' . (empty($this->urlParam) ? '' : http_build_query($this->urlParam) . '&');
 
         return $this;

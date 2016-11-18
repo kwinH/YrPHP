@@ -4,10 +4,14 @@
  * User: Kwin
  * QQ:284843370
  * Email:kwinwong@hotmail.com
- * GitHub:https://github.com/kwinH/YrPHP
+ * GitHub:https://GitHubhub.com/quinnfox/yrphp
  */
 
 /**
- * ·�ɹ��� ��������ƥ��
+ * 路由规则 就是正则匹配
  */
-//$route['abc/test1/(.*)'] = 'users/test/:1';//����abc/test1/123 ��ʵ�ʷ��ʵ���users/test/123
+/**
+ * example:
+ * $route['abc/test1/(.*)'] = 'users/test/:1';//访问abc/test1/123 则实际访问的是users/test/123
+ */
+

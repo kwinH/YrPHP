@@ -17,7 +17,7 @@
  */
 function &get_instance()
 {
-    return YrPHP\core\Controller::get_instance();
+    return YrPHP\Controller::get_instance();
 }
 
 
@@ -147,12 +147,12 @@ function loadClass()
 /**
  * 如果存在自定义的模型类，则实例化自定义模型类，如果不存在，则会实例化Model基类,同时对于已实例化过的模型，不会重复去实例化。
  * @param string $modelName 模型类名
- * @return YrPHP\Core\Model
+ * @return YrPHP\Model
  */
 function M($modelName = "")
 {
     if (empty($modelName)) {
-        return loadClass('YrPHP\Core\Model');
+        return loadClass('YrPHP\Model');
     } else {
         return loadClass('App\Models\\' . $modelName);
     }
@@ -724,14 +724,13 @@ function arrayISearch($needle, $haystack, $strict = false)
  */
 function desensitize($str = '', $start = 0, $length = 0, $replacement = '*')
 {
-    $strLen = strlen($str);
+    $strLen = mb_strlen($str);
 
-    if ($start + $length > $strLen)
-        $length = $strLen - $start;
+    $end = -($strLen - ($start + $length));
 
-    $replacement = str_repeat($replacement, $length);
+    $length = $length > $strLen ? $strLen - $start : $length;
 
-    return substr_replace($str, $replacement, $start, $length);
+    return mb_substr($str, 0, $start) . str_repeat($replacement, $length) . mb_substr($str, $end);
 }
 
 /**

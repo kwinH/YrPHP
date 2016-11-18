@@ -4,9 +4,9 @@
  * User: Kwin
  * QQ: 284843370
  * Email: kwinwong@hotmail.com
- * GitHub: https://github.com/kwinH/YrPHP
+ * GitHub: https://GitHubhub.com/quinnfox/yrphp
  */
-namespace YrPHP\Libs;
+namespace YrPHP;
 /*
 #文件目录操作类
 */

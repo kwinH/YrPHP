@@ -22,7 +22,7 @@ return [
             'dbUser' => 'root', // 用户名
             'dbPwd' => 'root', // 密码
             'dbPort' => '3306', // 端口
-            'tablePrefix' => 'YrPHP_', // 数据库表前缀
+            'tablePrefix' => '', // 数据库表前缀
             'charset' => 'utf8',
         ],
         //从服务器可以配置多个,也可以不配置，不做读写分离

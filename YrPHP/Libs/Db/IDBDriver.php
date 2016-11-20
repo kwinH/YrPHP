@@ -6,7 +6,7 @@
  * Email: kwinwong@hotmail.com
  * GitHub: https://GitHubhub.com/quinnfox/yrphp
  */
-namespace Yrphp\Db;
+namespace YrPHP\Db;
 
 
 interface IDBDriver

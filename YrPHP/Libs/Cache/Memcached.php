@@ -6,7 +6,7 @@
  * Email: kwinwong@hotmail.com
  * GitHub: https://GitHubhub.com/quinnfox/yrphp
  */
-namespace Yrphp\Cache;
+namespace YrPHP\Cache;
 
 
 class Memcached implements ICache

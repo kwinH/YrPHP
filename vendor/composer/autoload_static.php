@@ -27,11 +27,18 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
     public static $classMap = array (
         'Entry' => __DIR__ . '/../..' . '/YrPHP/base.php',
         'YrPHP\\Cache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache.php',
+        'YrPHP\\Cache\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/File.php',
+        'YrPHP\\Cache\\ICache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/ICache.php',
+        'YrPHP\\Cache\\Memcache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/Memcache.php',
+        'YrPHP\\Cache\\Memcached' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/Memcached.php',
+        'YrPHP\\Cache\\Redis' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/Redis.php',
         'YrPHP\\Cart' => __DIR__ . '/../..' . '/YrPHP/Libs/Cart.php',
         'YrPHP\\Controller' => __DIR__ . '/../..' . '/YrPHP/Libs/Controller.php',
         'YrPHP\\Crypt' => __DIR__ . '/../..' . '/YrPHP/Libs/Crypt.php',
         'YrPHP\\Crypt\\DES3' => __DIR__ . '/../..' . '/YrPHP/Libs/Crypt/DES3.php',
         'YrPHP\\Curl' => __DIR__ . '/../..' . '/YrPHP/Libs/Curl.php',
+        'YrPHP\\Db\\IDBDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/IDBDriver.php',
+        'YrPHP\\Db\\pdoDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/pdoDriver.php',
         'YrPHP\\Debug' => __DIR__ . '/../..' . '/YrPHP/Libs/Debug.php',
         'YrPHP\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/File.php',
         'YrPHP\\Image' => __DIR__ . '/../..' . '/YrPHP/Libs/Image.php',
@@ -45,13 +52,6 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
         'YrPHP\\Validate' => __DIR__ . '/../..' . '/YrPHP/Libs/Validate.php',
         'YrPHP\\VerifyCode' => __DIR__ . '/../..' . '/YrPHP/Libs/VerifyCode.php',
         'YrPHP\\YrTpl' => __DIR__ . '/../..' . '/YrPHP/Libs/YrTpl.php',
-        'Yrphp\\Cache\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/File.php',
-        'Yrphp\\Cache\\ICache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/ICache.php',
-        'Yrphp\\Cache\\Memcache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/Memcache.php',
-        'Yrphp\\Cache\\Memcached' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/Memcached.php',
-        'Yrphp\\Cache\\Redis' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/Redis.php',
-        'Yrphp\\Db\\IDBDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/IDBDriver.php',
-        'Yrphp\\Db\\pdoDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/pdoDriver.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

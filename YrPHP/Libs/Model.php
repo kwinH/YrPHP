@@ -70,6 +70,8 @@ class Model
 
     private $PreProcessStatus = true;
 
+    private static $tableFileds = [];
+
     public function __construct()
     {
 
@@ -398,11 +400,28 @@ class Model
     }
 
     /**
+     * @param array $field
+     * @param string $tableName
+     * @param bool $auto
+     * @return $this
+     */
+    public final function except($field = [], $tableName = '', $auto = true)
+    {
+        $tableField = $this->tableField($tableName, $auto);
+
+        $field = array_diff($tableField, $field);
+
+        $this->methods['field'] .= implode(',', $field);
+
+        return $this;
+    }
+
+    /**
      * @param string $tableName
      * @param int $auto 1 自动添加前缀
      * @return $this
      */
-    public final function table($tableName = "", $auto = 1)
+    public final function table($tableName = "", $auto = true)
     {
 
         if (empty($tableName)) {
@@ -421,6 +440,14 @@ class Model
         return $this;
     }
 
+    /**
+     * 获得表名
+     * @return null|string
+     */
+    public function getTable()
+    {
+        return $this->tableName;
+    }
 
     /**
      * @param string $tableName
@@ -756,9 +783,10 @@ class Model
 
 
     /**
-     * @param int $id
+     * 以主键为条件 查询
+     * @param int $id 查询的条件主键值
      * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
-     * @param string $tableName
+     * @param string $tableName 表名 默认$this->tableName
      * @param bool $auto 是否自动添加表前缀
      * @return mixed
      */
@@ -1014,7 +1042,16 @@ class Model
     public final function tableField($tableName = "", $auto = true)
     {
 
-        $result = $this->checkTable($tableName, $auto);
+        $this->table($tableName, $auto);
+
+        if (isset(self::$tableFileds[$this->escapeTableName]))
+            return self::$tableFileds[$this->escapeTableName];
+
+
+        $sql = "desc $this->escapeTableName";
+
+        $result = $this->query($sql)->result();
+
 
         foreach ($result as $k => $row) {
             // $row["Field"] = strtolower($row["Field"]);
@@ -1032,8 +1069,11 @@ class Model
             if (!array_key_exists("pri", $fields)) {
                 $fields["pri"] = array_shift($fields);
             }
-            return $fields;
+            self::$tableFileds[$tableName] = $fields;
+
+            return self::$tableFileds[$tableName];
         }
+
         return false;
     }
 
@@ -1307,17 +1347,11 @@ class Model
     function checkTable($tableName = '', $auto = true)
     {
         $this->table($tableName, $auto);
-        $cache = Cache::getInstance();
+
         $sql = "desc $this->escapeTableName";
-        $dbCacheFile = md5($sql);
-
-        if (!$cache->isExpired($dbCacheFile))
-            return $cache->get($dbCacheFile);
-
 
         $info = $this->query($sql)->result();
 
-        $cache->set($dbCacheFile, $info);
 
         return $info;
     }

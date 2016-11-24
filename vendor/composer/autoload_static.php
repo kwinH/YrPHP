@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
 {
     public static $files = array (
-        '77d93d6afd9888a7ca17e3d0482f89a5' => __DIR__ . '/../..' . '/YrPHP/Common/functions.php',
+        'df8ba4fd963eeedd28df00a91db10ada' => __DIR__ . '/../..' . '/YrPHP/Helpers/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -25,7 +25,7 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
     );
 
     public static $classMap = array (
-        'Entry' => __DIR__ . '/../..' . '/YrPHP/base.php',
+        'Entry' => __DIR__ . '/../..' . '/YrPHP/Entry.php',
         'YrPHP\\Cache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache.php',
         'YrPHP\\Cache\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/File.php',
         'YrPHP\\Cache\\ICache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/ICache.php',

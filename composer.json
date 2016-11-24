@@ -11,7 +11,7 @@
       "App\\": "App/"
     },
     "files": [
-      "YrPHP/Common/functions.php"
+      "YrPHP/Helpers/functions.php"
     ]
   }
 }

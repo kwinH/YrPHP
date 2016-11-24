@@ -93,8 +93,8 @@ st;
 
 
         $path = array(
-            APP_PATH . 'Common/index.html'              => $html,
-            APP_PATH . 'Common/functions.php'           => $fun,
+            APP_PATH . 'Helpers/index.html'              => $html,
+            APP_PATH . 'Helpers/functions.php'           => $fun,
             APP_PATH . 'Config/index.html'              => $html,
             APP_PATH . 'Controllers/index.html'            => $html,
             APP_PATH . 'Controllers/Index.php'       => $controls,

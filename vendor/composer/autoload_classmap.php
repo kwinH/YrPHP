@@ -6,7 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Entry' => $baseDir . '/YrPHP/base.php',
+    'Entry' => $baseDir . '/YrPHP/Entry.php',
     'YrPHP\\Cache' => $baseDir . '/YrPHP/Libs/Cache.php',
     'YrPHP\\Cache\\File' => $baseDir . '/YrPHP/Libs/Cache/File.php',
     'YrPHP\\Cache\\ICache' => $baseDir . '/YrPHP/Libs/Cache/ICache.php',

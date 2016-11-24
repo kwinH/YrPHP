@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    '77d93d6afd9888a7ca17e3d0482f89a5' => $baseDir . '/YrPHP/Common/functions.php',
+    'df8ba4fd963eeedd28df00a91db10ada' => $baseDir . '/YrPHP/Helpers/functions.php',
 );

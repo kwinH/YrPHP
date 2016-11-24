@@ -7,4 +7,4 @@
  */
 define('DEBUG',1);
 define("APP", 'App');
-include 'YrPHP/base.php';
+include 'YrPHP/Entry.php';

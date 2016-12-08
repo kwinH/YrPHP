@@ -16,7 +16,11 @@ class pdoDriver extends PDO implements IDBDriver
 {
     // 当前数据库操作对象
     public static $_instance = array();
-    // PDO操作实例
+
+    /**
+     *  PDO操作实例
+     * @var \PDOStatement
+     */
     public $PDOStatement = null;
     public $sql;
     public $result = false;
@@ -47,6 +51,7 @@ class pdoDriver extends PDO implements IDBDriver
                 // throw new PDOException("error");//错误抛出异常
                 self::$_instance[$key] = new self($dsn, $dbConfig['dbUser'], $dbConfig['dbPwd']);
                 self::$_instance[$key]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);// 设置为异常模式)))
+
                 if ($dbConfig['dbType'] == 'mysql' || $dbConfig['dbType'] == 'pgsql') {
                     self::$_instance[$key]->exec("SET NAMES '{$dbConfig['charset']}'");
                 }
@@ -84,14 +89,15 @@ class pdoDriver extends PDO implements IDBDriver
                 }
             }
             $this->PDOStatement = $result;
+
         } catch (\PDOException $e) {
 
             echo '<pre>';
             //var_export($e);
 
-             $errorSql = 'ERROR SQL: ' . $sql;
+            $errorSql = 'ERROR SQL: ' . $sql;
 
-           // echo "<br/>Error: " . $e->getMessage() . "<br />";
+            // echo "<br/>Error: " . $e->getMessage() . "<br />";
 
             /*
                          echo "Code: " . $e->getCode() . "<br />";
@@ -199,5 +205,6 @@ class pdoDriver extends PDO implements IDBDriver
         }
         return $this->PDOStatement->rowCount();
     }
+
 
 }

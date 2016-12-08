@@ -8,8 +8,6 @@
  */
 namespace YrPHP;
 
-use Yrphp\Validate;
-
 class Model
 {
     // 当前数据库操作对象
@@ -17,7 +15,7 @@ class Model
     //主服务器
     public $masterServer = null;
     //从服务器群
-    protected $slaveServer = array();
+    protected $slaveServer = [];
     //事务状态
     protected $transStatus = true;
     //是否有事务正在执行
@@ -27,14 +25,23 @@ class Model
 
     /**
      * 当前操作的数据库实例
-     * @var \YrPHP\Model
+     * @var \YrPHP\Db\pdoDriver
      */
     public $db = null;
     // 数据表前缀
     protected $tablePrefix = null;
 
     // 链操作方法列表
-    protected $methods = array("field" => "", "where" => "", "order" => "", "limit" => "", "group" => "", "having" => "");
+    protected $methods = [
+        'field' => '',
+        'where' => '',
+        'order' => '',
+        'limit' => '',
+        'group' => '',
+        'having' => '',
+        'join' => [],
+        'on' => '',
+    ];
 
     //表名称
     protected $tableName = null;
@@ -48,21 +55,20 @@ class Model
     //拼接后的sql语句
     protected $sql;
     //错误信息
-    protected $error = array();
-    //多表连接
-    protected $join = array();
+    protected $error = [];
+
     //验证规则 array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
-    protected $validate = array();
+    protected $validate = [];
     //是否开启缓存 bool
     protected $openCache;
     // query 预处理绑定的参数
-    protected $parameters = array();
+    protected $parameters = [];
     //执行过的sql
-    private $queries = array();
+    private $queries = [];
 
     public $connection = null;
 
-    private $dbConfig = array();
+    private $dbConfig = [];
 
     protected static $mutatorCache = [];
 
@@ -72,7 +78,7 @@ class Model
 
     private static $tableFileds = [];
 
-    public function __construct()
+    public function __construct($tableName = '')
     {
 
         if (defined('APP_MODE') && file_exists(APP_PATH . "Config/database_" . APP_MODE . ".php")) {
@@ -89,6 +95,8 @@ class Model
 
         $this->tablePrefix = $this->dbConfig[$this->connection]['masterServer']['tablePrefix'];
 
+        $this->tableName = $tableName;
+        $this->table($tableName);
         //$this->validate = array('filed' => array(array('验证规则', '错误提示', '附加规则')));
     }
 
@@ -158,57 +166,44 @@ class Model
     }
 
 
-    /**
-     * 添加反引号``
-     * @param $value
-     * @param bool $type
-     * @return string
-     */
-    protected function protect($value, $type = true)
+    public function escapeId($field)
     {
-        if (!$type)
-            return $value;
+        if (is_array($field)) {
+            return trim(array_reduce($field, function ($result, $item) {
+                return $result . ',' . $this->escapeId($item);
+            }), ',');
+        } else {
+            $field = explode('.', $field);
+            $field[0] = "`{$field[0]}`";
 
-        $value = trim($value);
-        $value = str_replace(array('`', "'", '"'), '', $value);
-        // $as = explode(' as ', $value);
-        $as = preg_split('/\s+(as|\s)\s+/', $value);
-        $as = empty($as[1]) ? preg_split('/[\n\r\t\s]+/i', $value) : $as;
+            if (isset($field[1])) $field[0] .= ".`{$field[1]}`";
 
+            return $field[0];
+        }
+    }
 
-        if (!empty($as[1])) { //a.id as b
-            $asLeft = trim($as[0]);
-            $asRight = trim($as[1]);
-            $dot = explode('.', $asLeft);
-            if (!empty($dot[1])) {
-                $value = "`$dot[0]`." . "`$dot[1]` as `$asRight`";
-            }
-            if (preg_match('/(count|sum|min|max|avg)\((.*)\)/Ui', $asLeft, $matches)) {
-                $value = strtoupper($matches[1]) . "($matches[2]) as `$asRight`";
+    public function escape($value)
+    {
+        if (is_array($value)) {
+            if (isAssoc($value)) {
+                $val = '';
+                foreach ($value as $k => $v) {
+                    $val .= $this->escapeId($k) . '=' . $this->escape($v);
+                }
+                return $val;
             } else {
-                $value = "`$asLeft` as `$asRight`";
+                return '(' . array_reduce($value, function ($result, $item) {
+                    return $result . ($result ? ',' : '') . $this->escape($item);
+                }) . ')';
             }
+
+        } else if (is_string($value)) {
+            return '"' . trim($value) . '"';
+        } else if (is_numeric($value)) {
             return $value;
         }
 
-
-        if (preg_match('/(count|sum|min|max|avg)\((.*)\)/Ui', $value, $matches)) {
-            return strtoupper($matches[1]) . "($matches[2])";
-        }
-
-        $dot = explode('.', $value);
-
-        if (!empty($dot[1])) {
-            $fields = "`$dot[0]`.";
-            if ($dot[1] == '*') {
-                $fields .= "$dot[1]";
-            } else {
-                $fields .= "`$dot[1]`";
-            }
-            return $fields;
-        }
-
-        return "`$value`";
+        return false;
     }
 
 
@@ -285,12 +280,7 @@ class Model
 
 
     /**
-     * @param string $where id=1 || array('id'=>1)||array('id'=>array(1,'is|>|=|<>|like','null|or|and'))
-     * @param string $where id between 20 and 100 || array('id'=>array('20 and 100','between|not between','null|or|and'))
-     *
-     * @param string $where id in 1,2,3,4,5,6,7,8 10 || array('id'=>array('1,2,3,4,5,6,7,8 10','in|not in','null|or|and'))
-     * 也可以用数组
-     * @param string $where id in 1,2,3,4,5,6,7,8 10 || array('id'=>array(array(1,2,3,4,5,6,7,8 10),'in|not in','null|or|and'))
+     * @param string $where id=1 || ['id'=>1,'or id'=>2,'age >'=>15,'or id in'=>[1,2,3,4,5]]
      * @param string $logical and | or
      * @param string $type where | having
      * @return $this
@@ -308,93 +298,85 @@ class Model
         } elseif (is_array($where)) {
             $count = 0;
             foreach ($where as $k => $v) {
-                $k = $this->protect($k);
-                if (is_array($v)) {
-                    $value = $v[0];
-                    if (empty($v[1])) {
-                        $symbol = "=";
-                    } else {
-                        $symbol = trim($v[1]);
-                    }
-                    $logical = empty($v[2]) ? $logical : $v[2];
+                $filed = preg_split('/\s+/', $k);
 
-                    if (strripos($symbol, 'is') !== false) {
-                        $value = $value;
-                    } elseif (strripos($symbol, 'in') !== false) {//in || not in
-
-                        if (is_string($value)) {
-                            $value = explode(',', $value);
-                        }
-                        $val = '';
-                        foreach ($value as $vv) {
-                            $val .= '"' . $vv . '",';
-                        }
-
-                        $value = '(' . trim($val, ',') . ')';
-
-                    } elseif (strripos($symbol, 'between') !== false) {//between|not between
-                        if (preg_match('/(.*)(and|or)(.*)/i', $value, $matches)) {
-                            $value = " '" . trim($matches[1]) . "' " . trim($matches[2]) . " '" . trim($matches[3]) . "' ";
-                        } else {
-
-                            $value = " " . $value . " ";
-                        }
-                    } else {
-
-                        $value = " '" . $value . "' ";
-                    }
-
-                    if ($count != 0) {
-                        $this->methods[$type] .= " " . $logical . " ";
-                    }
-
-                    $this->methods[$type] .= " $k " . $symbol . $value;
-
-
+                if (count($filed) == 3) {
+                    $logical = filed[0];
+                    $operator = filed[1];
+                    $filed = filed[2];
                 } else {
-
-                    if ($count != 0) {
-                        $this->methods[$type] .= " " . $logical . " ";
-                    }
-
-                    if (is_null($v)) {
-
-                        $this->methods[$type] .= " $k is null";
-
-                    } elseif (strripos($v, 'null') !== false) {
-
-                        $this->methods[$type] .= " $k is {$v}";
+                    if (preg_match('/and|or/i', $filed[0]) !== 0) {
+                        $logical = $filed[0];
+                        $operator = isset($filed[2]) ? $filed[2] : '=';
+                        $filed = $filed[1];
                     } else {
-
-                        $this->methods[$type] .= " $k " . "='$v'";
+                        $operator = isset($filed[1]) ? $filed[1] : '=';
+                        $filed = $filed[0];
                     }
                 }
+
+
+                if ($count != 0) {
+                    $this->methods[$type] .= ' ' + $logical + ' ';
+                }
+
+                if (is_null($v)) {
+                    $this->methods[$type] .= $this->escapeId($filed) . ' is null';
+                } else {
+                    $operator = strtoupper($operator);
+                    if (is_string($v)) $v = explode(',', $v);
+                    if (strpos($operator, 'IN') !== false) {
+                        $val = $this->escape($v);
+                    } else if (strpos($operator, 'BETWEEN') !== false) {
+                        $val = $this->escape($v[0]) . ' and  ' . $this->escape($v[1]);
+                    } else {
+                        if (strpos($type, 'on') !== false) {
+                            $val = $this->escapeId($v);
+                        } else {
+                            $val = $this->escape($v);
+                        }
+
+                    }
+                    $this->methods[$type] .= $this->escapeId($filed) . ' ' . $operator . ' ' . $val;
+                }
                 $count++;
+
             }
         }
         $this->methods[$type] .= ')';
         return $this;
+
+    }
+
+
+    /**
+     * @param array $field
+     * @return $this
+     */
+    public final function select($field = [])
+    {
+        $this->field($field);
+        return $this;
     }
 
     /**
-     * @param string $field
-     * @param bool $safe 是否添加限定符：反引号，默认false不添加
+     * @param array $field
      * @return $this
      */
-    public final function select($field = '', $safe = false)
+    public final function field($field = [])
     {
         if (is_array($field)) {
             $fieldArr = $field;
         } else {
             $fieldArr = explode(',', $field);
         }
-        foreach ($fieldArr as $k => $v) {
-            if (!$safe || $v == '*') {
-                $this->methods['field'] .= $v . ',';
-            } else {
-                $this->methods['field'] .= $this->protect($v) . ',';
-            }
-        }
+
+        $field = $this->escapeId($fieldArr);
+        //count(*) as c
+        $field = preg_replace('/`(.*)\s*\((.*)\)\s*(as|\s+)\s*(\S*)`/isU', '$1(`$2`) $3 `$4`', $field);
+        $field = preg_replace('/`\*`/', "*", $field);
+        $this->methods['field'] .= ',' . $field;
+        $this->methods['field'] = trim($this->methods['field'], ',');
 
         return $this;
     }
@@ -405,9 +387,9 @@ class Model
      * @param bool $auto
      * @return $this
      */
-    public final function except($field = [], $tableName = '', $auto = true)
+    public final function except($field = [])
     {
-        $tableField = $this->tableField($tableName, $auto);
+        $tableField = $this->tableField();
 
         $field = array_diff($tableField, $field);
 
@@ -423,19 +405,15 @@ class Model
      */
     public final function table($tableName = "", $auto = true)
     {
-
-        if (empty($tableName)) {
-            if (!is_null($this->escapeTableName)) return $this;
-
-            $tableName = $this->tableName;
-        }
-
+        if (empty($tableName)) return $this;
 
         if ($auto)
-            $tableName = strpos($tableName, $this->tablePrefix) === false ? $this->tablePrefix . $tableName : $tableName;
+            $tableName = strpos($tableName, $this->tablePrefix) === false
+                ? $this->tablePrefix . $tableName
+                : $tableName;
 
 
-        $this->escapeTableName = strrpos($tableName, '`') === false ? $this->protect($tableName) : $tableName;
+        $this->escapeTableName = $this->escapeId($tableName);
 
         return $this;
     }
@@ -449,26 +427,16 @@ class Model
         return $this->tableName;
     }
 
+
     /**
-     * @param string $tableName
-     * @param bool $auto 是否自动添加表前缀
      * @return $this
      */
-    public final function get($tableName = "", $auto = true)
+    public final function get()
     {
-
-        $this->table($tableName, $auto);
 
         $tableName = $this->escapeTableName;
 
-
-        //$tableField = $this->tableField();
-        if (empty($this->methods['field'])) {
-            //$field = implode(",", $tableField);
-            $field = ' * ';
-        } else {
-            $field = trim($this->methods['field'], ',');
-        }
+        $field = $this->methods['field'] ? $this->methods['field'] : '*';
 
 
         $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]}" : "";
@@ -477,8 +445,8 @@ class Model
 
         $sql = "SELECT $field FROM  {$tableName}";
 
-        if (is_array($this->join)) {
-            foreach ($this->join as $v) {
+        if (is_array($this->methods['join'])) {
+            foreach ($this->methods['join'] as $v) {
                 $sql .= " " . $v . " ";
             }
         }
@@ -491,13 +459,45 @@ class Model
         return $this;
     }
 
+
+    /**
+     * 以主键为条件 查询
+     * @param int $id 查询的条件主键值
+     * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
+     * @return mixed
+     */
+    public function find($id = 0, $assoc = false)
+    {
+        $field = $this->tableField();
+        return $this->where([$field['pri'] => $id])->get()->row($assoc);
+    }
+
+
+    /**
+     * @param bool $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
+     * @return mixed
+     */
+    public function all($assoc = false)
+    {
+        return $this->get()->result($assoc);
+    }
+
+
     /**
      * 清除上次组合的SQL记录，避免重复组合
      */
     public final function cleanLastSql()
     {
-        $this->join = "";
-        $this->methods = array("field" => "", "where" => "", "order" => "", "limit" => "", "group" => "", "having" => "");
+        $this->methods = [
+            'field' => '',
+            'where' => '',
+            'order' => '',
+            'limit' => '',
+            'group' => '',
+            'having' => '',
+            'join' => [],
+            'on' => '',
+        ];
         $this->table($this->tableName);
         $this->PreProcessStatus = true;
 
@@ -542,11 +542,13 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return $this
      */
-    public final function join($table, $cond, $type = '', $auto = true)
+    public final function join($table = '', $cond = [], $type = '', $auto = true)
     {
 
         $table = $auto ? $this->tablePrefix . $table : $table;
-        $table = strrpos($table, '`') === false ? $this->protect($table) : $table;
+        $table = preg_split('/\s+as\s+|\s+/', $table);
+        $tableAlias = isset($table[1]) ? $this->escapeId($table[1]) : '';
+        $table = $this->escapeId($table[0]);
 
         if ($type != '') {
             $type = strtoupper(trim($type));
@@ -565,17 +567,12 @@ class Model
                 $type .= ' ';
             }
         }
+        $this->methods['on'] = '';
+        $this->condition($cond, 'and', 'on');
 
+        $join = $type . 'JOIN ' . $table . ' ' . $tableAlias . ' ON ' . $this->methods['on'];
+        $this->methods['join'] = $join;
 
-        // Strip apart the condition and protect the identifiers
-        if (preg_match('/([\w\.]+)([\W\s]+)(.+)/', $cond, $match)) {
-            $cond = $this->protect($match[1]) . $match[2] . $this->protect($match[3]);
-        }
-
-        // Assemble the JOIN statement
-        $join = $type . 'JOIN ' . $table . ' ON ' . $cond;
-
-        $this->join[] = $join;
 
         return $this;
     }
@@ -628,27 +625,30 @@ class Model
 
         $preProcessCache = $this->getDataPreProcessAttr('set');
 
-        foreach ($preProcessCache as $fieldName => $method) {
+        if (empty($preProcessCache)) {
+            return false;
+        } else {
+            foreach ($preProcessCache as $fieldName => $method) {
 
 
-            if (($key = array_search($fieldName, $filed)) === false) break;
+                if (($key = array_search($fieldName, $filed)) === false) break;
 
 
-            if (is_array($data[0])) {
+                if (is_array($data[0])) {
 
-                foreach ($data as $k => $v) {
-                    $data[$k][$key] = $this->$method($data[$k][$key]);
+                    foreach ($data as $k => $v) {
+                        $data[$k][$key] = $this->$method($data[$k][$key]);
+                    }
+
+                } else {
+                    $data[$key] = $this->$method($data[$key]);
                 }
 
-            } else {
-                $data[$key] = $this->$method($data[$key]);
+
             }
-
-
+            return $data;
         }
 
-
-        return $data;
     }
 
     /**
@@ -696,11 +696,6 @@ class Model
     public static function cacheMutatedAttributes($class)
     {
         $mutatedAttributes = [];
-
-        // Here we will extract all of the mutated attributes so that we can quickly
-        // spin through them after we export models to their array form, which we
-        // need to be fast. This'll let us know the attributes that can mutate.
-
 
         if (preg_match_all('/(?<=^|;)(get|set)([^;]+?)Attribute(;|$)/', implode(';', get_class_methods($class)), $matches)) {
 
@@ -783,35 +778,8 @@ class Model
 
 
     /**
-     * 以主键为条件 查询
-     * @param int $id 查询的条件主键值
-     * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
-     * @param string $tableName 表名 默认$this->tableName
-     * @param bool $auto 是否自动添加表前缀
-     * @return mixed
-     */
-    public function find($id = 0, $assoc = false, $tableName = "", $auto = true)
-    {
-        $field = $this->tableField();
-        return $this->where([$field['pri'] => $id])->get($tableName, $auto)->row($assoc);
-    }
-
-
-    /**
-     * @param bool $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
-     * @param string $tableName
-     * @param bool $auto 是否自动添加表前缀
-     * @return mixed
-     */
-    public function all($assoc = false, $tableName = "", $auto = true)
-    {
-        return $this->get($tableName, $auto)->result($assoc);
-    }
-
-    /**
      * 返回数据集合
      * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
-     * @param bool|true $openCache 是否开启缓存
      * @return mixed
      */
     public final function result($assoc = false)
@@ -827,20 +795,17 @@ class Model
     /**
      * @param string $tableName //数据库表名
      * @param string|array $where 条件
-     * @param bool $auto 是否自动添加表前缀
      * @return int 返还受影响行数
      */
-    public final function delete($where = "", $tableName = "", $auto = true)
+    public final function delete($where = "")
     {
-
-        $this->table($tableName, $auto);
 
         if (!empty($where)) $this->where($where);
 
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
-        $this->sql = "DELETE FROM `{$this->escapeTableName}` {$where} {$limit}";
+        $this->sql = "DELETE FROM {$this->escapeTableName} {$where} {$limit}";
 
 
         $re = $this->query($this->sql)->result();
@@ -860,44 +825,19 @@ class Model
      * @param string $act
      * @return int 受影响行数
      */
-    public final function insert($data = array(), $tableName = "", $auto = true, $act = 'INSERT')
+    public final function insert($data = [], $act = 'INSERT')
     {
-
-        $this->table($tableName, $auto);
 
         if (empty($data)) $data = I('post');
 
         if (!$data) return false;
 
-        $data = $this->check($data);
+       // $data = $this->check($data);
 
         if ($data === false) return false;
 
-        $filed = array_keys($data);
-        $data = array_values($data);
-        return $this->inserts($filed, $data, $tableName, $auto, $act);
 
-        /*        $field = $value = '';
-                foreach ($data as $k => $v) {
-
-                    $field .= "`$k`,";
-                    $value .= "'$v',";
-                }
-
-                $field = trim($field, ',');
-                $value = trim($value, ',');
-
-                $this->sql = "{$act}  INTO " . $this->escapeTableName . "(" . $field . ")  VALUES(" . $value . ") ";
-
-
-                $re = $this->query($this->sql);
-
-                if (!$re->result())
-                    if ($this->hasActiveTransaction) $this->transStatus = false;
-
-
-        return $re->getLastId();
-           */
+        return $this->inserts($data, $act);
     }
 
     /**
@@ -907,7 +847,7 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return int 受影响行数
      */
-    function replace($data = array(), $tableName = "", $auto = true)
+    function replace($data = [], $tableName = "", $auto = true)
     {
         $this->insert($data, $tableName, $auto, $act = 'REPLACE');
     }
@@ -915,23 +855,30 @@ class Model
 
     /**
      * 预处理，添加多条数据
-     * @param array $filed 字段
-     * @param array $data 添加的数据
-     * @param string $tableName 数据库表名
-     * @param bool $auto 是否自动添加表前缀
+     * @param array $data 添加的数据 单条：[filed=>val]| 多条：[[filed=>val],[filed=>val]]
      * @param string $act
      * @return int 受影响行数
      */
-    function inserts($fields = array(), $data = array(), $tableName = "", $auto = true, $act = 'INSERT')
+    function inserts($data = [], $act = 'INSERT')
     {
+        if (is_array($data[0])) {
+            $fields = array_keys($data[0]);
+        } else {
+            $fields = array_keys($data);
+        }
 
-        if ($this->PreProcessStatus == true)
-            $data = $this->setDataPreProcessFill($fields, $data);
+        if ($this->PreProcessStatus == true) {
+            $values = $this->setDataPreProcessFill($fields, $data);
+            $data = $values === false ? $data : $values;
+        }
 
-        $this->table($tableName, $auto);
 
-        $field = implode(',', $fields);
-        $value = trim(str_repeat('?,', count($fields)), ',');
+        $field = $this->escapeId($fields);
+        //$value = trim(str_repeat('?,', count($fields)), ',');
+
+        $value = trim(array_reduce($fields, function ($res, $item) {
+            return $res .= ',:' . $item;
+        }), ',');
 
         $this->sql = "{$act}  INTO " . $this->escapeTableName . "(" . $field . ")  VALUES(" . $value . ") ";
 
@@ -949,13 +896,11 @@ class Model
      * 预处理添加多条数据 如已存在则替换
      * @param array $filed 字段
      * @param array $data 添加的数据
-     * @param string $tableName 数据库表名
-     * @param bool $auto 是否自动添加表前缀
      * @return int 受影响行数
      */
-    function replaces($filed = array(), $data = array(), $tableName = "", $auto = true)
+    function replaces($filed = [], $data = [])
     {
-        $this->inserts($filed, $data, $tableName, $auto, $act = 'REPLACE');
+        $this->inserts($filed, $data, $act = 'REPLACE');
     }
 
 
@@ -982,11 +927,10 @@ class Model
      *
      */
 
-    public final function check($array, $tableName = "", $auto = true)
+    public final function check($array)
     {
 
         if ($this->_validate) {
-            $this->table($tableName, $auto);
 
             $tableField = $this->tableField();
 
@@ -1039,10 +983,8 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return array|bool
      */
-    public final function tableField($tableName = "", $auto = true)
+    public final function tableField()
     {
-
-        $this->table($tableName, $auto);
 
         if (isset(self::$tableFileds[$this->escapeTableName]))
             return self::$tableFileds[$this->escapeTableName];
@@ -1069,9 +1011,9 @@ class Model
             if (!array_key_exists("pri", $fields)) {
                 $fields["pri"] = array_shift($fields);
             }
-            self::$tableFileds[$tableName] = $fields;
+            self::$tableFileds[$this->tableName] = $fields;
 
-            return self::$tableFileds[$tableName];
+            return self::$tableFileds[$this->tableName];
         }
 
         return false;
@@ -1093,7 +1035,7 @@ class Model
      * @param array $parameters array|''
      * @return $this|\PDOStatement
      */
-    public final function query($sql = "", $parameters = array())
+    public final function query($sql = "", $parameters = [])
     {
         Debug::start();
         if (!empty($sql)) $this->sql = $sql;
@@ -1101,7 +1043,7 @@ class Model
         $this->queries[] = $this->sql;
 
 
-        $this->parameters = !is_array($parameters) ? array() : $parameters;
+        $this->parameters = !is_array($parameters) ? [] : $parameters;
 
         $this->getConnectionInstance();
 
@@ -1112,7 +1054,7 @@ class Model
 
             $this->cleanLastSql();
             Debug::stop();
-            Debug::addMsg(array('sql' => $sql, 'time' => Debug::spent()), 2);
+            Debug::addMsg(array('sql' => $sql . json_encode($parameters), 'time' => Debug::spent()), 2);
             return $re;
         } else {
             $this->cleanLastSql();
@@ -1129,9 +1071,8 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return int 返回受影响行数
      */
-    public final function update($data = array(), $where = "", $tableName = "", $auto = true)
+    public final function update($data = [], $where = "")
     {
-        $this->table($tableName, $auto);
 
         if (empty($data))
             $data = I('post');
@@ -1150,22 +1091,16 @@ class Model
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
-        $NData = '';
-
-        $fields = array_keys($data);
-        $data = array_values($data);
-
-        if ($this->PreProcessStatus == true)
-            $data = $this->setDataPreProcessFill($fields, $data);
-
-        foreach ($data as $k => $v) {
-            $NData .= '`' . $fields[$k] . "`='" . $v . "',";
+        if ($this->PreProcessStatus == true) {
+            $fields = array_keys($data);
+            $values = array_values($data);
+            $values = $this->setDataPreProcessFill($fields, $values);
+            $data = $values === false ? $data : $values;
         }
 
-        $NData = trim($NData, ',');
+        $data = $this->escape($data);
 
-
-        $this->sql = "UPDATE `" . $this->escapeTableName . "` SET " . $NData . " " . $where . " " . $limit . "";
+        $this->sql = "UPDATE " . $this->escapeTableName . " SET " . $data . " " . $where . " " . $limit;
 
 
         $re = $this->query($this->sql)->result();
@@ -1204,7 +1139,6 @@ class Model
      */
     public final function lastSql()
     {
-
         return end($this->queries);
     }
 
@@ -1226,8 +1160,27 @@ class Model
         if ($this->hasActiveTransaction)
             return false;
 
+        $this->getConnectionInstance();
+
         $this->hasActiveTransaction = $this->masterServer->beginTransaction();
         return $this->hasActiveTransaction;
+
+    }
+
+    public final function transaction($callback)
+    {
+        try {
+            $this->getConnectionInstance();
+
+            $this->hasActiveTransaction = $this->masterServer->beginTransaction();
+            $callback();
+            $this->commit();
+            return true;
+        } catch (\Exception $err) {
+            $this->rollback();
+            return $err;
+        }
+
 
     }
 
@@ -1254,9 +1207,9 @@ class Model
      */
     public final function rollback()
     {
+        $this->getConnectionInstance();
         $this->transStatus = true;
         $this->hasActiveTransaction = false;
-
         return $this->masterServer->rollBack();
     }
 
@@ -1270,6 +1223,7 @@ class Model
      */
     public final function commit()
     {
+        $this->getConnectionInstance();
         $this->transStatus = true;
         $this->hasActiveTransaction = false;
 
@@ -1298,7 +1252,7 @@ class Model
     public function __destruct()
     {
         $this->cleanLastSql();
-        $this->error = array();
+        $this->error = [];
     }
 
 
@@ -1381,7 +1335,7 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return array 字段信息
      */
-    function addField($info = array(), $tableName = '', $auto = true)
+    function addField($info = [], $tableName = '', $auto = true)
     {
         $this->table($tableName, $auto);
 
@@ -1401,7 +1355,7 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return mixed
      */
-    function editField($info = array(), $tableName = '', $auto = true)
+    function editField($info = [], $tableName = '', $auto = true)
     {
 
         $this->table($tableName, $auto);
@@ -1423,11 +1377,11 @@ class Model
      * info['default']   字段默认值
      * info['comment']   字段备注
      */
-    private function filterFieldInfo($info = array())
+    private function filterFieldInfo($info = [])
     {
         if (!is_array($info)) return false;
 
-        $newInfo = array();
+        $newInfo = [];
         $newInfo['name'] = $info['name'];
         $newInfo['type'] = strtolower($info['type']);
         switch ($info['type']) {
@@ -1485,12 +1439,12 @@ class Model
      * @param bool $auto
      * @return array
      */
-    function getFieldInfo($field = array(), $tableName = '', $auto = true)
+    function getFieldInfo($field = [], $tableName = '', $auto = true)
     {
 
         $this->table($tableName, $auto);
 
-        $info = array();
+        $info = [];
         if (is_string($field)) {
             $field = explode(',', $field);
         }

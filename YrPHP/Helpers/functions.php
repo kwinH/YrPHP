@@ -161,11 +161,10 @@ function loadHelper($fileName)
  */
 function M($modelName = "")
 {
-    if (empty($modelName)) {
-        return loadClass('YrPHP\Model');
-    } else {
+    if (!empty($modelName) && class_exists('App\Models\\' . $modelName)) {
         return loadClass('App\Models\\' . $modelName);
     }
+    return loadClass('YrPHP\Model', $modelName);
 }
 
 
@@ -817,4 +816,18 @@ function parseNaming($name = '', $type = 0)
             break;
     }
 
+}
+
+/**
+ * echo is_assoc($array)?'索引数组':'不是索引数组';
+ * @param $array
+ * @return bool
+ */
+function isAssoc($array)
+{
+    if (is_array($array)) {
+        $keys = array_keys($array);
+        return $keys !== array_keys($keys);
+    }
+    return false;
 }

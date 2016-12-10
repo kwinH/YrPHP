@@ -53,7 +53,6 @@ www  WEB部署目录（或者子目录）
 .
 .
 .
-
 ```
 
 
@@ -323,7 +322,7 @@ C(array(key=>value,key1=>value1));
 
 ##加载配置文件
 ```php
-C(APP_PATH . 'config/config_test.php');
+C('config_test.php');//=>APP_PATH . 'config/config_test.php'
 ```
 
 
@@ -428,7 +427,124 @@ private $cacheFile;      //最后形成的缓存完整路径 根据前面参数�
 
 
 #模版
+## 模版继承
+
+#### 控制器中调用
+
+```
+<?php
+/**
+ * Created by YrPHP.
+ * User: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
+namespace App\Controllers;
+
+use YrPHP\Controller;
+
+class Index extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+
+    }
+
+
+    function index()
+    {
+        $m = M('users');
+        $all =$m->all();
+       $t = $this->display('index',['data'=>$all]);
+
+    }
+}
+```
+
+
+
+#### 定义页面布局layout.php
+
+```php
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+{yield body}
+
+</body>
+</html>
+```
+
+#### 继承页面布局 index.php
+
+```php
+{extends layout}
+
+{section(body)}
+{require test}
+{endsection}
+
+
+{section(test)}
+123456
+{endsection}
+```
+
+>由于layout中没有test内容区块 所以section(test)中的内容不会显示
+
+####  test.php
+
+```php
+<h1>hello world</h1>
+
+<div>
+    {foreach($data as $k=>$v)}
+    {=$v->userName}
+    {/foreach}
+</div>
+```
+
+
+
+#### 最后解析成：
+
+```php
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+  
+<h1>hello world</h1>
+
+<div>
+    <?php foreach($data as $k=>$v){?>
+    <?php echo $v->userName;?>
+    <?php } ?>
+</div>
+
+</body>
+</html>
+```
+
+
+
 ##变量输出
+
 在模板中输出变量的方法很简单，例如，在控制器中我们给模板变量赋值：
 
 ```php
@@ -605,7 +721,6 @@ return array(
 '=dump\s(.)\s*' => "<?php var_dump( \1);?>",
 
 );
-
 ```
 
 
@@ -747,7 +862,7 @@ class UserModel extends Model
 
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct('users');
   }
 
 }
@@ -759,17 +874,19 @@ class UserModel extends Model
 ##### M(['模型名']);
 >模型名是为选填 如果为空则实例化父类。
 
+
 ```php
-M('YrPHP\Model\UserModel');//实例化UserModel模型
+M('UserModel');//实例化UserModel模型
 ```
 
 >实例化请确保参数确定 区分大小写
+>如果模型UserModel不存在，则实例化父类 表为user_model
 
 ## CURL
 ### Active Record 模式
 
 ####添加数据INSERT
-> **$this->insert([添加的数据],[表名]，[是否自动添加前缀bool]);**
+> **$this->insert([添加的数据]);**
 
 ```php
 namespace App\Model;
@@ -778,27 +895,37 @@ class UserModel extends Model
 {
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct('users');//操作users表
   }
 
     public function userInsert()
     {
-      return $this->insert([添加的数据],[表名]，[是否自动添加前缀bool]);
+      return $this->insert(['name'=>'kwin','age'=>'18']);
+       //return int 受影响行数
+  }
+  
+  
+      public function userInserts()
+    {
+      return $this->inserts([
+        ['name'=>'kwin','age'=>'18'],
+        ['name'=>'nathan','age'=>'26']
+      ]);
        //return int 受影响行数
   }
 }
 ```
 >添加的数据如果为空,则获取$_POST数据，默认开启验证，如果字段数据库不存在 则过滤
 >如果有临时关闭则 $this->setOptions(array('_validate'=>false));
->表名如果为空，则调用**`$this->tableName`**
->是否自动添加前缀 默认 true
+>
+>inserts支付批量添加
 
 ------------
 
 
 ####删除数据DELETE
 
-> **$this->delete(条件，[表名]，[是否自动添加前缀bool]);**
+> **$this->delete(条件);**
 
 **在自定义模型在调用**
 ```php
@@ -810,19 +937,17 @@ class UserModel extends Model
 
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct('users');
   }
 
     public function userDelete()
     {
-     return $this->delete(条件，[表名]，[是否自动添加前缀bool]);
+     return $this->delete(['id <'=>3]);
      //return int 受影响行数
   }
 }
 ```
 >条件为array|string 推荐array
->表名如果为空，则调用上次调用的表名
->是否自动添加前缀 默认 true
 
 ------------
 
@@ -839,11 +964,11 @@ class UserModel extends Model
             parent::__construct();
         }
     
-       //直接调用父类model，进行操作
+       //直接调用父类model，操作users表
         function  model()
         {
-         $db = M();
-         $db->delete(条件，[表名]，[是否自动添加前缀bool]);
+         $db = M('users');
+         $db->delete([是否自动添加前缀bool]);
     
         }
        //实例化刚才创建的模型，操作其方法
@@ -856,12 +981,10 @@ class UserModel extends Model
 
 ####修改数据
 ```php
-$this->update(array 数据，array 条件，[表名]，[是否自动添加前缀bool]);
+$this->update(array 数据，array 条件);
 //return int 受影响行数
 ```
 >条件为array|string 推荐array
->表名如果为空，则调用上次调用的表名
->是否自动添加前缀 默认 true
 
 ####数据验证
 >如果 $this->_validate = true 则验证添加或修改的数据
@@ -876,7 +999,7 @@ class UserModel extends Model
 
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct('users');
     
         $this->_validate = true;
         $this->validate=array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
@@ -908,17 +1031,15 @@ class UserModel extends Model
 ####查询数据
 
 **FIND**
->**find($id = 0, $assoc = false, $tableName = "", $auto = true)
+>**find($id = 0, $assoc = false)
 >string|int $id 查询的条件主键值
 >bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object
->string $tableName 表名  默认$this->tableName
->$auto 是否自动添加表前缀**
 >以主键为条件 查询
 
 ------------
 ```php
-$this->tableName = 'users';
-$this->find(1);
+$db = M('users');
+$db->find(1);
 //生成的SQL语句
 //select * from `users` where id=1;
 ```
@@ -926,14 +1047,12 @@ $this->find(1);
 **ALL**
 >**all($assoc = false, $tableName = "", $auto = true)
 >bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object
->string $tableName 表名  默认$this->tableName
->$auto 是否自动添加表前缀**
 >以主键为条件 查询
 
 ------------
 ```php
-$this->tableName = 'users';
-$this->find(1);
+$db = M('users');
+$db->find(1);
 //生成的SQL语句
 //select * from `users` where id=1;
 ```
@@ -950,35 +1069,34 @@ $this->get([表名]，[是否自动添加前缀bool]);
 //select * from `tableName`;
 ```
 
-**SELECT**
+**SELECT|FIELD**
 
->**select($field ='', $safe = true)**
+>**select($field =[])**
+>
+>**field($field =[])**
+>
 >$field string|array 字段
->$safe bool FALSE，就可以阻止数据被转义**
 
 ------------
 
 **EXCEPT**
 
->**except($field = [], $tableName = '', $auto = true)**
+>**except($field = [])**
 >查询tableName表（默认$this->tableName）除了$field外所有字段
 >$field array 字段
-
 
 ------------
 
 ```php
-$this->select('field1,field2,field3')->get([表名]，[是否自动添加前缀bool]);
+$this->select('field1,field2,field3')->all();
 //生成的SQL语句
 //select `field1`,`field2`,`field3` from `tableName`;
 
-$this->select(array('field1','field2','field3'))->get([表名]，[是否自动添加前缀bool]);
+$this->select(['field1','field2','field3'])->all();
 //生成的SQL语句
 //select `field1`,`field2`,`field3` from `tableName`;
 
-$this->select(array('field1','field2','field3'),false)->get([表名]，[是否自动添加前缀bool]);
-//生成的SQL语句
-//select field1,field2,field3 from `tableName`;
+
 ```
 
 **LIMIT**
@@ -991,7 +1109,7 @@ $this->select(array('field1','field2','field3'),false)->get([表名]，[是否�
 
 ```php
 //查询一条数据
-$this->limit(1)->get([表名]，[是否自动添加前缀bool]);
+$this->limit(1)->all();
 //生成的SQL语句
 //select * from `tableName` limit 1;
 ```
@@ -1002,36 +1120,35 @@ $this->limit(1)->get([表名]，[是否自动添加前缀bool]);
 > @param $where string|array
 >string "id>'100'"   `->`     where id>'100'**
 >**
->一维数组 array($field=>$value) `->` where  \`field\` = 'value'
->$value is null `->` where  \`field\` is null
->$value string ‘not null’   `->` where  \`field\` is not null**
-
-
->**二维数组 array('field'=>array($value,$symbol,$logical))
->filed 字段
->$value 值 string|int|null|‘not null’
->$symbol 运算符 =|!=|<>|>|<|like|is|between|not between|in|not in
->$logical or|and 与前一个条件的连接符 默认调用`$logical`
+>array($field=>$value)
+>
+>例：
+>['id'=>1,'or id'=>2,'age >'=>15,'or id in'=>[1,2,3,4,5]]
+>
+>$value 值 array|string|int|null|‘not null’
+>field可以用空格分开，与连接符、字段名、运算符组成
+>运算符 =|!=|<>|>|<|like|is|between|not between|in|not in
+>连接符 or|and 与前一个条件的连接符 默认调用`$logical`
 >**
 
 ```php
 
-$this->where("id='100'")->get([表名]，[是否自动添加前缀bool]);
+$this->where("id='100'")->all();
 //生成的SQL语句
 //select * from `tableName` where （id = '100'）;
 
-$this->->where("id='1659'")->where(array('id'=>array('1113','!='),'name'=>array('%nathan%','like')))->get('users');//前缀在config/database.php 设置 tablePrefix
+$this->->where("id='1659'")->where(array('id !='=>'1113','name like'=>'%nathan%'))->get('users');//前缀在config/database.php 设置 tablePrefix
 //生成的SQL语句
 //SELECT  *  FROM  `yrp_users` where (id='1659') or ( `id` != '1113'  or  `name` like '%nathan%' )
 
 
-$this->where("id='1596'")->where(array('id'=>array('1113','!='),'fullname'=>array('%nathan%','like','or'),
-'update_time'=>array('10000 and 100000000','between','and')))->get('users');
+$this->where("id='1596'")->where(array('id !='=>'1113','or fullname like'=>'%nathan%',
+'and update_time between'=>array(10000 , 100000000)))->get('users');
 //前缀在config/database.php 设置 tablePrefix
 //生成的SQL语句
 //SELECT  *  FROM  `yrp_users` where (id='1596') and ( `id` != '1113'  or  `fullname` like '%nathan%'  and  `update_time` between '10000' and '100000000' )
 
-$this->where(array('id'=>array('1,2,3,4,5,6,7,8,9,10','in')))->get('users');
+$this->where(array('id in'=>array(1,2,3,4,5,6,7,8,9,10)))->get('users');
 //生成的SQL语句
 //SELECT  *  FROM  `yrp_users` where ( `id` in(1,2,3,4,5,6,7,8,9,10))
 ```
@@ -1039,14 +1156,14 @@ $this->where(array('id'=>array('1,2,3,4,5,6,7,8,9,10','in')))->get('users');
 
 **ORDER**
 ```php
-$this->order('id desc')->get('users');
+$this->order('id desc')->all();
 //生成的SQL语句
  SELECT  *  FROM  `yrp_users` ORDER BY `id` desc
 ```
 
 **GROUP**
 ```php
-$this->order('ip')->get('users');
+$this->order('ip')->all();
 //生成的SQL语句
 //SELECT  *  FROM  `yrp_users` `GROUP BY `ip`
 ```
@@ -1055,7 +1172,7 @@ $this->order('ip')->get('users');
 >同WHERE
 
 ```php
-$this->group('id')->having(array('id'=>array('2000','>')))->get('users');
+$this->group('id')->having(array('id >'=>'2000'))->get('users');
 //生成的SQL语句
 //SELECT  *  FROM  `yrp_users` GROUP BY `id` having ( `id` > '2000' )
 ```
@@ -1063,13 +1180,13 @@ $this->group('id')->having(array('id'=>array('2000','>')))->get('users');
 **JOIN**
 >**join($table, $cond, $type = '', $auto = true)
 > @param $table 表名
-> @param $cond  连接条件
+> @param $cond  连接条件 同where
 > @param string $type 连接方式
 > @param bool $auto 是否自动添加表前缀**
 
 
 ```php
-$this->join('users as b', 'a.id=b.id', 'left')->get('users as a');
+$this->join('users as b', ['a.id'=>'b.id'], 'left')->get('users as a');
 //生成的SQL语句
 //SELECT  *  FROM  `yrp_users` as `a` LEFT JOIN `yrp_users` as `b` ON `a`.`id`=`b`.`id`
 ```
@@ -1087,7 +1204,6 @@ $this->count('users');
 $this->select('count(*) as count')->get('users')->row()->count;
 //生成的SQL语句
 //SELECT COUNT(*) as `count` FROM  `yrp_users`
-
 
 ```
 
@@ -1213,25 +1329,21 @@ $re = $db->query("update yrp_users name='nathan' where id=500")->rowCount();
 **public $transStatus;bool 事务是否发生错误**
 
 ```php
-$this->startTrans();
+$m = M('users');
+$t= $m->transaction(function () use($m) {
+  $m->insert(['name' => 'q1']);
 
-$this->query('一条SQL查询...');
+   $m->insert(['name' => 'q17567']);
+   $m->insert(['name1' => 'q3', 'age' => 24]);
 
-$this->query('另一条查询...');
+})->transStatus;
+var_export($t);
 
-re = this->query('还有一条查询...');
 
-//手动定义错误
 
-if($re = false){
 
-$this->transStatus = false;
 
-//当transStatus 为false时事务失败
 
-}
-
-$this->transComplete();
 
 ```
 
@@ -1239,39 +1351,17 @@ $this->transComplete();
 **或则**
 
 ```php
+try{
 $this->startTrans();
-
 $this->query('一条SQL查询...');
 
 $this->query('另一条查询...');
-
+  
 re = this->query('还有一条查询...');
-
-//手动定义错误
-
-if($re = false){
-
-$this->rollback();事务回滚
-
-}else{
-
-$this->commit();事务提交
-
-}
-
-/*
-
-if($this->transStatus === false)｛
-
-$this->rollback();
-
-｝else{
-
 $this->commit();
-
+}catch (\Exception $e){
+$m->rollback();
 }
-
-*/
 ```
 
 
@@ -1457,6 +1547,15 @@ $user = M('User')->closePreProcess()->insert(['first_name'=>'Sally'])；
 ```php
 <?php
 
+  
+/**
+ * 访问控制器的原始资源
+ * 返回当前实例控制器对象
+ * $app =& getInstance();
+ * @return Controller 资源
+ */
+function &getInstance(){}
+
 /**
 * 获取和设置配置参数 支持批量定义  具体请看配置章节
 * @param string|array $name 配置变量 支持传入配置文件
@@ -1607,6 +1706,127 @@ cookie('id',null);
 * @param int $time 指定时间跳转
     */
     function error404($msg = '', $url = '', $time = 3){}
+
+/**
+ * 下载一个远程文件到客户端
+ * 例  clientDown('http://img.bizhi.sogou.com/images/2012/02/13/66899.jpg');
+ * @param $url 一个远程文件
+ * @return bool
+ */
+function clientDown($url){}
+
+/**
+ * 获取某个月第一天与最后一天的时间戳
+ * @param  [type] $month [description]
+ * @param  string $year [description]
+ * @return [type]        [description]
+ */
+function getMonthTime($month, $year = ''){}
+
+/**
+ * http://www.php100.com/html/php/lei/2013/0904/3819.html
+ * 获取客户端真实IP
+ * @return mixed
+ */
+function getClientIp(){}
+
+/**
+ * //新浪根据IP获得地址
+ * @param string $ip
+ * @return mixed|string
+ * array ( 'ret' => 1, 'start' => -1, 'end' => -1, 'country' => '中国', 'province' => '浙江', 'city' => '杭州', 'district' => '', 'isp' => '', 'type' => '', 'desc' => '', )
+ */
+function Ip2Area($ip = ''){}
+
+/**
+ * 生成随机字符
+ * @param  string $type w：英文字符 d：数字 wd: dw:数字加英文字符
+ * @param  integer $len [description]
+ * @return [type]        [description]
+ */
+function randStr($type = 'w', $len = 8){}
+
+/**
+ * 发送HTTP状态
+ * @param integer $code 状态码
+ * @return void
+ */
+function sendHttpStatus($code){}
+
+/**
+ * 页面跳转
+ * @param string $url
+ */
+function gotoUrl($url = ''){}
+
+/**
+ * @param string $str 提示消息
+ * @param string $url 跳转链接 默认跳转首页
+ * @param int $goto 默认0 跳转$url，1调整上一页
+ */
+function alert($str = "", $url = "", $goto = 0){}
+
+/**
+ * 不区分大小写的in_array实现
+ * @param string $value
+ * @param array $array
+ * @return bool
+ */
+function inIArray($value ='', $array = []){}
+
+/**
+ * 在数组中搜索给定的值（不区分大小写），如果成功则返回相应的键名
+ * @param $needle
+ * @param $haystack
+ * @param bool $strict
+ * @return mixed
+ */
+function arrayISearch($needle, $haystack, $strict = false){}
+
+/**
+ * 数据脱敏处理隐私数据的安全保护
+ * @param string $str
+ * @param int $start
+ * @param int $length
+ * @param string $replacement
+ * @return mixed
+ */
+function desensitize($str = '', $start = 0, $length = 0, $replacement = '*'){}
+
+/**
+ * 返回一个旧的输入值
+ * @param string $inputName
+ * @param null $default
+ * @return string|null
+ */
+function old($inputName = '', $default = null){}
+
+/**
+ * CSRF Token，该Token可用于验证登录用户和发起请求者是否是同一人，如果不是则请求失败。
+ * @return bool|string
+ */
+function csrfToken(){}
+
+/**
+ * 生成一个包含CSRF Token值的隐藏域
+ * @return string
+ */
+function csrfField(){}
+
+/**
+ * 命名规则转换
+ * @param string $name
+ * @param int $type 0、小驼峰法、1、大驼峰法、2、蛇形命名法
+ * @return mixed|string
+ */
+function parseNaming($name = '', $type = 0){}
+
+/**
+ *  判断是不是索引数组
+ * @param $array
+ * @return bool true ? 索引数组 : 不是索引数组
+ */
+function isAssoc($array){}
 ```
 
 ------------
@@ -1663,7 +1883,13 @@ cookie('id',null);
 
 
 #系统类库(YrPHP/Libs)
+> **所有系統类都注冊了别名，可以直接在控制器中用$this->[类名]来调用**
+> **如： \$this->encrypt->encrypt($str)**
+>
+> **当然自定义的类，在Config/class_alias.php中注册了别名，也可以这样调用**
+
 ##加密类     Crypt
+
 ####配置密钥
 >在`APP_PATH`.config/config.php下配置
 
@@ -1901,6 +2127,7 @@ YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
  //参数配置也可以在init方法中传入
         $up = loadClass('YrPHP\\Upload');
         $re = $up->init($config)->upload('file123');
+
 ```
 
 ##图像处理类 Image

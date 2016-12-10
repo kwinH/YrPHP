@@ -25,6 +25,7 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
     );
 
     public static $classMap = array (
+        'App\\Controllers\\Index' => __DIR__ . '/../..' . '/App/Controllers/Index.php',
         'Entry' => __DIR__ . '/../..' . '/YrPHP/Entry.php',
         'YrPHP\\Cache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache.php',
         'YrPHP\\Cache\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/File.php',
@@ -38,14 +39,12 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
         'YrPHP\\Crypt\\DES3' => __DIR__ . '/../..' . '/YrPHP/Libs/Crypt/DES3.php',
         'YrPHP\\Curl' => __DIR__ . '/../..' . '/YrPHP/Libs/Curl.php',
         'YrPHP\\Db\\IDBDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/IDBDriver.php',
-        'YrPHP\\Db\\pdoDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/pdoDriver.php',
+        'YrPHP\\Db\\PdoDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/PdoDriver.php',
         'YrPHP\\Debug' => __DIR__ . '/../..' . '/YrPHP/Libs/Debug.php',
         'YrPHP\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/File.php',
         'YrPHP\\Image' => __DIR__ . '/../..' . '/YrPHP/Libs/Image.php',
         'YrPHP\\Model' => __DIR__ . '/../..' . '/YrPHP/Libs/Model.php',
-        'YrPHP\\PHPMailer' => __DIR__ . '/../..' . '/YrPHP/Libs/PHPMailer.php',
         'YrPHP\\Page' => __DIR__ . '/../..' . '/YrPHP/Libs/Page.php',
-        'YrPHP\\SMTP' => __DIR__ . '/../..' . '/YrPHP/Libs/PHPMailer.php',
         'YrPHP\\Structure' => __DIR__ . '/../..' . '/YrPHP/Libs/Structure.php',
         'YrPHP\\Upload' => __DIR__ . '/../..' . '/YrPHP/Libs/Upload.php',
         'YrPHP\\Uri' => __DIR__ . '/../..' . '/YrPHP/Libs/Uri.php',

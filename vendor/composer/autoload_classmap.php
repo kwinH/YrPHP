@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Controllers\\Index' => $baseDir . '/App/Controllers/Index.php',
     'Entry' => $baseDir . '/YrPHP/Entry.php',
     'YrPHP\\Cache' => $baseDir . '/YrPHP/Libs/Cache.php',
     'YrPHP\\Cache\\File' => $baseDir . '/YrPHP/Libs/Cache/File.php',
@@ -19,14 +20,12 @@ return array(
     'YrPHP\\Crypt\\DES3' => $baseDir . '/YrPHP/Libs/Crypt/DES3.php',
     'YrPHP\\Curl' => $baseDir . '/YrPHP/Libs/Curl.php',
     'YrPHP\\Db\\IDBDriver' => $baseDir . '/YrPHP/Libs/Db/IDBDriver.php',
-    'YrPHP\\Db\\pdoDriver' => $baseDir . '/YrPHP/Libs/Db/pdoDriver.php',
+    'YrPHP\\Db\\PdoDriver' => $baseDir . '/YrPHP/Libs/Db/PdoDriver.php',
     'YrPHP\\Debug' => $baseDir . '/YrPHP/Libs/Debug.php',
     'YrPHP\\File' => $baseDir . '/YrPHP/Libs/File.php',
     'YrPHP\\Image' => $baseDir . '/YrPHP/Libs/Image.php',
     'YrPHP\\Model' => $baseDir . '/YrPHP/Libs/Model.php',
-    'YrPHP\\PHPMailer' => $baseDir . '/YrPHP/Libs/PHPMailer.php',
     'YrPHP\\Page' => $baseDir . '/YrPHP/Libs/Page.php',
-    'YrPHP\\SMTP' => $baseDir . '/YrPHP/Libs/PHPMailer.php',
     'YrPHP\\Structure' => $baseDir . '/YrPHP/Libs/Structure.php',
     'YrPHP\\Upload' => $baseDir . '/YrPHP/Libs/Upload.php',
     'YrPHP\\Uri' => $baseDir . '/YrPHP/Libs/Uri.php',

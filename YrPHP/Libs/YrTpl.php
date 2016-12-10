@@ -27,6 +27,8 @@ class YrTpl
     protected $rule = array();//替换搜索的模式的数组 array(搜索的模式 => 用于替换的字符串 )
     private $tplVars = array(); //内部使用的临时变量
 
+    public $block = [];
+    public $realComFile = null;
 
     public function __construct()
     {
@@ -76,33 +78,13 @@ class YrTpl
         //缓存静态文件
         $this->init($cacheId);
 
-        if (!empty($tplVars)) $this->tplVars = array_merge($this->tplVars, $tplVars);
+
+        $this->buildTplFile($fileName, $tplVars, true);
+        $this->blockExtends();
+
 
         extract($this->tplVars);
-
-        /* 到指定的目录中寻找模板文件 */
-        $fileName = strpos($fileName, '.') !== false ? $fileName : ($fileName . '.' . C('templateExt'));
-        $tplFile = $this->templateDir . $fileName;
-
-        /* 如果需要处理的模板文件不存在,则退出并报告错误 */
-        if (!file_exists($tplFile)) die("模板文件{$tplFile}不存在！");
-
-        /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
-        $comFileDir = $this->compileDir . C('ctlName');
-
-        if (!file_exists($comFileDir)) mkdir($comFileDir, 0755);
-
-        $this->comFileName = $comFileDir . '/' . $fileName . '.php';
-
-
-        if (!file_exists($this->comFileName) || filemtime($this->comFileName) < filemtime($tplFile) || filemtime($this->comFileName) < filemtime($this->ctlFile)) {
-            $repContent = $this->tplReplace(file_get_contents($tplFile));
-            /* 保存由系统组合后的脚本文件 */
-            file_put_contents($this->comFileName, $repContent);
-        }
-        /* 包含处理后的模板文件输出给客户端 */
-
-        require($this->comFileName);
+        require $this->comFileName;
 
         $this->cacheContent = ob_get_contents();
 
@@ -117,6 +99,130 @@ class YrTpl
 
     }
 
+
+    function buildTplFile($fileName, $tplVars = '')
+    {
+
+        if (!empty($tplVars)) $this->tplVars = array_merge($this->tplVars, $tplVars);
+
+        /* 到指定的目录中寻找模板文件 */
+        $fileName = strpos($fileName, '.') !== false ? $fileName : ($fileName . '.' . C('templateExt'));
+        $tplFile = $this->templateDir . $fileName;
+
+        /* 如果需要处理的模板文件不存在,则退出并报告错误 */
+        if (!file_exists($tplFile)) die("模板文件{$tplFile}不存在！");
+
+        /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
+        $comFileDir = $this->compileDir . C('ctlName');
+
+        if (!file_exists($comFileDir)) mkdir($comFileDir, 0755);
+
+        $comFileName = $comFileDir . '/' . $fileName . '.php';
+
+        if (is_null($this->comFileName)) $this->comFileName = $comFileName;
+
+
+        if (!file_exists($comFileName) || filemtime($comFileName) < filemtime($tplFile) || filemtime($comFileName) < filemtime($this->ctlFile)) {
+            $repContent = $this->tplReplace(file_get_contents($tplFile));
+
+            $this->setBlock($repContent);
+
+
+            /* 保存由系统组合后的脚本文件 */
+            file_put_contents($comFileName, $repContent);
+            return $repContent;
+        }
+
+        return file_get_contents($comFileName);
+
+
+    }
+
+
+    function getComFileName($fileName)
+    {
+        /* 到指定的目录中寻找模板文件 */
+        $fileName = strpos($fileName, '.') !== false ? $fileName : ($fileName . '.' . C('templateExt'));
+
+        /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
+        $this->comFileName = $this->compileDir . C('ctlName') . '/' . $fileName . '.php';
+
+        return $this->comFileName;
+    }
+
+
+    private function tplReplace($content)
+    {
+
+        $this->rule['/' . $this->leftDelimiter . '=(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php echo \\1;?>";//输出变量、常量或函数
+        $this->rule['/' . $this->leftDelimiter . 'foreach\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php foreach(\\1){?>";//foreach
+        $this->rule['/' . $this->leftDelimiter . 'loop\s*\$(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php foreach(\$\\1 as \$k=>\$v){?>";//loop
+        $this->rule['/' . $this->leftDelimiter . 'while\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php while(\\1){?>";//while
+        $this->rule['/' . $this->leftDelimiter . 'for\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php for(\\1){ ?>";//for
+        $this->rule['/' . $this->leftDelimiter . 'if\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php if(\\1){?>\n";//判断 if
+        $this->rule['/' . $this->leftDelimiter . 'else\s*if\s*\((.*)\)\s*' . $this->rightDelimiter . '/'] = "<?php }else if(\\1){?>";//判断 ifelse
+        $this->rule['/' . $this->leftDelimiter . 'else\s*' . $this->rightDelimiter . '/'] = "<?php }else{?>";//判断 else
+        $this->rule['/' . $this->leftDelimiter . '(\/foreach|\/for|\/while|\/if|\/loop)\s*' . $this->rightDelimiter . '/isU'] = "<?php } ?>";//end
+        /*        $this->rule['/' . $this->leftDelimiter . '(include|require)\s+(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php \$this->display('\\2');?>";//包含标签*/
+        $this->rule['/' . $this->leftDelimiter . 'assign\s+(.*)\s*=\s*(.*)' . $this->rightDelimiter . '/isU'] = "<?php \\1 = \\2;?>";//分配变量
+        $this->rule['/' . $this->leftDelimiter . '(break|continue)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1;?>";//跳出循环
+        $this->rule['/' . $this->leftDelimiter . '(\$.*|\+\+|\-\-)(\+\+|\-\-|\$.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1\\2;?>";//运算
+
+
+        $content = preg_replace(array_keys($this->rule), array_values($this->rule), $content);
+
+        //变量替换
+        foreach ($this->tplVars as $key => $value) {
+            $content = preg_replace('/\$(' . $key . ')/', '$\\1', $content);
+        }
+
+
+        $content = preg_replace_callback('/' . $this->leftDelimiter . '(include|require)\s+(.*)\s*' . $this->rightDelimiter . '/isU',
+            function ($matches) {
+                return $this->buildTplFile($matches[2], null);
+            },
+            $content);
+
+
+        return $content;
+
+    }
+
+    public function setBlock($data)
+    {
+        preg_match_all('/' . $this->leftDelimiter . 'section\((.*)\)' . $this->rightDelimiter . '(.*)' .
+            $this->leftDelimiter . 'endsection' . $this->rightDelimiter . '/isU', $data, $matches);
+
+
+        foreach ($matches[1] as $k => $v) {
+            $this->block[$v] = $matches[2][$k];
+        }
+    }
+
+
+    protected function blockExtends()
+    {
+
+        $data = file_get_contents($this->comFileName);
+
+        preg_match('/' . $this->leftDelimiter . 'extends\s+(.*)' . $this->rightDelimiter . '/isU', $data, $matches);
+
+        if (!empty($matches[1])) {
+            $data = $this->buildTplFile($matches[1]);
+
+
+            $data = preg_replace_callback(
+                '/' . $this->leftDelimiter . 'yield\s+(.*)' . $this->rightDelimiter . '/isU',
+                function ($matches) {
+                    return $this->block[$matches[1]];
+                },
+                $data
+            );
+
+            file_put_contents($this->comFileName, $data);
+        }
+    }
+
     /**
      * 静态化
      * @param    string $cacheId 缓存ID 当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
@@ -125,6 +231,7 @@ class YrTpl
     {
         ob_start();
         if (self::$callNumber) return;
+
 
         if ($this->caching) {
             //self::$cacheId[] = $cacheId;
@@ -145,36 +252,8 @@ class YrTpl
                 self::$callNumber++;
             }
         }
-    }
-
-    private function tplReplace($content)
-    {
-
-        $this->rule['/' . $this->leftDelimiter . '=(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php echo \\1;?>";//输出变量、常量或函数
-        $this->rule['/' . $this->leftDelimiter . 'foreach\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php foreach(\\1){?>";//foreach
-        $this->rule['/' . $this->leftDelimiter . 'loop\s*\$(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php foreach(\$\\1 as \$k=>\$v){?>";//loop
-        $this->rule['/' . $this->leftDelimiter . 'while\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php while(\\1){?>";//while
-        $this->rule['/' . $this->leftDelimiter . 'for\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php for(\\1){ ?>";//for
-        $this->rule['/' . $this->leftDelimiter . 'if\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php if(\\1){?>\n";//判断 if
-        $this->rule['/' . $this->leftDelimiter . 'else\s*if\s*\((.*)\)\s*' . $this->rightDelimiter . '/'] = "<?php }else if(\\1){?>";//判断 ifelse
-        $this->rule['/' . $this->leftDelimiter . 'else\s*' . $this->rightDelimiter . '/'] = "<?php }else{?>";//判断 else
-        $this->rule['/' . $this->leftDelimiter . '(\/foreach|\/for|\/while|\/if|\/loop)\s*' . $this->rightDelimiter . '/isU'] = "<?php } ?>";//end
-        $this->rule['/' . $this->leftDelimiter . '(include|require)\s+(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php \$this->display('\\2');?>";//包含标签
-        $this->rule['/' . $this->leftDelimiter . 'assign\s+(.*)\s*=\s*(.*)' . $this->rightDelimiter . '/isU'] = "<?php \\1 = \\2;?>";//分配变量
-        $this->rule['/' . $this->leftDelimiter . '(break|continue)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1;?>";//跳出循环
-        $this->rule['/' . $this->leftDelimiter . '(\$.*|\+\+|\-\-)(\+\+|\-\-|\$.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1\\2;?>";//运算
-
-
-        $content = preg_replace(array_keys($this->rule), array_values($this->rule), $content);
-
-        //变量替换
-        foreach ($this->tplVars as $key => $value) {
-            $content = preg_replace('/\$(' . $key . ')/', '$\\1', $content);
-        }
-        return $content;
 
     }
-
 
     /**
      *  生成静态文件
@@ -240,21 +319,16 @@ class YrTpl
             unlink($file);
         }
     }
-        public function getMutatedAttributes()
-        {
-            return $class = get_class($this);
-        }
+
 
     /**
      * 析构函数 生成缓存文件
      */
     function __destruct()
     {
+        //    $this->blockExtends();
         $this->setCache();
 
-        if (DEBUG && !isAjaxRequest()) {
-            echo Debug::message();
-        }
     }
 
 }

@@ -13,6 +13,7 @@ abstract class Controller extends YrTpl
 {
     private static $instance;
 
+
     function __construct()
     {
         self::$instance =& $this;
@@ -29,6 +30,7 @@ abstract class Controller extends YrTpl
 
         $this->uri = loadClass('YrPHP\Uri');
         $this->checkCacheId();
+
     }
 
 
@@ -39,7 +41,7 @@ abstract class Controller extends YrTpl
      * @static
      * @return    object
      */
-    public static function &get_instance()
+    public static function &getInstance()
     {
         return self::$instance;
     }
@@ -58,5 +60,13 @@ abstract class Controller extends YrTpl
     {
         error404();
     }
+
+    public function __get($name)
+    {
+        if (class_exists($name)) {
+            return loadClass($name);
+        }
+    }
+
 
 }

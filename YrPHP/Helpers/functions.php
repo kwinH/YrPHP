@@ -12,12 +12,12 @@
 /**
  * 访问控制器的原始资源
  * 返回当前实例控制器对象
- *
+ * $app =& getInstance();
  * @return Controller 资源
  */
-function &get_instance()
+function &getInstance()
 {
-    return YrPHP\Controller::get_instance();
+    return YrPHP\Controller::getInstance();
 }
 
 
@@ -32,9 +32,12 @@ function C($name = null, $value = null, $default = null)
 {
     static $config = array();
 
-    if (is_string($name) && file_exists($name)) {
-        $name = require $name;
-        if (!is_array($name)) return false;
+    if (is_string($name) && strpos($name, '.php') !== false) {
+        $name = requireCache(APP_PATH . 'Config/' . $name);
+        if (is_array($name)) {
+            $config = array_merge($config, $name);
+            return $config;
+        }
     }
 
     // 批量设置
@@ -42,9 +45,9 @@ function C($name = null, $value = null, $default = null)
         $config = array_merge($config, $name);
         return $config;
     }
-    if (!empty($name) && !empty($value)) $config[$name] = $value;
+    if (!is_null($name) && !is_null($value)) $config[$name] = $value;
 
-    if (empty($name)) return $config;
+    if (is_null($name)) return $config;
 
     if (isset($config[$name])) return $config[$name];
 
@@ -164,7 +167,7 @@ function M($modelName = "")
     if (!empty($modelName) && class_exists('App\Models\\' . $modelName)) {
         return loadClass('App\Models\\' . $modelName);
     }
-    return loadClass('YrPHP\Model', $modelName);
+    return loadClass('YrPHP\Model', parseNaming($modelName, 2));
 }
 
 
@@ -673,9 +676,9 @@ function sendHttpStatus($code)
 
 /**
  * 页面跳转
- * @param null $url
+ * @param string $url
  */
-function gotoUrl($url = null)
+function gotoUrl($url = '')
 {
     if (is_null($url)) $url = getUrl();
     $location = "parent.window.location.href=\"$url\";";
@@ -705,8 +708,13 @@ function alert($str = "", $url = "", $goto = 0)
 
 }
 
-// 不区分大小写的in_array实现
-function inIArray($value, $array)
+/**
+ * 不区分大小写的in_array实现
+ * @param string $value
+ * @param array $array
+ * @return bool
+ */
+function inIArray($value = '', $array = [])
 {
     return in_array(strtolower($value), array_map('strtolower', $array));
 }
@@ -819,9 +827,9 @@ function parseNaming($name = '', $type = 0)
 }
 
 /**
- * echo is_assoc($array)?'索引数组':'不是索引数组';
+ *  判断是不是索引数组
  * @param $array
- * @return bool
+ * @return bool true ? 索引数组 : 不是索引数组
  */
 function isAssoc($array)
 {

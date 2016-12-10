@@ -12,20 +12,28 @@ class Model
 {
     // 当前数据库操作对象
     private static $object;
-    //主服务器
+    /**
+     * 主服务器
+     * @var \YrPHP\Db\PdoDriver
+     */
     public $masterServer = null;
-    //从服务器群
+    /**
+     * 从服务器群
+     * @var \YrPHP\Db\PdoDriver
+     */
     protected $slaveServer = [];
-    //事务状态
-    protected $transStatus = true;
+
     //是否有事务正在执行
     protected $hasActiveTransaction = false;
+    //事务状态
+    public $transStatus = false;
+
     //是否验证 将验证字段在数据库中是否存在，不存在 则舍弃 再验证 $validate验证规则 不通过 则报错
     public $_validate = true;
 
     /**
      * 当前操作的数据库实例
-     * @var \YrPHP\Db\pdoDriver
+     * @var \YrPHP\Db\PdoDriver
      */
     public $db = null;
     // 数据表前缀
@@ -142,8 +150,9 @@ class Model
      */
     public static function getInstance($dbConfig)
     {
+        $startTime = time();
         if (is_object(self::$object)) {
-            return self::$object;
+            $obj = self::$object;
         } else {
             switch ($dbConfig['dbDriver']) {
                 case 'mysqli' :
@@ -152,17 +161,20 @@ class Model
                     break;
                 default :
                     // self::$object = new pdo_driver($dbConfig);
-                    self::$object = Db\pdoDriver::getInstance($dbConfig);
+                    self::$object = Db\PdoDriver::getInstance($dbConfig);
 
             }
 
             if (self::$object instanceof Db\IDBDriver) {
-                return self::$object;
+                $obj = self::$object;
             } else {
                 die('错误：必须实现db\Driver接口');
             }
 
         }
+        $endTime = time();
+        Debug::addMsg(['sql' => '数据库连接时间', 'time' => Debug::spent($startTime, $endTime)], 2);
+        return $obj;
     }
 
 
@@ -298,6 +310,7 @@ class Model
         } elseif (is_array($where)) {
             $count = 0;
             foreach ($where as $k => $v) {
+                $v = trim($v);
                 $filed = preg_split('/\s+/', $k);
 
                 if (count($filed) == 3) {
@@ -322,6 +335,8 @@ class Model
 
                 if (is_null($v)) {
                     $this->methods[$type] .= $this->escapeId($filed) . ' is null';
+                } elseif (strripos($v, 'null') !== false) {
+                    $this->methods[$type] .= " $k is {$v}";
                 } else {
                     $operator = strtoupper($operator);
                     if (is_string($v)) $v = explode(',', $v);
@@ -407,7 +422,7 @@ class Model
     {
         if (empty($tableName)) return $this;
 
-        if ($auto)
+        if ($auto && !empty($this->tablePrefix))
             $tableName = strpos($tableName, $this->tablePrefix) === false
                 ? $this->tablePrefix . $tableName
                 : $tableName;
@@ -429,17 +444,21 @@ class Model
 
 
     /**
+     * @param string $tableName
+     * @param bool $auto 是否自动添加表前缀
      * @return $this
      */
-    public final function get()
+    public final function get($tableName = "", $auto = true)
     {
-
+        $this->table($tableName, $auto);
         $tableName = $this->escapeTableName;
 
         $field = $this->methods['field'] ? $this->methods['field'] : '*';
 
 
-        $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]}" : "";
+        $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]}
+
+" : "";
         $group = $this->methods["group"] != "" ? " GROUP BY {$this->methods["group"]}" : "";
         $having = $this->methods["having"] != "" ? "{$this->methods["having"]}" : "";
 
@@ -747,16 +766,13 @@ class Model
         }
 
 
-        Debug::stop();
-        $debug = ['sql' => $this->sql, 'time' => Debug::spent()];
-
         if ($this->PreProcessStatus == true)
             $re = $this->getDataPreProcessFill($data, $assoc);
 
-        if ($openCacheBak) $cache->set($dbCacheFile, (object)['sql' => $debug['sql'], 'data' => $re]);
+        if ($openCacheBak) $cache->set($dbCacheFile, (object)['sql' => $this->sql, 'data' => $re]);
 
         $this->cleanLastSql();
-        Debug::addMsg($debug, 2);
+
         return $re;
 
     }
@@ -768,7 +784,7 @@ class Model
      */
     public final function row($assoc = false)
     {
-        Debug::start();
+
 
         $re = $this->cache($assoc, 'row');
 
@@ -784,7 +800,6 @@ class Model
      */
     public final function result($assoc = false)
     {
-        Debug::start();
 
         $re = $this->cache($assoc, 'result');
 
@@ -809,10 +824,6 @@ class Model
 
 
         $re = $this->query($this->sql)->result();
-        if (!$re) {
-            if ($this->hasActiveTransaction) $this->transStatus = false;
-
-        }
 
         return $re;
     }
@@ -832,7 +843,7 @@ class Model
 
         if (!$data) return false;
 
-       // $data = $this->check($data);
+        $data = $this->check($data);
 
         if ($data === false) return false;
 
@@ -884,9 +895,6 @@ class Model
 
 
         $re = $this->query($this->sql, $data);
-
-        if (!$re->result() && $this->hasActiveTransaction)
-            $this->transStatus = false;
 
 
         return $re->getLastId();
@@ -1037,7 +1045,7 @@ class Model
      */
     public final function query($sql = "", $parameters = [])
     {
-        Debug::start();
+
         if (!empty($sql)) $this->sql = $sql;
 
         $this->queries[] = $this->sql;
@@ -1047,17 +1055,17 @@ class Model
 
         $this->getConnectionInstance();
 
+        $this->cleanLastSql();
         if (stripos($sql, 'select') === false) {
             $this->queries[] = $sql;
             $this->db = $this->masterServer;
+
             $re = $this->db->query($this->sql, $parameters);
 
-            $this->cleanLastSql();
-            Debug::stop();
-            Debug::addMsg(array('sql' => $sql . json_encode($parameters), 'time' => Debug::spent()), 2);
             return $re;
+
+
         } else {
-            $this->cleanLastSql();
             return $this;
         }
 
@@ -1105,10 +1113,6 @@ class Model
 
         $re = $this->query($this->sql)->result();
 
-        if (!$re) {
-            if ($this->hasActiveTransaction) $this->transStatus = false;
-
-        }
 
         return $re;
     }
@@ -1157,47 +1161,16 @@ class Model
      */
     public final function startTrans()
     {
-        if ($this->hasActiveTransaction)
-            return false;
 
-        $this->getConnectionInstance();
+        if ($this->hasActiveTransaction == false) {
+            $this->hasActiveTransaction = true;
+            if (is_null($this->masterServer)) {
+                $this->getConnectionInstance();
+            }
 
-        $this->hasActiveTransaction = $this->masterServer->beginTransaction();
-        return $this->hasActiveTransaction;
-
-    }
-
-    public final function transaction($callback)
-    {
-        try {
-            $this->getConnectionInstance();
-
-            $this->hasActiveTransaction = $this->masterServer->beginTransaction();
-            $callback();
-            $this->commit();
-            return true;
-        } catch (\Exception $err) {
-            $this->rollback();
-            return $err;
+            $this->masterServer->beginTransaction();
         }
 
-
-    }
-
-    /**
-     * 启动事务处理模式
-     * @return bool 成功返回true，失败返回false
-     */
-    public final function transComplete()
-    {
-        if ($this->transStatus === FALSE)
-            $this->rollback();
-        else
-            $this->commit();
-
-
-        $this->transStatus = true;
-        return $this->transStatus;
     }
 
 
@@ -1207,15 +1180,16 @@ class Model
      */
     public final function rollback()
     {
-        $this->getConnectionInstance();
-        $this->transStatus = true;
-        $this->hasActiveTransaction = false;
-        return $this->masterServer->rollBack();
-    }
+        if ($this->hasActiveTransaction) {
+            $this->hasActiveTransaction = false;
+            $this->transStatus = false;
+            if (is_null($this->masterServer)) {
+                $this->getConnectionInstance();
+            }
 
-    /*
-     * @return 错误信息
-     */
+            $this->masterServer->rollback();
+        }
+    }
 
     /**
      * 提交事务
@@ -1223,12 +1197,43 @@ class Model
      */
     public final function commit()
     {
-        $this->getConnectionInstance();
-        $this->transStatus = true;
-        $this->hasActiveTransaction = false;
+        if ($this->hasActiveTransaction) {
+            $this->transStatus = true;
+            if (is_null($this->masterServer)) {
+                $this->getConnectionInstance();
+            }
 
-        return $this->masterServer->commit();
+            $this->masterServer->commit();
+        }
+
+        $this->hasActiveTransaction = false;
     }
+
+
+    /**
+     * 启动事务处理模式
+     * @return bool 成功返回true，失败返回false
+     */
+
+    public final function transaction($callback)
+    {
+        try {
+            $this->startTrans();
+
+            $callback();
+            $this->commit();
+
+        } catch (\Exception $err) {
+            $this->rollback();
+            //   throw  new \Exception($err->getMessage());
+
+        } finally {
+            return $this;
+        }
+
+
+    }
+
 
     /**
      * 获取最后一次插入的自增值

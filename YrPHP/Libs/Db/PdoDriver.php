@@ -10,9 +10,9 @@ namespace YrPHP\Db;
 
 use PDO;
 use PDOException;
+use YrPHP\Debug;
 
-
-class pdoDriver extends PDO implements IDBDriver
+class PdoDriver extends PDO implements IDBDriver
 {
     // 当前数据库操作对象
     public static $_instance = array();
@@ -24,7 +24,7 @@ class pdoDriver extends PDO implements IDBDriver
     public $PDOStatement = null;
     public $sql;
     public $result = false;
-    protected $exception = array();
+
 
     public function __construct($dsn, $username, $passwd, $options = array())
     {
@@ -72,6 +72,9 @@ class pdoDriver extends PDO implements IDBDriver
      */
     function query($sql, $parameters = array())
     {
+        $errmsg = '';
+        Debug::start();
+
         $this->sql = $sql;
         try {
             $result = parent::prepare($sql);
@@ -93,56 +96,19 @@ class pdoDriver extends PDO implements IDBDriver
         } catch (\PDOException $e) {
 
             echo '<pre>';
-            //var_export($e);
+            // var_export($e);
+            $errmsg = $e->getMessage();
+            $errorSql = 'ERROR SQL: ' . $sql . $errmsg;
 
-            $errorSql = 'ERROR SQL: ' . $sql;
 
-            // echo "<br/>Error: " . $e->getMessage() . "<br />";
+            throw  new \Exception($errorSql);
 
-            /*
-                         echo "Code: " . $e->getCode() . "<br />";
-                        echo "File: " . $e->getFile() . "<br />";
-                        echo "Line: " . $e->getLine() . "<br />";
-                        echo "Trace: " . $e->getTraceAsString() . "<br />";
-            */
-
-            throw  new \PDOException($errorSql);
-
+        } finally {
+            Debug::stop();
+            Debug::addMsg(array('sql' => trim($sql) . ($parameters ? json_encode($parameters) : ''), 'time' => Debug::spent(), 'error' => $errmsg), 2);
         }
+
         return $this;
-    }
-
-
-    /**
-     * 启动事务处理模式
-     * @return bool 成功返回true，失败返回false
-     */
-    public function startTrans()
-    {
-        $this->setAttribute(PDO::ATTR_AUTOCOMMIT, 0);
-        return parent::beginTransaction();
-    }
-
-    /**
-     * 提交事务
-     * @return bool 成功返回true，失败返回false
-     */
-    public function commit()
-    {
-        $re = parent::commit();
-        $this->setAttribute(PDO::ATTR_AUTOCOMMIT, 1);
-        return $re;
-    }
-
-    /**
-     * 事务回滚
-     * @return bool 成功返回true，失败返回false
-     */
-    public function rollback()
-    {
-        $re = parent::rollback();
-        $this->setAttribute(PDO::ATTR_AUTOCOMMIT, 1);
-        return $re;
     }
 
 
@@ -206,5 +172,9 @@ class pdoDriver extends PDO implements IDBDriver
         return $this->PDOStatement->rowCount();
     }
 
+    public function getSql()
+    {
+        return $this->sql;
+    }
 
 }

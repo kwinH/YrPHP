@@ -32,11 +32,21 @@ class Entry
 
     }
 
+    //注册类别名 方便调用
+    public static function setClassAlias()
+    {
+        $classMap = requireCache(APP_PATH . 'Config/class_alias.php');
+
+        foreach ($classMap as $alias => $original) {
+            class_alias($original, $alias);
+        }
+
+    }
 
     static function loadConf()
     {
         //包含系统配置文件
-        C(require BASE_PATH . "Config/Config.php");
+        C("Config.php");
         //包含自定义配置文件
         $configPath = APP_PATH . "Config/Config.php";
         if (defined('APP_MODE')) {
@@ -165,6 +175,7 @@ class Entry
     {
 
         self::init();
+        self::setClassAlias();
         self::loadConf();
 
         $url = loadClass('YrPHP\Uri')->rsegment();
@@ -223,15 +234,15 @@ class Entry
 
         $nowAction = $className . '/' . $action;
 
-        $classPath = $ctrBaseNamespace . $className . '.class.php';
+        $classPath = $ctrBaseNamespace . $className . '.php';
 
-        C(array(
+        C([
             'classPath' => $classPath,
             'ctlName' => $className,
             'actName' => $action,
             'nowAction' => $nowAction,
             'Lang' => session('Lang')
-        ));
+        ]);
 
 
         if (method_exists($classObj, $action))
@@ -240,8 +251,16 @@ class Entry
             error404();
 
 
+        if (DEBUG && !isAjaxRequest()) {
+            echo Debug::message();
+        }
     }
 
+    function __get($name)
+    {
+        return $name;
+    }
 }
+
 
 Entry::run();

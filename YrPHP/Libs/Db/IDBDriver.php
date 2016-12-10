@@ -31,7 +31,7 @@ interface IDBDriver
      * 启动事务处理模式
      * @return bool 成功返回true，失败返回false
      */
-    public function startTrans();
+    public function beginTransaction();
 
     /**
      * 提交事务

@@ -28,7 +28,7 @@ index.php
     //定义项目目录
     define("APP", 'App');
     //框架入口文件
-    include 'YrPHP/Entry.php';
+    include 'App.php';
 ```
 
 > 注意：APP的定义必须是当前目录下的文件名,不需要标明路径

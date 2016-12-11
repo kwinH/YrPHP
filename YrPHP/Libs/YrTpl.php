@@ -27,8 +27,8 @@ class YrTpl
     protected $rule = array();//替换搜索的模式的数组 array(搜索的模式 => 用于替换的字符串 )
     private $tplVars = array(); //内部使用的临时变量
 
-    public $block = [];
-    public $realComFile = null;
+    public $block = [];//section内容块
+
 
     public function __construct()
     {
@@ -326,7 +326,6 @@ class YrTpl
      */
     function __destruct()
     {
-        //    $this->blockExtends();
         $this->setCache();
 
     }

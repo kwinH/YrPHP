@@ -22,4 +22,5 @@ return [
     'uri' => 'YrPHP\\Uri',
     'validate' => 'YrPHP\\Validate',
     'verifyCode' => 'YrPHP\\VerifyCode',
+    'pipeline' => 'YrPHP\\Pipeline',
 ];

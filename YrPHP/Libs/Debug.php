@@ -7,9 +7,10 @@
  * GitHub:https://github.com/kwinH/YrPHP
  */
 namespace YrPHP;
+use App;
+
 class Debug
 {
-    static $includeFile = array();
     static $info = array();
     static $queries = array();
     static $startTime;                //保存脚本开始执行时的时间（以微秒的形式保存）
@@ -52,6 +53,36 @@ class Debug
                     break;
             }
         }
+    }
+
+    /**
+     * 已经实例化的自定义类集合
+     * @return array
+     */
+    static function newClasses()
+    {
+        $declaredClasses = [];
+        foreach (get_declared_classes() as $class) {
+            //实例化一个反射类
+            $reflectionClass = new \ReflectionClass($class);
+            //如果该类是自定义类
+            if ($reflectionClass->isUserDefined()) {
+                //导出该类信息
+                // \Reflection::export($reflectionClass);
+                $declaredClasses[] = $class;
+            }
+
+        }
+        return $declaredClasses;
+    }
+
+    /**
+     *  返回被 include 和 require 文件名的 array
+     * @return array
+     */
+    static function getIncludedFiles()
+    {
+        return get_included_files();
     }
 
     /**
@@ -107,20 +138,16 @@ class Debug
      */
     static function message()
     {
-        $uri = loadClass('YrPHP\Uri');
+
         $mess = "";
         $mess .= '<div style="clear:both;font-size:12px;width:97%;margin:10px;padding:10px;background:#ddd;border:1px solid #009900;z-index:100">';
         $mess .= '<div style="float:left;width:100%;"><span style="float:left;width:200px;"><b>运行信息</b>( <font color="red">' . self::spent(STARTTIME, microtime(true)) . ' </font>秒):</span><span onclick="this.parentNode.parentNode.style.display=\'none\'" style="cursor:pointer;float:right;width:35px;background:#500;border:1px solid #555;color:white">关闭X</span></div><br>';
         $mess .= '<ul style="margin:0px;padding:0 10px 0 10px;list-style:none">';
-        if (count(self::$includeFile) > 0) {
-            $mess .= '自动包含 ' . count(self::$includeFile) . ' 个文件';
-            foreach (self::$includeFile as $v) {
-                $mess .= '<li>[' . $v['time'] . '秒]&nbsp;&nbsp;&nbsp;&nbsp;' . $v['path'] . '</li>';
-            }
-        }
+
+
         self::$info[] = '内存使用：<strong style="color:red">' . round(memory_get_usage() / 1024, 2) . ' KB</strong>';
-        self::$info[] = 'URI字符串：' . implode('/', $uri->segment());
-        self::$info[] = 'URI路由地址：' . implode('/', $uri->rsegment());
+        self::$info[] = 'URI字符串：' . implode('/', App::uri()->segment());
+        self::$info[] = 'URI路由地址：' . implode('/', App::uri()->rsegment());
         self::$info[] = '控制器地址：' . C('classPath');
         self::$info[] = '调用方法：' . C('actName');
         if (count(self::$info) > 0) {
@@ -169,6 +196,6 @@ class Debug
     static function log($fileName, $content)
     {
         $fileName = C('logDir') . $fileName . '.log';
-        file_put_contents($fileName, $content."\n", FILE_APPEND);
+        file_put_contents($fileName, $content . "\n", FILE_APPEND);
     }
 }

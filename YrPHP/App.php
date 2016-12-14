@@ -32,16 +32,6 @@ class App
 
     }
 
-    //注册类别名 方便调用
-    public static function setClassAlias()
-    {
-        $classMap = requireCache(APP_PATH . 'Config/class_alias.php');
-
-        foreach ($classMap as $alias => $original) {
-            class_alias($original, $alias);
-        }
-
-    }
 
     static function loadConf()
     {
@@ -175,7 +165,6 @@ class App
     {
 
         self::init();
-        self::setClassAlias();
         self::loadConf();
 
         $url = self::uri()->rsegment();
@@ -246,31 +235,35 @@ class App
         ]);
 
         if (method_exists($classObj, $action)) {
-            $reflectionMethod = new ReflectionMethod($classObj, $action);
-            $classgParameters = $reflectionMethod->getParameters();//返回类方法的参数
-            $args = [];
-            foreach ($classgParameters as $k => $v) {
-                if ($class = $v->getClass()) {
-                    $args[$k] = loadClass($class->name);
-                } else {
-                    $args[$k] = array_shift($url);
-                }
-            }
-            $reflectionMethod->invokeArgs(new $classObj, $args);
+
+            $ctlObj = new $classObj;
+            $middleware = $ctlObj->getMiddleware();
+
+            self::pipeline()
+                ->send(self::request())
+                ->through($middleware)
+                ->then(function ($request) use ($classObj, $ctlObj, $action,$url) {
+                $reflectionMethod = new ReflectionMethod($classObj, $action);
+
+                $args = getDependencies($reflectionMethod,$url);//返回类方法的参数
+
+                $reflectionMethod->invokeArgs($ctlObj, $args);
+            });
 
         } else {
             error404();
         }
 
-        if (DEBUG && !isAjaxRequest()) {
+        if (DEBUG && !self::request()->isAjax()) {
             echo Debug::message();
         }
     }
 
     public static function __callStatic($name, $paramenters)
     {
-        if (class_exists($name))
-            return loadClass($name, $paramenters);
+        $classMap = requireCache(APP_PATH . 'Config/class_alias.php');
+        if (class_exists($classMap[$name]))
+            return loadClass($classMap[$name], $paramenters);
     }
 }
 

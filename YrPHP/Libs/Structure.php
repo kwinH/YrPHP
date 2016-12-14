@@ -9,7 +9,6 @@
  *
  */
 namespace YrPHP;
-use YrPHP\File;
 
 class Structure
 {
@@ -88,35 +87,32 @@ return array(
 st;
 
 
-
-
-
-
         $path = array(
-            APP_PATH . 'Helpers/index.html'              => $html,
-            APP_PATH . 'Helpers/functions.php'           => $fun,
-            APP_PATH . 'Config/index.html'              => $html,
-            APP_PATH . 'Controllers/index.html'            => $html,
-            APP_PATH . 'Controllers/Index.php'       => $controls,
-            APP_PATH . 'Lang/index.html'                => $html,
-            APP_PATH . 'Lang/lang_cn.php'               => $phpReturn,
-            APP_PATH . 'Libs/index.html'                => $html,
-            APP_PATH . 'Models/index.html'              => $html,
-            APP_PATH . 'Runtime/index.html'             => $html,
-            APP_PATH . 'Runtime/Cache/index.html'       => $html,
-            APP_PATH . 'Runtime/Session/index.html'       => $html,
+            APP_PATH . 'Helpers/index.html' => $html,
+            APP_PATH . 'Helpers/functions.php' => $fun,
+            APP_PATH . 'Config/index.html' => $html,
+            APP_PATH . 'Controllers/index.html' => $html,
+            APP_PATH . 'Controllers/Index.php' => $controls,
+            APP_PATH . 'Lang/index.html' => $html,
+            APP_PATH . 'Lang/lang_cn.php' => $phpReturn,
+            APP_PATH . 'Libs/index.html' => $html,
+            APP_PATH . 'Models/index.html' => $html,
+            APP_PATH . 'Runtime/index.html' => $html,
+            APP_PATH . 'Runtime/Cache/index.html' => $html,
+            APP_PATH . 'Runtime/Session/index.html' => $html,
             APP_PATH . 'Runtime/CompileTpl/index.html' => $html,
-            APP_PATH . 'Runtime/Data/index.html'        => $html,
-            APP_PATH . 'Runtime/Logs/index.html'        => $html,
-            APP_PATH . 'views/index.html'               => $html,
+            APP_PATH . 'Runtime/Data/index.html' => $html,
+            APP_PATH . 'Runtime/Logs/index.html' => $html,
+            APP_PATH . 'views/index.html' => $html,
+            APP_PATH . 'Middleware/index.html' => $html,
         );
 
 
         foreach ($path as $k => $v) {
             File::vi($k, $v);
         }
-        File::cp(BASE_PATH.'Config',APP_PATH.'Config');
-        File::mkDir(ROOT_PATH.'public');
+        File::cp(BASE_PATH . 'Config', APP_PATH . 'Config');
+        File::mkDir(ROOT_PATH . 'public');
         header("Location: " . getUrl());
 
     }

@@ -26,7 +26,6 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
 
     public static $classMap = array (
         'App' => __DIR__ . '/../..' . '/YrPHP/App.php',
-        'App\\Controllers\\Index' => __DIR__ . '/../..' . '/App/Controllers/Index.php',
         'YrPHP\\Cache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache.php',
         'YrPHP\\Cache\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/File.php',
         'YrPHP\\Cache\\ICache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/ICache.php',
@@ -42,15 +41,18 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
         'YrPHP\\Db\\PdoDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/PdoDriver.php',
         'YrPHP\\Debug' => __DIR__ . '/../..' . '/YrPHP/Libs/Debug.php',
         'YrPHP\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/File.php',
+        'YrPHP\\IMiddleware' => __DIR__ . '/../..' . '/YrPHP/Libs/IMiddleware.php',
         'YrPHP\\Image' => __DIR__ . '/../..' . '/YrPHP/Libs/Image.php',
         'YrPHP\\Model' => __DIR__ . '/../..' . '/YrPHP/Libs/Model.php',
         'YrPHP\\Page' => __DIR__ . '/../..' . '/YrPHP/Libs/Page.php',
+        'YrPHP\\Pipeline' => __DIR__ . '/../..' . '/YrPHP/Libs/Pipeline.php',
+        'YrPHP\\Request' => __DIR__ . '/../..' . '/YrPHP/Libs/Request.php',
         'YrPHP\\Structure' => __DIR__ . '/../..' . '/YrPHP/Libs/Structure.php',
         'YrPHP\\Upload' => __DIR__ . '/../..' . '/YrPHP/Libs/Upload.php',
         'YrPHP\\Uri' => __DIR__ . '/../..' . '/YrPHP/Libs/Uri.php',
         'YrPHP\\Validate' => __DIR__ . '/../..' . '/YrPHP/Libs/Validate.php',
         'YrPHP\\VerifyCode' => __DIR__ . '/../..' . '/YrPHP/Libs/VerifyCode.php',
-        'YrPHP\\YrTpl' => __DIR__ . '/../..' . '/YrPHP/Libs/YrTpl.php',
+        'YrPHP\\View' => __DIR__ . '/../..' . '/YrPHP/Libs/View.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

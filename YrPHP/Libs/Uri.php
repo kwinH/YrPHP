@@ -85,7 +85,7 @@ class Uri
 
     public function rpart($n = null, $no_result = null)
     {
-        $this->rsegment($n = null, $no_result = null);
+        return $this->rsegment($n = null, $no_result = null);
     }
 
 
@@ -125,7 +125,7 @@ class Uri
 
     public function part($n = null, $no_result = null)
     {
-        $this->segment($n = null, $no_result = null);
+        return $this->segment($n = null, $no_result = null);
     }
 
     /**

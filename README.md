@@ -360,37 +360,14 @@ display($fileName, $tplVars = '', $cacheId = '');
 
 >$fileName 提供模板文件的文件名
 > $tpl_var 动态数据
-> $cacheId 当为Boolean值true时则做为数据返回，不输出到屏幕，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
-> 如果开启缓存 display方法会自动生成缓存文件 但常常我们的display方法会在最后调用 导致我们display之前的逻辑判断及数据读取做无用功 所以我们可以在 方法开头做判断 直接调用`init($cacheId)`  或则在构造函数中调用checkCacheId方法（系统已经自动调用 你无需再次调用 你只要**重写checkCacheId方法**就可），checkCacheId方法如下
-> */
+> $cacheId 当为Boolean值true时则做为数据返回，不输出到屏幕，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖,当$cacheId为false时，不会生成缓存文件
 
-```php
-/**
- * 重写这个方法 在构造函数中调用
- * 缓存初始化 判断缓存ID是否合理 避免生成无用静态文件
- */
-private function checkCacheId(){
-if($this->caching){
-    $act = C('actName');
-    switch ($act){
-        case "index":
-            $param =$_GET['id'];
-          //  if($param=='') error404('参数错误');
 
-            break;
-        default:
-            $param = '';
-            break;
-    }
-    $this->init($param);//$param 缓存ID
-    }
-    //同样 你也可以在方法开头做判断 不调用checkCacheId方法
-}
-```
+
 
 
 ```php
-$this->display('name');
+\App::view()->display('name');
 ```
 
 >上面的 <var>name</var> 便是你的视图文件的名字 如 index.html。
@@ -399,17 +376,17 @@ $this->display('name');
 
 ### 给视图添加动态数据
 ```php
-$this->assign('name','yrPHP');//赋值单个数据
+\App::view()->assign('name','yrPHP');//赋值单个数据
 
 //等同于
 
-$this->display('name',array('name'=>'yrPHP'));
+\App::view()->display('name',array('name'=>'yrPHP'));
 ```
 
 
 
 ###视图缓存
->以下参数可用于视图缓存,可在控制器中重载
+>以下参数可用于视图缓存
 
 ```php
 protected $caching = true;   //bool 设置缓存是否开启 配置中可设置
@@ -456,7 +433,7 @@ class Index extends Controller
     {
         $m = M('users');
         $all =$m->all();
-       $t = $this->display('index',['data'=>$all]);
+       $t = \App::view()->display('index',['data'=>$all]);
 
     }
 }
@@ -746,7 +723,7 @@ function index()
 
 $data['arr'] = array(1,2,3,4,5,6);
 
-this->display('index.html',data);
+\App::view()->display('index.html',$data);
 
 }
 
@@ -1658,21 +1635,6 @@ cookie('id');
 
 //删除
 cookie('id',null);
-
-/**********************************************************/
-/**
-* 判断是不是 AJAX 请求
-* 测试请求是否包含HTTP_X_REQUESTED_WITH请求头。
-* @return    bool
-    */
-   function isAjaxRequest(){}
-
-/**********************************************************/
-/**
-* 判断是否SSL协议
-* @return boolean
-    */
-   function isHttps(){}
 
 /**********************************************************/
 /**

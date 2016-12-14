@@ -7,7 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App' => $baseDir . '/YrPHP/App.php',
-    'App\\Controllers\\Index' => $baseDir . '/App/Controllers/Index.php',
     'YrPHP\\Cache' => $baseDir . '/YrPHP/Libs/Cache.php',
     'YrPHP\\Cache\\File' => $baseDir . '/YrPHP/Libs/Cache/File.php',
     'YrPHP\\Cache\\ICache' => $baseDir . '/YrPHP/Libs/Cache/ICache.php',
@@ -23,13 +22,16 @@ return array(
     'YrPHP\\Db\\PdoDriver' => $baseDir . '/YrPHP/Libs/Db/PdoDriver.php',
     'YrPHP\\Debug' => $baseDir . '/YrPHP/Libs/Debug.php',
     'YrPHP\\File' => $baseDir . '/YrPHP/Libs/File.php',
+    'YrPHP\\IMiddleware' => $baseDir . '/YrPHP/Libs/IMiddleware.php',
     'YrPHP\\Image' => $baseDir . '/YrPHP/Libs/Image.php',
     'YrPHP\\Model' => $baseDir . '/YrPHP/Libs/Model.php',
     'YrPHP\\Page' => $baseDir . '/YrPHP/Libs/Page.php',
+    'YrPHP\\Pipeline' => $baseDir . '/YrPHP/Libs/Pipeline.php',
+    'YrPHP\\Request' => $baseDir . '/YrPHP/Libs/Request.php',
     'YrPHP\\Structure' => $baseDir . '/YrPHP/Libs/Structure.php',
     'YrPHP\\Upload' => $baseDir . '/YrPHP/Libs/Upload.php',
     'YrPHP\\Uri' => $baseDir . '/YrPHP/Libs/Uri.php',
     'YrPHP\\Validate' => $baseDir . '/YrPHP/Libs/Validate.php',
     'YrPHP\\VerifyCode' => $baseDir . '/YrPHP/Libs/VerifyCode.php',
-    'YrPHP\\YrTpl' => $baseDir . '/YrPHP/Libs/YrTpl.php',
+    'YrPHP\\View' => $baseDir . '/YrPHP/Libs/View.php',
 );

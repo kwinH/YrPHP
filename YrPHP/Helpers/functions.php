@@ -64,7 +64,7 @@ function C($name = null, $value = null, $default = null)
 function getUrl($url = '', $indexPage = true)
 {
     if (isset($_SERVER['HTTP_HOST']) && preg_match('/^((\[[0-9a-f:]+\])|(\d{1,3}(\.\d{1,3}){3})|[a-z0-9\-\.]+)(:\d+)?$/i', $_SERVER['HTTP_HOST'])) {
-        $base_url = (isHttps() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']
+        $base_url = (App::request()->isHttps() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']
             . substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'], basename($_SERVER['SCRIPT_FILENAME'])));
     } else {
         $base_url = 'http://localhost/';
@@ -72,19 +72,14 @@ function getUrl($url = '', $indexPage = true)
 
     $base_url = trim($base_url, '/');
 
-    if (C('urlType') != 2) {
-
-        if ($indexPage) {
-            $base_url .= $_SERVER['SCRIPT_NAME'];
-        }
-
-
+    if (C('urlType') != 2 && $indexPage) {
+        $base_url .= $_SERVER['SCRIPT_NAME'];
     }
-
 
     if (!empty($url)) {
         $base_url .= '/' . ltrim($url, '/');
     }
+
     return $base_url;
 }
 
@@ -139,12 +134,47 @@ function loadClass()
     $key = trim($className, '\\');
 
     if (!isset($instanceList[$key])) {
+        $reflection = new ReflectionClass($className);
 
-        $class = new ReflectionClass($className);
-        $instanceList[$key] = $class->newInstanceArgs($arguments);
+        if (!$arguments) {
+            $arguments = getDependencies($reflection->getConstructor());
+        }
+
+        $instanceList[$key] = $reflection->newInstanceArgs($arguments);
     }
     return $instanceList[$key];
 }
+
+/**
+ * 递归解析参数
+ * @param \ReflectionMethod $rfMethod
+ * @return array
+ * @throws \Exception
+ */
+function getDependencies(\ReflectionMethod $rfMethod, $params = [])
+{
+    $instanceParams = [];
+
+    if (!$rfMethod instanceof \ReflectionMethod) return $instanceParams;
+
+    foreach ($rfMethod->getParameters() as $param) {
+
+        if ($dependency = $param->getClass()) {   //该参数不是对象
+            $instanceParams[] = loadClass($dependency->name);
+
+        } else {
+            if ($argument = array_shift($params)) {
+                $instanceParams[] = $argument;
+            } else if ($param->isDefaultValueAvailable()) {
+                $instanceParams[] = $param->getDefaultValue();
+            } else {
+                 $instanceParams[] = null;
+            }
+        }
+    }
+    return $instanceParams;
+}
+
 
 /**
  * 导入辅助函数的文件
@@ -152,7 +182,7 @@ function loadClass()
  */
 function loadHelper($fileName)
 {
-    $filePath = APP . 'Helpers/' . $fileName . '.php';
+    $filePath = APP_PATH . 'Helpers/' . $fileName . '.php';
 
     if (file_exists($filePath)) requireCache($filePath);
 }
@@ -164,105 +194,10 @@ function loadHelper($fileName)
  */
 function M($modelName = "")
 {
-    if (!empty($modelName) && class_exists('App\Models\\' . $modelName)) {
-        return loadClass('App\Models\\' . $modelName);
+    if (!empty($modelName) && class_exists(APP . '\Models\\' . $modelName)) {
+        return loadClass(APP . '\Models\\' . $modelName);
     }
     return loadClass('YrPHP\Model', parseNaming($modelName, 2));
-}
-
-
-/**
- * 过滤数据
- * @param null $data
- */
-function filter(& $data = null)
-{
-    $filters = C('defaultFilter');
-    if (is_string($filters)) {
-        $filters = explode('|', $filters);
-    }
-    foreach ($filters as $filter) {
-        if (function_exists($filter)) {
-            $data = $filter($data);
-        }
-    }
-}
-
-/**
- * 获取输入参数 支持过滤和默认值
- * 使用方法:
- * <code>
- * I('id',0); 获取id参数 自动判断get或者post
- * I('post.name','','htmlspecialchars'); 获取$_POST['name']
- * I('get.'); 获取$_GET
- * </code>
- * @param string $name 变量的名称 支持指定类型
- * @param bool|false $default 默认值
- * @param null $filter 参数过滤方法 默认调用配置里的defaultFilter array或string 用|分割
- * @return array
- */
-function I($name = '', $default = null, $filter = null)
-{
-    if (strpos($name, '.')) { // 指定修饰符
-        list($method, $name) = explode('.', $name, 2);
-    } else { // 默认为自动判断
-        $method = 'param';
-    }
-
-    switch (strtolower($method)) {
-        case 'get'     :
-            $input =& $_GET;
-            break;
-        case 'post'    :
-            $input =& $_POST;
-            break;
-        case 'param'   :
-            switch ($_SERVER['REQUEST_METHOD']) {
-                case 'POST':
-                    $input = $_POST;
-                    break;
-                default:
-                    $input = $_GET;
-            }
-            break;
-
-        case 'request' :
-            $input =& $_REQUEST;
-            break;
-        case 'session' :
-            $input =& $_SESSION;
-            break;
-        case 'cookie'  :
-            $input =& $_COOKIE;
-            break;
-        case 'server'  :
-            $input =& $_SERVER;
-            break;
-        case 'globals' :
-            $input =& $GLOBALS;
-            break;
-
-        default:
-            return null;
-    }
-
-    if (empty($name)) {
-        $data = &$input;
-    } else {
-        if (isset($input[$name])) {
-            $data[$name] = $input[$name];
-        } else {
-            return $default;
-        }
-    }
-
-    if (!is_null($filter)) C('defaultFilter', $filter);
-
-    array_walk($data, 'fil ter');//回调过滤数据
-
-
-    return empty($name) ? $data : $data[$name];
-
 }
 
 
@@ -357,44 +292,6 @@ function cookie($key = '', $val = '')
     }
 
     return $_COOKIE;
-}
-
-/**
- * 判断是不是 AJAX 请求
- * 测试请求是否包含HTTP_X_REQUESTED_WITH请求头。
- * @return    bool
- */
-function isAjaxRequest()
-{
-    return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
-}
-
-
-/**
- * 判断是不是 POST 请求
- * @return    bool
- */
-function isPost()
-{
-    return ($_SERVER['REQUEST_METHOD'] == 'POST');
-}
-
-
-/**
- * 判断是否SSL协议
- * @return boolean
- */
-function isHttps()
-{
-    if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
-        return TRUE;
-    } elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-        return TRUE;
-    } elseif (!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off') {
-        return TRUE;
-    }
-
-    return FALSE;
 }
 
 

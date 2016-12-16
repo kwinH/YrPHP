@@ -23,4 +23,6 @@ return [
     'validate' => 'YrPHP\\Validate',
     'verifyCode' => 'YrPHP\\VerifyCode',
     'pipeline' => 'YrPHP\\Pipeline',
+    'request' => 'YrPHP\\Request',
+    'view' => 'YrPHP\\View',
 ];

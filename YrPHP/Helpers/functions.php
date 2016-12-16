@@ -22,36 +22,14 @@ function &getInstance()
 
 
 /**
- * 获取和设置配置参数 支持批量定义
- * @param string|array $name 配置变量 支持传入配置文件
- * @param mixed $value 配置值
+ * 获取配置参数
+ * @param string|array $name 配置变量
  * @param mixed $default 默认值
  * @return mixed
  */
-function C($name = null, $value = null, $default = null)
+function C($name = null, $default = null)
 {
-    static $config = array();
-
-    if (is_string($name) && strpos($name, '.php') !== false) {
-        $name = requireCache(APP_PATH . 'Config/' . $name);
-        if (is_array($name)) {
-            $config = array_merge($config, $name);
-            return $config;
-        }
-    }
-
-    // 批量设置
-    if (is_array($name)) {
-        $config = array_merge($config, $name);
-        return $config;
-    }
-    if (!is_null($name) && !is_null($value)) $config[$name] = $value;
-
-    if (is_null($name)) return $config;
-
-    if (isset($config[$name])) return $config[$name];
-
-    return $default;
+    return \YrPHP\Config::get($name, $default);
 }
 
 
@@ -126,53 +104,7 @@ function getLang($key = null, $value = null)
  */
 function loadClass()
 {
-    static $instanceList = array();
-    //取得所有参数
-    $arguments = func_get_args();
-    //弹出第一个参数，这是类名，剩下的都是要传给实例化类的构造函数的参数了
-    $className = array_shift($arguments);
-    $key = trim($className, '\\');
-
-    if (!isset($instanceList[$key])) {
-        $reflection = new ReflectionClass($className);
-
-        if (!$arguments) {
-            $arguments = getDependencies($reflection->getConstructor());
-        }
-
-        $instanceList[$key] = $reflection->newInstanceArgs($arguments);
-    }
-    return $instanceList[$key];
-}
-
-/**
- * 递归解析参数
- * @param \ReflectionMethod $rfMethod
- * @return array
- * @throws \Exception
- */
-function getDependencies(\ReflectionMethod $rfMethod, $params = [])
-{
-    $instanceParams = [];
-
-    if (!$rfMethod instanceof \ReflectionMethod) return $instanceParams;
-
-    foreach ($rfMethod->getParameters() as $param) {
-
-        if ($dependency = $param->getClass()) {   //该参数不是对象
-            $instanceParams[] = loadClass($dependency->name);
-
-        } else {
-            if ($argument = array_shift($params)) {
-                $instanceParams[] = $argument;
-            } else if ($param->isDefaultValueAvailable()) {
-                $instanceParams[] = $param->getDefaultValue();
-            } else {
-                 $instanceParams[] = null;
-            }
-        }
-    }
-    return $instanceParams;
+    return call_user_func_array(['App', 'loadClass'], func_get_args());
 }
 
 

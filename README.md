@@ -285,7 +285,7 @@ return [
 获取已经设置的参数值：**C('参数名称')**
 
 ```php
-$charset = C('charset');//获得配置中的编码格式
+$charset = C('charset');//获得配置中的编码格式 =>YrPHP\Config::get('charset');两者等同
 ```
 
 如果`charset`尚未存在设置，则返回NULL。
@@ -293,7 +293,7 @@ $charset = C('charset');//获得配置中的编码格式
 > 支持设置默认值例如：
 
 ```php
-C('my_config',null,'default_config');
+C('my_config','default_config');
 ```
 
 >如果不传参数 则返回所有配置信息
@@ -307,9 +307,9 @@ $config = C();//return array;
 >设置新的值 如果存在则覆盖，否则新建：
 
 ```php
-C('参数名称','新的参数值');
+YrPHP\Config::set('参数名称','新的参数值');
 
-C("openCache",false);//关闭数据库缓存，只在该次请求有效
+YrPHP\Config::set("openCache",false);//关闭数据库缓存，只在该次请求有效
 ```
 
 
@@ -317,12 +317,12 @@ C("openCache",false);//关闭数据库缓存，只在该次请求有效
 ##批量设置：
 
 ```php
-C(array(key=>value,key1=>value1));
+YrPHP\Config::set(array(key=>value,key1=>value1));
 ```
 
 ##加载配置文件
 ```php
-C('config_test.php');//=>APP_PATH . 'config/config_test.php'
+YrPHP\Config::load('config_test');//=>APP_PATH . 'config/config_test.php'
 ```
 
 
@@ -360,14 +360,14 @@ display($fileName, $tplVars = '', $cacheId = '');
 
 >$fileName 提供模板文件的文件名
 > $tpl_var 动态数据
-> $cacheId 当为Boolean值true时则做为数据返回，不输出到屏幕，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖,当$cacheId为false时，不会生成缓存文件
+> $cacheId 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
 
 
 
 
 
 ```php
-\App::view()->display('name');
+return \App::view()->display('name');
 ```
 
 >上面的 <var>name</var> 便是你的视图文件的名字 如 index.html。
@@ -380,7 +380,7 @@ display($fileName, $tplVars = '', $cacheId = '');
 
 //等同于
 
-\App::view()->display('name',array('name'=>'yrPHP'));
+return \App::view()->display('name',array('name'=>'yrPHP'));
 ```
 
 
@@ -433,7 +433,7 @@ class Index extends Controller
     {
         $m = M('users');
         $all =$m->all();
-       $t = \App::view()->display('index',['data'=>$all]);
+       return \App::view()->display('index',['data'=>$all]);
 
     }
 }
@@ -723,7 +723,7 @@ function index()
 
 $data['arr'] = array(1,2,3,4,5,6);
 
-\App::view()->display('index.html',$data);
+return \App::view()->display('index.html',$data);
 
 }
 
@@ -1534,13 +1534,12 @@ $user = M('User')->closePreProcess()->insert(['first_name'=>'Sally'])；
 function &getInstance(){}
 
 /**
-* 获取和设置配置参数 支持批量定义  具体请看配置章节
-* @param string|array $name 配置变量 支持传入配置文件
-* @param mixed $value 配置值
+* 获取配置参数
+* @param string|array $name 配置变量 
 * @param mixed $default 默认值
 * @return mixed
-    */
-   function C($name = null, $value = null, $default = null){}
+*/
+   function C($name = null,  $default = null){}
 
 /**********************************************************/
 /**

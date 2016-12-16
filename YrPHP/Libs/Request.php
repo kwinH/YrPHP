@@ -16,6 +16,8 @@ class Request
     protected $onlyKey = [];
     protected static $getData = [];
     protected static $postData = [];
+    //最后生成的视图
+    public $view = '';
 
     public function __construct()
     {
@@ -149,7 +151,7 @@ class Request
      */
     function part($n = null, $no_result = null)
     {
-        return App::uri()->segment($n = null, $no_result = null);
+        return App::uri()->segment($n, $no_result);
     }
 
     /**
@@ -160,7 +162,7 @@ class Request
      */
     function rpart($n = null, $no_result = null)
     {
-        return App::uri()->rsegment($n = null, $no_result = null);
+        return App::uri()->rsegment($n, $no_result);
     }
 
     /**
@@ -174,10 +176,13 @@ class Request
 
     public function is($rule)
     {
-        $rule = addslashes(trim($rule, '/'));
-        var_dump($rule);
+        $rule = preg_quote($rule, '/');
+        $rule = str_replace('\*', '.*', $rule) . '\z';
+
         $path = $this->getPath();
-        return preg_match('/' . $rule . '/Ui', $path);
+        return (bool)preg_match('/' . $rule . '/Ui', $path);
+
+
     }
 
     /**
@@ -218,16 +223,6 @@ class Request
         return ($_SERVER['REQUEST_METHOD'] == 'POST');
     }
 
-    public function prot()
-    {
-        return $_SERVER['SERVER_PORT'];
-    }
-
-    public function referer()
-    {
-        return $_SERVER['HTTP_REFERER'];
-    }
-
     /**
      * 判断是否SSL协议
      * @return boolean
@@ -243,6 +238,27 @@ class Request
         }
 
         return false;
+    }
+
+    public function prot()
+    {
+        return $_SERVER['SERVER_PORT'];
+    }
+
+    public function host()
+    {
+        return $_SERVER['HTTP_HOST'];
+    }
+
+    public function referer()
+    {
+        return $_SERVER['HTTP_REFERER'];
+    }
+
+
+    public function toJson(array $data)
+    {
+        return json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 
 }

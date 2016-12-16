@@ -77,7 +77,7 @@ class Pipeline
         return function ($stack, $pipe) {
             return function ($passable) use ($stack, $pipe) {
                 if ($stack instanceof \Closure) {
-                    $pipe = loadClass(APP . '\Middleware\\' . $pipe);
+                    $pipe = loadClass($pipe);
 
                     if ($pipe instanceof IMiddleware) {
                         return call_user_func([$pipe, $this->method], $passable, $stack);

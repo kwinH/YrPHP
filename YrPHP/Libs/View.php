@@ -80,17 +80,15 @@ class View
      * 加载指定目录下的模板文件，并将替换后的内容生成组合文件存放到另一个指定目录下
      * @param    string $fileName 提供模板文件的文件名
      * @param    array $tpl_var 需要一个字符串参数作为关联数组下标，要和模板中的变量名对应
-     * @param    string $cacheId 缓存ID 当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
+     * @param    string 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
      */
     function display($fileName, $tplVars = '', $cacheId = '')
     {
         //缓存静态文件
         $this->init($cacheId);
 
-
         $this->buildTplFile($fileName, $tplVars, true);
         $this->blockExtends();
-
 
         extract($this->tplVars);
         require $this->comFileName;
@@ -101,12 +99,8 @@ class View
         ob_end_clean();
 
         $this->cacheStatus = $cacheId;
-        if ($cacheId === true) {
-            return $this->cacheContent;
-        } else {
-            echo $this->cacheContent;
-        }
 
+        return $this->cacheContent;
     }
 
 

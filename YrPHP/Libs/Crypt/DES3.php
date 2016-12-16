@@ -1,6 +1,6 @@
 <?php
 namespace YrPHP\Crypt;
-class DES3
+class DES3 implements ICrypt
 {
     public $key;
     public $iv;

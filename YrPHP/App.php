@@ -11,6 +11,7 @@
 use YrPHP\Config;
 use YrPHP\Debug;
 use YrPHP\File;
+use YrPHP\Session;
 use YrPHP\Structure;
 
 class App
@@ -50,22 +51,6 @@ class App
         header("Content-Type:" . Config::get('contentType') . ";charset=" . Config::get('charset')); //设置系统的输出字符为utf-8
         date_default_timezone_set(Config::get('timezone')); //设置时区（默认中国）
 
-        if ($sessionName = Config::get('sessionName'))
-            session_name($sessionName);
-
-
-        if ($sessionPath = Config::get('sessionSavePath')) {
-            if (!file_exists($sessionPath)) File::mkDir($sessionPath);
-            session_save_path($sessionPath);
-        }
-
-        if ($sessionExpire = Config::get('sessionExpire')) {
-            ini_set('session.gc_maxlifetime', $sessionExpire);
-            ini_set('session.cookie_lifetime', $sessionExpire);
-        }
-
-        ini_set('session.cookieDomain', Config::get('sessionDomain'));
-
 
         error_reporting(-1); //报告所有PHP错误
         if (Config::get('logRecord')) {
@@ -87,26 +72,26 @@ class App
         }
 
         if (isset($_GET['Lang'])) {
-            session('Lang', 'en');
+            Session::set('Lang', 'en');
         } else {
-            if (!session('Lang')) session('Lang', 'en');
+            if (!Session::get('Lang')) Session::set('Lang', 'en');
         }
 
         if (isset($_GET['country'])) {
-            session('country', strtoupper($_GET['country']));
+            Session::set('country', strtoupper($_GET['country']));
         } else {
-            if (!session('country'))
-                session('country', reset(explode(',', $_SERVER["HTTP_ACCEPT_LANGUAGE"])));
+            if (!Session::get('country'))
+                Session::set('country', reset(explode(',', $_SERVER["HTTP_ACCEPT_LANGUAGE"])));
         }
 
-        $langPath = APP_PATH . 'Lang/lang_' . session('Lang') . '.php';
+        $langPath = APP_PATH . 'Lang/lang_' . Session::get('Lang') . '.php';
 
         if (file_exists($langPath))
             getLang(require $langPath);
 
 
         csrfToken();
-        session('_old_input', $_POST);
+        Session::set('_old_input', $_POST);
     }
 
 
@@ -226,7 +211,7 @@ class App
             'ctlName' => $className,
             'actName' => $action,
             'nowAction' => $nowAction,
-            'Lang' => session('Lang')
+            'Lang' => Session::get('Lang')
         ]);
 
         if (method_exists($classObj, $action)) {

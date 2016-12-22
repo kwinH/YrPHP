@@ -62,12 +62,13 @@ return [
 
 
     /*--------------------以下是session配置---------------------------------------*/
-    'sessionPrefix' => '',
-    'sessionExpire' => 7200,//有效期时长
-    'sessionSavePath' => APP_PATH . "Runtime/Session/",
-    'sessionName' => 'YrPHP',
-    'sessionDomain' => '',//设置域，默认为当前域名
-
+    'session' => [
+        'expire' => 7200,//有效期时长
+        'saveHandler' => 'file',
+        'savePath' => APP_PATH . "Runtime/Session/",
+        'name' => 'YrPHP',
+        'domain' => '',//设置域，默认为当前域名
+    ],
     /*--------------------以下是cookie配置---------------------------------------*/
     'cookiePrefix' => 'yrPHP_',
     'cookieExpire' => 7200,//有效期时长
@@ -83,7 +84,7 @@ return [
     'middleware' => [
         //在实例化控制器之前
         'before' => [
-        //    \App\Middleware\BeforeMiddlewate::class
+            //    \App\Middleware\BeforeMiddlewate::class
         ],
         //在实例化控制器实例化之后，未调用方法之前
         'middle' => [

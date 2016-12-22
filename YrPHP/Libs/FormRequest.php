@@ -17,12 +17,12 @@ class FormRequest
     function __construct(Request $request)
     {
         $this->request = $request;
-        $this->rule();
+        $this->rules();
         $this->validate();
     }
 
 
-    function rule()
+    function rules()
     {
 
     }
@@ -78,7 +78,7 @@ class FormRequest
             }
 
             if (!empty($error)) {
-                session('errors', $error);
+                Session::set('errors', $error);
                 $this->response($error);
                 return false;
             }
@@ -92,11 +92,11 @@ class FormRequest
     public function response(array $errors)
     {
         if ($this->isAjax()) {
-            exit($this->toJson(['error' => $errors]));
+            exit($this->request->toJson(['error' => $errors]));
         }
 
         if ($this->isPost()) {
-            gotoUrl($this->referer());
+            gotoUrl($this->request->referer());
         }
     }
 

@@ -8,6 +8,8 @@
  */
 namespace YrPHP;
 
+use App;
+
 class Model
 {
     // 当前数据库操作对象
@@ -65,8 +67,6 @@ class Model
     //错误信息
     protected $error = [];
 
-    //验证规则 array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
-    protected $validate = [];
     //是否开启缓存 bool
     protected $openCache;
     // query 预处理绑定的参数
@@ -105,7 +105,7 @@ class Model
 
         $this->tableName = $tableName;
         $this->table($tableName);
-        //$this->validate = array('filed' => array(array('验证规则', '错误提示', '附加规则')));
+
     }
 
 
@@ -563,7 +563,6 @@ class Model
      */
     public final function join($table = '', $cond = [], $type = '', $auto = true)
     {
-
         $table = $auto ? $this->tablePrefix . $table : $table;
         $table = preg_split('/\s+as\s+|\s+/', $table);
         $tableAlias = isset($table[1]) ? $this->escapeId($table[1]) : '';
@@ -641,7 +640,6 @@ class Model
      */
     protected function setDataPreProcessFill($filed, $data)
     {
-
         $preProcessCache = $this->getDataPreProcessAttr('set');
 
         if (empty($preProcessCache)) {
@@ -741,7 +739,6 @@ class Model
      */
     protected final function cache($assoc = false, $row = 'result')
     {
-
         $dbCacheFile = $this->tableName . '_' . md5($this->sql) . '_' . $row . (int)$assoc . (int)$this->PreProcessStatus;
 
         $cache = Cache::getInstance();
@@ -784,8 +781,6 @@ class Model
      */
     public final function row($assoc = false)
     {
-
-
         $re = $this->cache($assoc, 'row');
 
 
@@ -800,7 +795,6 @@ class Model
      */
     public final function result($assoc = false)
     {
-
         $re = $this->cache($assoc, 'result');
 
         return $re;
@@ -814,7 +808,6 @@ class Model
      */
     public final function delete($where = "")
     {
-
         if (!empty($where)) $this->where($where);
 
         $where = $this->methods['where'];
@@ -838,8 +831,7 @@ class Model
      */
     public final function insert($data = [], $act = 'INSERT')
     {
-
-        if (empty($data)) $data = I('post');
+        if (empty($data)) $data = App::request()->post();
 
         if (!$data) return false;
 
@@ -918,26 +910,10 @@ class Model
      * @param bool $auto
      * @return array
      *
-     * array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
-     *附加规则:
-     * equal:值域:string|null 当值与之相等时，通过验证
-     * notequal:值域:string|null 当值与之不相等时 通过验证
-     * in:值域:array(1,2,3)|1,2,3 当值存在指定范围时 通过验证
-     * notin: 值域:array(1,2,3)|1,2,3  当不存在指定范围时 通过验证
-     * between: 值域:array(1,30)|1,30 当存在指定范围时 通过验证
-     * notbetween:值域:array(1,30)|1,30 当不存在指定范围时 通过验证
-     * length:值域:array(10,30)|10,30 当字符长度大于等于10，小于等于30时 通过验证 || array(30)|30 当字符等于30时 通过验证
-     * unique:值域:string 当该字段在数据库中不存在该值时 通过验证
-     * email： 值域：string 当值为email格式时 通过验证
-     * url： 值域：string 当值为url格式时 通过验证
-     * number: 值域：string 当值为数字格式时 通过验证
-     * regex:值域:正则表达式 //当符合正则表达式时 通过验证
-     *
      */
 
     public final function check($array)
     {
-
         if ($this->_validate) {
 
             $tableField = $this->tableField();
@@ -946,35 +922,11 @@ class Model
 
                 if (!in_array(strtolower($key), array_map('strtolower', $tableField))) {//判断字段是否存在 不存在则舍弃
                     unset($array[$key]);
-                } else {
-                    /*** 验证规则validate*****/
-                    if (isset($this->validate[$key])) {//判断验证规则是否存在
-
-                        foreach ($this->validate[$key] as $validate) {
-
-                            if (empty($validate[1]))
-                                $validate[1] = "错误:{$key}验证不通过";
-
-
-                            if (method_exists('\YrPHP\Validate', $validate[2])) {
-
-                                if (!Validate::$validate[2]($value, $validate[0]))
-                                    $this->error[$key] = $validate[1];
-
-                            }
-                        }
-                    }
-
-
                 }
 
 
             }
 
-            if (!empty($this->error)) {
-                session('errors', $this->error);
-                return false;
-            }
         }
 
         if (!get_magic_quotes_gpc()) {
@@ -993,7 +945,6 @@ class Model
      */
     public final function tableField()
     {
-
         if (isset(self::$tableFileds[$this->escapeTableName]))
             return self::$tableFileds[$this->escapeTableName];
 
@@ -1045,7 +996,6 @@ class Model
      */
     public final function query($sql = "", $parameters = [])
     {
-
         if (!empty($sql)) $this->sql = $sql;
 
         $this->queries[] = $this->sql;
@@ -1081,10 +1031,8 @@ class Model
      */
     public final function update($data = [], $where = "")
     {
-
         if (empty($data))
-            $data = I('post');
-
+            $data = App::request()->post();
 
         if (!$data)
             return false;
@@ -1245,19 +1193,10 @@ class Model
     }
 
 
-    /**
-     *获得验证错误提示
-     * @return mixed
-     */
-    public final function getError()
-    {
-        return $this->error;
-    }
-
     public function __destruct()
     {
         $this->cleanLastSql();
-        $this->error = [];
+
     }
 
 
@@ -1272,7 +1211,6 @@ class Model
      */
     function createTable($tableName = '', $key = 'id', $engine = 'InnoDB', $auto = true)
     {
-
         $this->table($tableName, $auto);
 
         $sql = "CREATE TABLE IF NOT EXISTS {$this->escapeTableName} (`$key` INT NOT NULL AUTO_INCREMENT  primary key) ENGINE = {$engine};";
@@ -1289,7 +1227,6 @@ class Model
      */
     function dropTable($tableName = '', $auto = true)
     {
-
         $this->table($tableName, $auto);
 
         $sql = " DROP TABLE IF EXISTS $this->escapeTableName";
@@ -1428,7 +1365,6 @@ class Model
      */
     function dropField($field = '', $tableName = '', $auto = true)
     {
-
         $this->table($tableName, $auto);
 
         $sql = "alter table {$this->escapeTableName} drop column $field";
@@ -1446,7 +1382,6 @@ class Model
      */
     function getFieldInfo($field = [], $tableName = '', $auto = true)
     {
-
         $this->table($tableName, $auto);
 
         $info = [];

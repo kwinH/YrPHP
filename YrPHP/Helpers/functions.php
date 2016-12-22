@@ -127,9 +127,9 @@ function loadHelper($fileName)
 function M($modelName = "")
 {
     if (!empty($modelName) && class_exists(APP . '\Models\\' . $modelName)) {
-        return loadClass(APP . '\Models\\' . $modelName);
+        return App::loadClass(APP . '\Models\\' . $modelName);
     }
-    return loadClass('YrPHP\Model', parseNaming($modelName, 2));
+    return App::loadClass('YrPHP\Model', parseNaming($modelName, 2));
 }
 
 
@@ -141,39 +141,26 @@ function M($modelName = "")
  */
 function session($key = '', $val = '')
 {
-    if (!session_id()) session_start();
-
-    $sessionPrefix = C('sessionPrefix');
     if (is_null($key)) {
-        session_unset();//释放当前注册的所有会话变量
-        session_destroy();
-        return true;
-    }
-
-    if (is_array($key)) {
-        foreach ($key as $k => $v) {
-            $_SESSION[$sessionPrefix . $k] = $v;
-        }
+        \YrPHP\Session::destroy();
         return true;
     }
 
     if (is_null($val)) {
-        unset($_SESSION[$sessionPrefix . $key]);
+        \YrPHP\Session::delete($key);
         return true;
     }
 
     if (!empty($val)) {
-
-        $_SESSION[$sessionPrefix . $key] = $val;
+        \YrPHP\Session::set($key, $val);
         return true;
     }
 
     if (!empty($key)) {
-
-        return isset($_SESSION[$sessionPrefix . $key]) ? $_SESSION[$sessionPrefix . $key] : false;
+        return \YrPHP\Session::get($key);
     }
 
-    return $_SESSION;
+    return \YrPHP\Session::all();
 }
 
 /**
@@ -286,7 +273,6 @@ function requireCache($filename)
  */
 function error404($msg = '', $url = '', $time = 3)
 {
-
     sendHttpStatus(404);
 
     $msg = empty($msg) ? '你访问的页面不存在或被删除！' : $msg;
@@ -590,7 +576,7 @@ function desensitize($str = '', $start = 0, $length = 0, $replacement = '*')
  */
 function old($inputName = '', $default = null)
 {
-    if (!$oldInput = session('_old_input')) return $default;
+    if (!$oldInput = YrPHP\Session::get('_old_input')) return $default;
 
     if (empty($inputName)) return $oldInput;
 
@@ -605,10 +591,10 @@ function old($inputName = '', $default = null)
  */
 function csrfToken()
 {
-    if (!$token = session('_token'))
+    if (!$token = YrPHP\Session::get('_token'))
         $token = randStr('dw', 32);
 
-    session('_token', $token);
+    YrPHP\Session::get('_token', $token);
 
     return $token;
 }

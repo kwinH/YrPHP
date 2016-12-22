@@ -204,6 +204,12 @@ $route['news/(\d*)'] = 'article/news/:1';
 
 
 
+
+
+# 中间件
+
+略。。。
+
 #控制器
 
 例子：创造一个控制器
@@ -963,47 +969,7 @@ $this->update(array 数据，array 条件);
 ```
 >条件为array|string 推荐array
 
-####数据验证
->如果 $this->_validate = true 则验证添加或修改的数据
->如果验证有一个不通过则不提交或修改数据
 
-```php
-<?php
-namespace App\Model;
-use YrPHP\Model;
-class UserModel extends Model
-{
-
-    public function __construct()
-    {
-        parent::__construct('users');
-    
-        $this->_validate = true;
-        $this->validate=array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
-/*
-*附加规则:
-* equal:值域:string|null 当值与之相等时，通过验证
-* notequal:值域:string|null 当值与之不相等时 通过验证
-* in:值域:array(1,2,3)|1,2,3 当值存在指定范围时 通过验证
-* notin: 值域:array(1,2,3)|1,2,3  当不存在指定范围时 通过验证
-* between: 值域:array(1,30)|1,30 当存在指定范围时 通过验证
-* notbetween:值域:array(1,30)|1,30 当不存在指定范围时 通过验证
-* length:值域:array(10,30)|10,30 当字符长度大于等于10，小于等于30时 通过验证 || array(30)|30 当字符等于30时 通过验证
-* unique:值域:string 当该字段在数据库中不存在该值时 通过验证
-* email： 值域：string 当值为email格式时 通过验证
-* url： 值域：string 当值为url格式时 通过验证
-* number: 值域：string 当值为数字格式时 通过验证
-* regex:值域:正则表达式 //当符合正则表达式时 通过验证
-  */
-  }
-
-    public function userDelete()
-    {
-     return $this->insert([添加的数据],[表名]，[是否自动添加前缀bool]);
-     //return int 受影响行数
-  }
-  }
-```
 
 ####查询数据
 
@@ -1518,6 +1484,75 @@ $user = M('User')->closePreProcess()->insert(['first_name'=>'Sally'])；
 在这个例子中，`setFirstNameAttribute` 函数将会使用 `Sally` 作为参数来调用。修改器会对该名字使用`strtolower` 函数并将其值返回。
 
 ------------
+
+# 表单验证
+
+```php
+namespace App;
+
+
+use YrPHP\FormRequest;
+
+
+class TestRequest extends FormRequest
+{
+
+    function rules()
+    {
+    /*
+     * array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
+     *附加规则:
+     * equal:值域:string|null 当值与之相等时，通过验证
+     * notequal:值域:string|null 当值与之不相等时 通过验证
+     * in:值域:array(1,2,3)|1,2,3 当值存在指定范围时 通过验证
+     * notin: 值域:array(1,2,3)|1,2,3  当不存在指定范围时 通过验证
+     * between: 值域:array(1,30)|1,30 当存在指定范围时 通过验证
+     * notbetween:值域:array(1,30)|1,30 当不存在指定范围时 通过验证
+     * length:值域:array(10,30)|10,30 当字符长度大于等于10，小于等于30时 通过验证 || array(30)|30 当字符等于30时 通过验证
+     * unique:值域:string 当该字段在数据库中不存在该值时 通过验证
+     * email： 值域：string 当值为email格式时 通过验证
+     * url： 值域：string 当值为url格式时 通过验证
+     * number: 值域：string 当值为数字格式时 通过验证
+     * regex:值域:正则表达式 //当符合正则表达式时 通过验证
+     * 匿名函数：function($inputValue, $range){}
+     */
+        $this->validate = ['id' => [[10, '', 'equal']]];
+    }
+
+    
+}
+```
+
+
+
+```php
+<?php
+/**
+ * Created by YrPHP.
+ * User: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
+namespace App\Controllers;
+
+use App;
+use App\TestRequest;
+use YrPHP\Controller;
+
+
+class Index extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+    }
+
+
+    function index(TestRequest $request, $id)
+    {
+		//如果TestRequest验证没通过，则会将错误信息写入session 如果是post提交则返回上一页,如果是ajax，则返回{error:{}}, 获取错误信息：session('error')
+    }
+```
 
 #系统函数
 

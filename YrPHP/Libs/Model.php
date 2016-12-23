@@ -88,7 +88,6 @@ class Model
 
     public function __construct($tableName = '')
     {
-
         if (defined('APP_MODE') && file_exists(APP_PATH . "Config/database_" . APP_MODE . ".php")) {
             $this->dbConfig = requireCache(APP_PATH . "Config/database_" . APP_MODE . ".php");
         } else {
@@ -104,7 +103,6 @@ class Model
         $this->tablePrefix = $this->dbConfig[$this->connection]['masterServer']['tablePrefix'];
 
         $this->tableName = $tableName;
-        $this->table($tableName);
 
     }
 
@@ -178,8 +176,10 @@ class Model
     }
 
 
-    public function escapeId($field)
+    public function escapeId($field = '')
     {
+        if (empty($field)) return '';
+
         if (is_array($field)) {
             return trim(array_reduce($field, function ($result, $item) {
                 return $result . ',' . $this->escapeId($item);
@@ -194,7 +194,7 @@ class Model
         }
     }
 
-    public function escape($value)
+    public function escape($value = '')
     {
         if (is_array($value)) {
             if (isAssoc($value)) {
@@ -310,49 +310,52 @@ class Model
         } elseif (is_array($where)) {
             $count = 0;
             foreach ($where as $k => $v) {
-                $v = trim($v);
                 $filed = preg_split('/\s+/', $k);
 
                 if (count($filed) == 3) {
                     $logical = filed[0];
                     $operator = filed[1];
-                    $filed = filed[2];
+                    $filed = $this->escapeId(filed[2]);
                 } else {
                     if (preg_match('/and|or/i', $filed[0]) !== 0) {
                         $logical = $filed[0];
                         $operator = isset($filed[2]) ? $filed[2] : '=';
-                        $filed = $filed[1];
+                        $filed = $this->escapeId($filed[1]);
                     } else {
                         $operator = isset($filed[1]) ? $filed[1] : '=';
-                        $filed = $filed[0];
+                        $filed = $this->escapeId($filed[0]);
                     }
                 }
 
 
                 if ($count != 0) {
-                    $this->methods[$type] .= ' ' + $logical + ' ';
+                    $this->methods[$type] .= ' ' . $logical . ' ';
                 }
 
-                if (is_null($v)) {
-                    $this->methods[$type] .= $this->escapeId($filed) . ' is null';
+                if ($v instanceof \Closure) {
+                    $this->methods[$type] .= $filed . ' ' . $operator . ' (' . call_user_func($v, new Model($this->tableName)) . ')';
+                } else if (is_null($v)) {
+                    $this->methods[$type] .= $filed . ' is null';
                 } elseif (strripos($v, 'null') !== false) {
-                    $this->methods[$type] .= " $k is {$v}";
+                    $this->methods[$type] .= $filed . "  is {$v}";
                 } else {
                     $operator = strtoupper($operator);
-                    if (is_string($v)) $v = explode(',', $v);
                     if (strpos($operator, 'IN') !== false) {
+                        if (is_string($v)) $v = explode(',', $v);
                         $val = $this->escape($v);
                     } else if (strpos($operator, 'BETWEEN') !== false) {
+                        if (is_string($v)) $v = explode(',', $v);
                         $val = $this->escape($v[0]) . ' and  ' . $this->escape($v[1]);
                     } else {
                         if (strpos($type, 'on') !== false) {
+                            if (is_string($v)) $v = explode(',', $v);
                             $val = $this->escapeId($v);
                         } else {
                             $val = $this->escape($v);
                         }
 
                     }
-                    $this->methods[$type] .= $this->escapeId($filed) . ' ' . $operator . ' ' . $val;
+                    $this->methods[$type] .= $filed . ' ' . $operator . ' ' . $val;
                 }
                 $count++;
 
@@ -420,7 +423,17 @@ class Model
      */
     public final function table($tableName = "", $auto = true)
     {
-        if (empty($tableName)) return $this;
+        $this->setEscapeTableName($tableName, $auto);
+        return $this;
+    }
+
+    protected final function setEscapeTableName($tableName = "", $auto = true)
+    {
+        if ($tableName instanceof \Closure) {
+            return $this->escapeTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp'.uniqid();
+        }
+
+        if (empty($tableName)) $tableName = $this->tableName;
 
         if ($auto && !empty($this->tablePrefix))
             $tableName = strpos($tableName, $this->tablePrefix) === false
@@ -430,7 +443,12 @@ class Model
 
         $this->escapeTableName = $this->escapeId($tableName);
 
-        return $this;
+    }
+
+    protected final function getEscapeTableName()
+    {
+        if (is_null($this->escapeTableName))
+            $this->setEscapeTableName($this->tableName);
     }
 
     /**
@@ -442,39 +460,34 @@ class Model
         return $this->tableName;
     }
 
-
-    /**
-     * @param string $tableName
-     * @param bool $auto 是否自动添加表前缀
-     * @return $this
-     */
-    public final function get($tableName = "", $auto = true)
+    public function buildSql()
     {
-        $this->table($tableName, $auto);
-        $tableName = $this->escapeTableName;
+        $this->getEscapeTableName();
 
         $field = $this->methods['field'] ? $this->methods['field'] : '*';
-
-
-        $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]}
-
-" : "";
+        $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]} " : "";
         $group = $this->methods["group"] != "" ? " GROUP BY {$this->methods["group"]}" : "";
         $having = $this->methods["having"] != "" ? "{$this->methods["having"]}" : "";
 
-        $sql = "SELECT $field FROM  {$tableName}";
+        $this->sql = "SELECT $field FROM  {$this->escapeTableName}";
 
         if (is_array($this->methods['join'])) {
             foreach ($this->methods['join'] as $v) {
-                $sql .= " " . $v . " ";
+                $this->sql .= " " . $v . " ";
             }
         }
 
-        $sql .= "{$this->methods['where']}{$group}
-                            {$having}{$order}{$this->methods['limit']}";
-        $this->sql = $sql;
+        $this->sql .= "{$this->methods['where']}{$group}{$having}{$order}{$this->methods['limit']}";
+        return $this->sql;
+    }
 
 
+    /**
+     * @return $this
+     */
+    public final function get()
+    {
+        $this->buildSql();
         return $this;
     }
 
@@ -517,7 +530,7 @@ class Model
             'join' => [],
             'on' => '',
         ];
-        $this->table($this->tableName);
+        $this->escapeTableName = null;
         $this->PreProcessStatus = true;
 
     }
@@ -755,13 +768,13 @@ class Model
         $this->db = $this->slaveServer[array_rand($this->slaveServer, 1)];
 
         $query = $this->db->query($this->sql);
+        $this->queries[] = $this->sql;
 
         if ($row == 'result') {
             $data = $query->result($assoc);
         } else {
             $data[] = $query->row($assoc);
         }
-
 
         if ($this->PreProcessStatus == true)
             $re = $this->getDataPreProcessFill($data, $assoc);
@@ -808,13 +821,13 @@ class Model
      */
     public final function delete($where = "")
     {
+        $this->getEscapeTableName();
         if (!empty($where)) $this->where($where);
 
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
         $this->sql = "DELETE FROM {$this->escapeTableName} {$where} {$limit}";
-
 
         $re = $this->query($this->sql)->result();
 
@@ -864,6 +877,7 @@ class Model
      */
     function inserts($data = [], $act = 'INSERT')
     {
+        $this->getEscapeTableName();
         if (is_array($data[0])) {
             $fields = array_keys($data[0]);
         } else {
@@ -1031,6 +1045,8 @@ class Model
      */
     public final function update($data = [], $where = "")
     {
+        $this->getEscapeTableName();
+
         if (empty($data))
             $data = App::request()->post();
 

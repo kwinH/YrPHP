@@ -430,7 +430,7 @@ class Model
     protected final function setEscapeTableName($tableName = "", $auto = true)
     {
         if ($tableName instanceof \Closure) {
-            return $this->escapeTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp'.uniqid();
+            return $this->escapeTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
         }
 
         if (empty($tableName)) $tableName = $this->tableName;
@@ -478,6 +478,7 @@ class Model
         }
 
         $this->sql .= "{$this->methods['where']}{$group}{$having}{$order}{$this->methods['limit']}";
+        $this->cleanLastSql();
         return $this->sql;
     }
 
@@ -531,8 +532,6 @@ class Model
             'on' => '',
         ];
         $this->escapeTableName = null;
-        $this->PreProcessStatus = true;
-
     }
 
     /**
@@ -608,7 +607,10 @@ class Model
         return $this;
     }
 
-
+    /**
+     * 临时关闭预处理功能
+     * @return $this
+     */
     public function closePreProcess()
     {
         $this->PreProcessStatus = false;
@@ -776,12 +778,14 @@ class Model
             $data[] = $query->row($assoc);
         }
 
-        if ($this->PreProcessStatus == true)
+        if ($this->PreProcessStatus == true) {
             $re = $this->getDataPreProcessFill($data, $assoc);
+        } else {
+            $this->PreProcessStatus = true;
+        }
+
 
         if ($openCacheBak) $cache->set($dbCacheFile, (object)['sql' => $this->sql, 'data' => $re]);
-
-        $this->cleanLastSql();
 
         return $re;
 
@@ -887,6 +891,8 @@ class Model
         if ($this->PreProcessStatus == true) {
             $values = $this->setDataPreProcessFill($fields, $data);
             $data = $values === false ? $data : $values;
+        } else {
+            $this->PreProcessStatus = true;
         }
 
 
@@ -1068,6 +1074,8 @@ class Model
             $values = array_values($data);
             $values = $this->setDataPreProcessFill($fields, $values);
             $data = $values === false ? $data : $values;
+        } else {
+            $this->PreProcessStatus = true;
         }
 
         $data = $this->escape($data);
@@ -1125,7 +1133,6 @@ class Model
      */
     public final function startTrans()
     {
-
         if ($this->hasActiveTransaction == false) {
             $this->hasActiveTransaction = true;
             if (is_null($this->masterServer)) {

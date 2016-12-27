@@ -402,7 +402,7 @@ function Ip2Area($ip = '')
  * @param  integer $len [description]
  * @return [type]        [description]
  */
-function randStr($type = 'w', $len = 8)
+function randStr($type = 'wd', $len = 8)
 {
     $type = strtolower($type);
 
@@ -418,7 +418,7 @@ function randStr($type = 'w', $len = 8)
             $pool = '0123456789';
             break;
         default:
-            $pool = mt_rand();
+            $pool = uniqid();
             break;
     }
 
@@ -594,7 +594,7 @@ function csrfToken()
     if (!$token = YrPHP\Session::get('_token'))
         $token = randStr('dw', 32);
 
-    YrPHP\Session::get('_token', $token);
+    YrPHP\Session::set('_token', $token);
 
     return $token;
 }

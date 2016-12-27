@@ -64,7 +64,7 @@ return [
     /*--------------------以下是session配置---------------------------------------*/
     'session' => [
         'expire' => 7200,//有效期时长
-        'saveHandler' => 'file',
+        'saveHandler' => 'files',
         'savePath' => APP_PATH . "Runtime/Session/",
         'name' => 'YrPHP',
         'domain' => '',//设置域，默认为当前域名
@@ -84,7 +84,7 @@ return [
     'middleware' => [
         //在实例化控制器之前
         'before' => [
-            //    \App\Middleware\BeforeMiddlewate::class
+            YrPHP\Middleware\VerifyCsrfToken::class,
         ],
         //在实例化控制器实例化之后，未调用方法之前
         'middle' => [

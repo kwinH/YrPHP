@@ -1440,7 +1440,7 @@ $user = M('User')->find(1);
 
 $firstName = $user->first_name;
 
-//closePreProcess访问器和修改器
+//closePreProcess方法可以临时关闭访问器和修改器
 $user = M('User')->closePreProcess()->find(1);
 ```
 

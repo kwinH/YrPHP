@@ -91,7 +91,7 @@ class App
 
 
         csrfToken();
-        Session::set('_old_input', $_POST);
+
     }
 
 

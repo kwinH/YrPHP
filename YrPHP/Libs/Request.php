@@ -214,6 +214,11 @@ class Request
     }
 
 
+    public function method()
+    {
+        return $_SERVER['REQUEST_METHOD'];
+    }
+
     /**
      * 判断是不是 POST 请求
      * @return    bool

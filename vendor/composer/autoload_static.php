@@ -46,6 +46,7 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
         'YrPHP\\FormRequest' => __DIR__ . '/../..' . '/YrPHP/Libs/FormRequest.php',
         'YrPHP\\IMiddleware' => __DIR__ . '/../..' . '/YrPHP/Libs/IMiddleware.php',
         'YrPHP\\Image' => __DIR__ . '/../..' . '/YrPHP/Libs/Image.php',
+        'YrPHP\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/YrPHP/Middleware/VerifyCsrfToken.php',
         'YrPHP\\Model' => __DIR__ . '/../..' . '/YrPHP/Libs/Model.php',
         'YrPHP\\Page' => __DIR__ . '/../..' . '/YrPHP/Libs/Page.php',
         'YrPHP\\Pipeline' => __DIR__ . '/../..' . '/YrPHP/Libs/Pipeline.php',

@@ -10,7 +10,6 @@
 
 use YrPHP\Config;
 use YrPHP\Debug;
-use YrPHP\File;
 use YrPHP\Session;
 use YrPHP\Structure;
 
@@ -28,7 +27,6 @@ class App
         define("ROOT_PATH", dirname(BASE_PATH) . '/'); //项目的根路径，也就是框架所在的目录
         define("APP_PATH", ROOT_PATH . rtrim(APP, '/') . '/'); //用户项目的应用绝对路径
 
-
         require ROOT_PATH . 'vendor/autoload.php';
 
         if (!file_exists(APP)) Structure::run();
@@ -44,9 +42,6 @@ class App
         if (defined('APP_MODE')) {
             Config::load('config_' . APP_MODE);
         }
-
-        Config::load('class_alias', 'classAlias');
-        Config::load('interface', 'interface');
 
         header("Content-Type:" . Config::get('contentType') . ";charset=" . Config::get('charset')); //设置系统的输出字符为utf-8
         date_default_timezone_set(Config::get('timezone')); //设置时区（默认中国）
@@ -86,14 +81,23 @@ class App
 
         $langPath = APP_PATH . 'Lang/lang_' . Session::get('Lang') . '.php';
 
-        if (file_exists($langPath))
-            getLang(require $langPath);
-
+        if (file_exists($langPath)) getLang(require $langPath);
 
         csrfToken();
 
     }
 
+
+    public static function setClassAlias()
+    {
+        Config::load('class_alias', 'classAlias');
+        Config::load('interface', 'interface');
+        $classAlias = Config::get('classAlias');
+
+        foreach ($classAlias as $alias => $original) {
+            class_alias($original, $alias);
+        }
+    }
 
     /**
      * 错误处理函数
@@ -145,6 +149,7 @@ class App
     static function run()
     {
         self::init();
+        self::setClassAlias();
         self::loadConf();
 
         $url = self::uri()->rsegment();
@@ -199,11 +204,8 @@ class App
 
         }
 
-
         $classObj .= '\\' . $className;
-
         $nowAction = $className . '/' . $action;
-
         $classPath = $ctrBaseNamespace . $className . '.php';
 
         Config::set([
@@ -270,11 +272,17 @@ class App
             if ($reflection->isInterface()) {
                 $reflection = new ReflectionClass(Config::get('interface.' . $className));
             }
-            if (!$arguments) {
-                $arguments = self::getDependencies($reflection->getConstructor());
+
+            $constructor = $reflection->getConstructor();
+
+            if (is_null($constructor)) {
+                self::$instanceList[$key] = $reflection->newInstanceArgs();
+            } else {
+                if (!$arguments) $arguments = self::getDependencies($constructor);
+
+                self::$instanceList[$key] = $reflection->newInstanceArgs($arguments);
             }
 
-            self::$instanceList[$key] = $reflection->newInstanceArgs($arguments);
         }
         return self::$instanceList[$key];
     }
@@ -292,11 +300,8 @@ class App
         if (!$rfMethod instanceof \ReflectionMethod) return $instanceParams;
 
         foreach ($rfMethod->getParameters() as $param) {
-
-
             if ($dependency = $param->getClass()) {   //该参数不是对象
                 $instanceParams[] = self::loadClass($dependency->name);
-
             } else {
                 if ($argument = array_shift($params)) {
                     $instanceParams[] = $argument;
@@ -329,9 +334,8 @@ class App
 
     public static function __callStatic($name, $paramenters)
     {
-        $class = Config::get('classAlias.' . $name);
-        if (class_exists($class))
-            return loadClass($class, $paramenters);
+        if (class_exists($name))
+            return loadClass($name, $paramenters);
     }
 }
 

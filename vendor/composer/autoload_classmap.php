@@ -25,6 +25,7 @@ return array(
     'YrPHP\\Debug' => $baseDir . '/YrPHP/Libs/Debug.php',
     'YrPHP\\File' => $baseDir . '/YrPHP/Libs/File.php',
     'YrPHP\\FormRequest' => $baseDir . '/YrPHP/Libs/FormRequest.php',
+    'YrPHP\\From' => $baseDir . '/YrPHP/Libs/From.php',
     'YrPHP\\IMiddleware' => $baseDir . '/YrPHP/Libs/IMiddleware.php',
     'YrPHP\\Image' => $baseDir . '/YrPHP/Libs/Image.php',
     'YrPHP\\Middleware\\VerifyCsrfToken' => $baseDir . '/YrPHP/Middleware/VerifyCsrfToken.php',

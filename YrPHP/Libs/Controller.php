@@ -14,8 +14,8 @@ abstract class Controller
     private static $instance;
 
     /**
-     * 在控制器上注册的中间件
      *
+     * 在控制器上注册的中间件
      * @var array
      */
     protected $middleware = [];
@@ -28,6 +28,7 @@ abstract class Controller
 
 
     /**
+     *
      * 定义一个静态全局Controller超级对象
      * 可通过引用的方式使用Controller对象
      * 返回当前实例控制器对象
@@ -41,7 +42,7 @@ abstract class Controller
 
 
     /**
-     * Register middleware on the controller.
+     * 注册中间件
      *
      * @param  string $middleware
      * @param  array $options
@@ -71,14 +72,6 @@ abstract class Controller
         return $middleware;
     }
 
-    /**
-     * 重写这个方法 在构造函数中调用
-     * 缓存初始化 判断缓存ID是否合理 避免生成无用静态文件
-     */
-    private function checkCacheId()
-    {
-
-    }
 
     public function __call($method, $args)
     {

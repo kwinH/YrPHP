@@ -33,7 +33,6 @@ class View
 
     public function __construct()
     {
-
         $this->templateDir = C('setTemplateDir');       //定义模板文件存放的目录
         $this->compileDir = C('setCompileDir');      //定义通过模板引擎组合后文件存放目录
         $this->caching = C('caching');     //缓存开关 1开启，0为关闭
@@ -106,7 +105,6 @@ class View
 
     function buildTplFile($fileName, $tplVars = '')
     {
-
         if (!empty($tplVars)) $this->tplVars = array_merge($this->tplVars, $tplVars);
 
         /* 到指定的目录中寻找模板文件 */
@@ -139,7 +137,6 @@ class View
 
         return file_get_contents($comFileName);
 
-
     }
 
 
@@ -157,7 +154,6 @@ class View
 
     private function tplReplace($content)
     {
-
         $this->rule['/' . $this->leftDelimiter . '=(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php echo \\1;?>";//输出变量、常量或函数
         $this->rule['/' . $this->leftDelimiter . 'foreach\s*\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php foreach(\\1){?>";//foreach
         $this->rule['/' . $this->leftDelimiter . 'loop\s*\$(.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php foreach(\$\\1 as \$k=>\$v){?>";//loop
@@ -171,6 +167,8 @@ class View
         $this->rule['/' . $this->leftDelimiter . 'assign\s+(.*)\s*=\s*(.*)' . $this->rightDelimiter . '/isU'] = "<?php \\1 = \\2;?>";//分配变量
         $this->rule['/' . $this->leftDelimiter . '(break|continue)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1;?>";//跳出循环
         $this->rule['/' . $this->leftDelimiter . '(\$.*|\+\+|\-\-)(\+\+|\-\-|\$.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1\\2;?>";//运算
+
+        $this->rule['/' . $this->leftDelimiter . '\s*Form::(.*)\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php echo App::from()->\\1(\\2);?>";//表单
 
 
         $content = preg_replace(array_keys($this->rule), array_values($this->rule), $content);

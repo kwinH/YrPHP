@@ -655,7 +655,6 @@ class Index extends Controller
 <br/>
 
 {/for}
-
 ```
 
 
@@ -741,14 +740,11 @@ return \App::view()->display('index.html',$data);
 ####在模版中调用
 ```html
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <title>TEST</title>
-  </head>
+</head>
 
 <body>
 {=dump $a}
@@ -756,6 +752,114 @@ return \App::view()->display('index.html',$data);
 
 </html>
 ```
+
+## 表单
+
+#### 实例：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TEST</title>
+</head>
+
+<body>
+{from::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
+{from::text('name', null)}
+{from::password('password', null)}
+{from::submit('提交')}
+{from::close()}
+</body>
+
+</html>
+```
+
+#### 开启表单
+
+```
+{from::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
+
+{from::close()}
+```
+
+默认表单使用 POST 方法，当然您也可以指定传参其他表单的方法
+
+当填写第二个参数$data（模型）时，当您产生表单元素时，如 text 字段，模型的值将会自动比对到字段名称，并设定此字段值，举例来说，用户模型的 `email` 属性，将会设定到名称为 `email` 的 text 字段的字段值，不仅如此，当 Session 中有与字段名称相符的名称， Session 的值将会优先于模型的值，而优先顺序如下：
+
+1. Session 的数据 (旧的输入值)
+2. 明确传递的数据
+3. 模型属性数据
+
+这样可以允许您快速地建立表单，不仅是绑定模型数据，也可以在服务器端数据验证错误时，轻松的回填用户输入的旧数据！
+
+
+#### CSRF 保护
+
+YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受到 CSRF (跨网站请求伪造) 攻击。首先YrPHP会自动在用户的 session中放置随机的token，别担心这些会自动完成。如果你调用了form::open方法，这个 CSRF 参数会用隐藏字段的方式自动加到您的表单中。另外，您也可以使用 token 方法去产生这个隐藏的 CSRF 字段的 HTML 标签：
+
+```
+{form::token()}
+```
+
+#### 标签（Label）
+
+```
+{form::label('name', '姓名', array('class' => 'name'))}
+```
+
+> **注意：** 在建立标签时，任何您建立的表单元素名称与标签相符时，将会自动在 ID 属性建立与标签名称相同的 ID。
+
+#### 文字字段
+
+```
+{form::text('name', '默认值', array('class' => 'input-text'))}
+```
+> 默认ID为字段名，如上如果没有在第三个参数中指定ID，则ID为name
+
+#### 多行文本域
+
+```
+{form::textarea('desc', '默认值', array('class' => 'input-text','size'=>50,10))}
+```
+>size 50为cols,10为rows，cols和rows默认就是50*10
+
+
+
+#### 密码字段
+
+```
+{form::password('name', '默认值', array('class' => 'input-text'))}
+```
+
+#### 隐藏域
+
+```
+{form::hidden('name', '默认值', array('class' => 'input-text'))}
+```
+
+#### 复选框、单选按钮
+
+```
+{form::checkbox('name', 'value',true)}
+{form::checkbox('name', 'value',true)}
+```
+>第三个参数为是否默认选中
+
+#### 下拉框
+
+```
+{form::select($name, $list = [], $selected = null, $options = [])}
+```
+
+#### 按钮
+
+```
+{form::submit('name',['class'=>'button'])}
+{form::button('name',['class'=>'button'])}
+```
+
 #模型
 
 ##数据库配置

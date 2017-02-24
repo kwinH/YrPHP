@@ -117,18 +117,16 @@ class View
         /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
         $comFileDir = $this->compileDir . C('ctlName');
 
-        if (!file_exists($comFileDir)) mkdir($comFileDir, 0755);
+        if (!file_exists($comFileDir)) File::mkDir($comFileDir);
 
-        $comFileName = $comFileDir . '/' . $fileName . '.php';
+        $comFileName = $comFileDir . '/' . basename($fileName) . '.php';
 
         if (is_null($this->comFileName)) $this->comFileName = $comFileName;
-
 
         if (!file_exists($comFileName) || filemtime($comFileName) < filemtime($tplFile) || filemtime($comFileName) < filemtime($this->ctlFile)) {
             $repContent = $this->tplReplace(file_get_contents($tplFile));
 
             $this->setBlock($repContent);
-
 
             /* 保存由系统组合后的脚本文件 */
             file_put_contents($comFileName, $repContent);

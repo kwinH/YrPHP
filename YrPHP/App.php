@@ -154,7 +154,7 @@ class App
 
         $url = self::uri()->rsegment();
 
-        $ctrBaseNamespace = APP_PATH . Config::get('ctrBaseNamespace') . '/';
+        $ctrBasePath = APP_PATH . Config::get('ctrBaseNamespace') . '/';
 
         //默认控制器文件
         $defaultCtl = Config::get('defaultCtl');
@@ -180,11 +180,12 @@ class App
 
         } else {
             //(PATHINFO 模式)
+            $ctrBaseNamespace = [];
             foreach ($url as $k => $v) {
                 $v = ucfirst(strtolower($v));
-
-                if (is_dir($ctrBaseNamespace . $v)) {
-                    $ctrBaseNamespace .= empty($v) ? '' : $v . '/';
+                if (is_dir($ctrBasePath . $v)) {
+                    $ctrBaseNamespace[] = $v;
+                    $ctrBasePath .= empty($v) ? '' : $v . '/';
                     $classObj .= '\\' . $v;
                 } else {
                     $className = ucfirst(strtolower($v));
@@ -202,8 +203,10 @@ class App
         }
 
         $classObj .= '\\' . $className;
-        $nowAction = $className . '/' . $action;
-        $classPath = $ctrBaseNamespace . $className . '.php';
+        $classPath = $ctrBasePath . $className . '.php';
+        $ctrBaseNamespace[] = $className;
+        $className = implode('/', $ctrBaseNamespace);
+        $nowAction = $classObj . '::' . $action;
 
         Config::set([
             'classPath' => $classPath,

@@ -149,7 +149,7 @@ class Debug
         self::$info[] = 'URI字符串：' . implode('/', App::uri()->segment());
         self::$info[] = 'URI路由地址：' . implode('/', App::uri()->rsegment());
         self::$info[] = '控制器地址：' . C('classPath');
-        self::$info[] = '调用方法：' . C('actName');
+        self::$info[] = '调用方法：' . C('nowAction');
         if (count(self::$info) > 0) {
             $mess .= '<br>［系统信息］';
             foreach (self::$info as $info) {

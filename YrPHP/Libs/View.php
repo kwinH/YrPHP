@@ -190,7 +190,7 @@ class View
 
     public function setBlock($data)
     {
-        preg_match_all('/' . $this->leftDelimiter . 'section\((.*)\)' . $this->rightDelimiter . '(.*)' .
+        preg_match_all('/' . $this->leftDelimiter . 'section\s*(.*)\s*' . $this->rightDelimiter . '(.*)' .
             $this->leftDelimiter . 'endsection' . $this->rightDelimiter . '/isU', $data, $matches);
 
 

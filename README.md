@@ -472,17 +472,17 @@ class Index extends Controller
 ```php
 {extends layout}
 
-{section(body)}
+{section body}
 {require test}
 {endsection}
 
 
-{section(test)}
+{section test}
 123456
 {endsection}
 ```
 
->由于layout中没有test内容区块 所以section(test)中的内容不会显示
+>由于layout中没有test内容区块 所以section test中的内容不会显示
 
 ####  test.php
 

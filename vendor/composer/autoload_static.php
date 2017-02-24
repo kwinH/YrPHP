@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
+class ComposerStaticInitbeb289f9886f00932c5bddf136893312
 {
     public static $files = array (
         'df8ba4fd963eeedd28df00a91db10ada' => __DIR__ . '/../..' . '/YrPHP/Helpers/functions.php',
@@ -44,6 +44,7 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
         'YrPHP\\Debug' => __DIR__ . '/../..' . '/YrPHP/Libs/Debug.php',
         'YrPHP\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/File.php',
         'YrPHP\\FormRequest' => __DIR__ . '/../..' . '/YrPHP/Libs/FormRequest.php',
+        'YrPHP\\From' => __DIR__ . '/../..' . '/YrPHP/Libs/From.php',
         'YrPHP\\IMiddleware' => __DIR__ . '/../..' . '/YrPHP/Libs/IMiddleware.php',
         'YrPHP\\Image' => __DIR__ . '/../..' . '/YrPHP/Libs/Image.php',
         'YrPHP\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/YrPHP/Middleware/VerifyCsrfToken.php',
@@ -52,9 +53,9 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
         'YrPHP\\Pipeline' => __DIR__ . '/../..' . '/YrPHP/Libs/Pipeline.php',
         'YrPHP\\Request' => __DIR__ . '/../..' . '/YrPHP/Libs/Request.php',
         'YrPHP\\Session' => __DIR__ . '/../..' . '/YrPHP/Libs/Session.php',
-        'YrPHP\\Session\\Memcache' => __DIR__ . '/../..' . '/YrPHP/Libs/Session/Memcache.php',
-        'YrPHP\\Session\\Memcached' => __DIR__ . '/../..' . '/YrPHP/Libs/Session/Memcached.php',
-        'YrPHP\\Session\\Redis' => __DIR__ . '/../..' . '/YrPHP/Libs/Session/Redis.php',
+        'YrPHP\\Session\\Memcache' => __DIR__ . '/../..' . '/YrPHP/Libs/session/Memcache.php',
+        'YrPHP\\Session\\Memcached' => __DIR__ . '/../..' . '/YrPHP/Libs/session/Memcached.php',
+        'YrPHP\\Session\\Redis' => __DIR__ . '/../..' . '/YrPHP/Libs/session/Redis.php',
         'YrPHP\\Structure' => __DIR__ . '/../..' . '/YrPHP/Libs/Structure.php',
         'YrPHP\\Upload' => __DIR__ . '/../..' . '/YrPHP/Libs/Upload.php',
         'YrPHP\\Uri' => __DIR__ . '/../..' . '/YrPHP/Libs/Uri.php',
@@ -66,9 +67,9 @@ class ComposerStaticInitbe846f5072f6ec4804022a54eb071228
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitbe846f5072f6ec4804022a54eb071228::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitbe846f5072f6ec4804022a54eb071228::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitbe846f5072f6ec4804022a54eb071228::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitbeb289f9886f00932c5bddf136893312::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitbeb289f9886f00932c5bddf136893312::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitbeb289f9886f00932c5bddf136893312::$classMap;
 
         }, null, ClassLoader::class);
     }

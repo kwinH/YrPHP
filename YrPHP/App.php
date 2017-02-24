@@ -166,7 +166,6 @@ class App
 
         if (Config::get('urlType') == 0) {
             //普通模式 GET
-
             if (empty($_GET[Config::get('ctlTrigger')])) {
                 $className = $defaultCtl;
             } else {
@@ -180,9 +179,7 @@ class App
             $action = empty($_GET[Config::get('actTrigger')]) ? $defaultAct : strtolower($_GET[Config::get('actTrigger')]);
 
         } else {
-
             //(PATHINFO 模式)
-
             foreach ($url as $k => $v) {
                 $v = ucfirst(strtolower($v));
 
@@ -338,6 +335,5 @@ class App
             return loadClass($name, $paramenters);
     }
 }
-
 
 App::run();

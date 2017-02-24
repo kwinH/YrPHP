@@ -113,7 +113,7 @@ st;
         }
         File::cp(BASE_PATH . 'Config', APP_PATH . 'Config');
         File::mkDir(ROOT_PATH . 'public');
-        header("Location: " . getUrl());
+        header("Location: /" );
 
     }
 }

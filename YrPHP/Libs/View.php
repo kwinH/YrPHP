@@ -190,9 +190,9 @@ class View
 
     public function setBlock($data)
     {
-        preg_match_all('/' . $this->leftDelimiter . 'section\s*(.*)\s*' . $this->rightDelimiter . '(.*)' .
+        preg_match_all('/' . $this->leftDelimiter . 'section\s+(.*)\s*' . $this->rightDelimiter . '(.*)' .
             $this->leftDelimiter . 'endsection' . $this->rightDelimiter . '/isU', $data, $matches);
-
+var_dump($matches[1]);
 
         foreach ($matches[1] as $k => $v) {
             $this->block[$v] = $matches[2][$k];

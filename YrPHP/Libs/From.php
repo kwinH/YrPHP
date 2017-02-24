@@ -1,9 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: TOYOTA
- * Date: 2017/2/22 0022
- * Time: 10:56
+ * Created by YrPHP.
+ * User: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
  */
 
 namespace YrPHP;
@@ -165,7 +165,7 @@ class From
     public function text($name, $value = null, $options = [])
     {
         return self::class;
-       // return $this->input('text', $name, $value, $options);
+        // return $this->input('text', $name, $value, $options);
     }
 
 

@@ -204,7 +204,15 @@ $route['news/(\d*)'] = 'article/news/:1';
 
 
 
+#  cli命令行模式
 
+## 实现代码提示、跟踪和自动补全
+
+```shell
+$ php index.php ide-help generate
+```
+
+> 参数必须是3个及以上，index.php是入口文件，ide-help是config/commands.php中类的key值（也可以说是类别名），generate是方法名，其他参数都做为调用的方法的参数
 
 # 中间件
 

@@ -9,7 +9,6 @@
 
 //'class_alias_name' => 'class_ original_name',
 return [
-    'cache' => 'YrPHP\\Cache',
     'cart' => 'YrPHP\\Cart',
     'crypt' => 'YrPHP\\Crypt',
     'curl' => 'YrPHP\\Curl',

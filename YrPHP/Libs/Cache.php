@@ -20,6 +20,10 @@ class Cache
 
     }
 
+    /**
+     * @param null $dbCacheType
+     * @return null|Cache\File|Cache\Memcache|Cache\Memcached|Cache\Redis
+     */
     static function getInstance($dbCacheType = null)
     {
         if (!(self::$_instance instanceof self)) {

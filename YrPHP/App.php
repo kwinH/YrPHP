@@ -70,7 +70,7 @@ class App
             Config::load('config_' . APP_MODE);
         }
 
-        header("Content-Type:" . Config::get('contentType') . ";charset=" . Config::get('charset')); //设置系统的输出字符为utf-8
+
         date_default_timezone_set(Config::get('timezone')); //设置时区（默认中国）
 
 
@@ -166,6 +166,7 @@ class App
         Config::load('class_alias', 'classAlias');
         Config::load('interface', 'interface');
         self::loadConf();
+        header("Content-Type:" . Config::get('contentType') . ";charset=" . Config::get('charset')); //设置系统的输出字符为utf-8
 
         $url = uri::rsegment();
 
@@ -267,6 +268,27 @@ class App
         }
     }
 
+    static function cli($argv)
+    {
+        if (count($argv) < 3) exit('Parameter error');
+
+        self::init();
+        Config::load('class_alias', 'classAlias');
+        Config::load('interface', 'interface');
+        Config::load('commands', 'commands');
+        self::loadConf();
+
+        $class = Config::get('commands.' . $argv[1]);
+        $method = $argv[2];
+
+        if (class_exists($class)) {
+            unset($argv[0], $argv[1], $argv[2]);
+            $class = static::loadClass($class);
+            call_user_func_array([$class, $method], $argv);
+        }
+
+    }
+
 
     /**
      * loadClass($className [, mixed $parameter [, mixed $... ]])
@@ -358,4 +380,9 @@ class App
     }
 }
 
-App::run();
+if (substr(PHP_SAPI, 0, 3) == 'cli') {
+    App::cli($argv);
+} else {
+    App::run();
+}
+

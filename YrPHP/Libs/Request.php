@@ -8,8 +8,6 @@
 
 namespace YrPHP;
 
-use App;
-
 class Request
 {
     protected $exceptKey = [];
@@ -151,7 +149,7 @@ class Request
      */
     function part($n = null, $no_result = null)
     {
-        return App::uri()->segment($n, $no_result);
+        return \uri::segment($n, $no_result);
     }
 
     /**
@@ -162,7 +160,7 @@ class Request
      */
     function rpart($n = null, $no_result = null)
     {
-        return App::uri()->rsegment($n, $no_result);
+        return \uri::rsegment($n, $no_result);
     }
 
     /**
@@ -171,7 +169,7 @@ class Request
      */
     public function getPath()
     {
-        return App::uri()->path;
+        return \uri::path;
     }
 
     public function is($rule)
@@ -191,7 +189,7 @@ class Request
      */
     public function getRPath()
     {
-        return App::uri()->parseRoutes();
+        return \uri::parseRoutes();
     }
 
     /**
@@ -200,7 +198,7 @@ class Request
      */
     public function getQuery()
     {
-        return App::uri()->query;
+        return \uri::query;
     }
 
     /**

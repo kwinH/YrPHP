@@ -848,7 +848,7 @@ class Model
      */
     public final function insert($data = [], $act = 'INSERT')
     {
-        if (empty($data)) $data = App::request()->post();
+        if (empty($data)) $data = \request::post();
 
         if (!$data) return false;
 
@@ -1054,7 +1054,7 @@ class Model
         $this->getEscapeTableName();
 
         if (empty($data))
-            $data = App::request()->post();
+            $data = \request::post();
 
         if (!$data)
             return false;

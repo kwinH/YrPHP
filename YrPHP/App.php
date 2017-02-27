@@ -29,10 +29,37 @@ class App
 
         require ROOT_PATH . 'vendor/autoload.php';
 
+        //注册自动加载函数
+        spl_autoload_register('self::autoLoadClass');
+
         if (!file_exists(APP)) Structure::run();
 
     }
 
+
+    /*
+  /设置包含目录（类所在的全部目录）,  PATH_SEPARATOR 分隔符号 Linux(:) Windows(;)
+  $include_path=get_include_path();                         //原基目录
+  $include_path.=PATH_SEPARATOR.ROOT_PATH;       //框架中基类所在的目录
+  //设置include包含文件所在的所有目录
+  set_include_path($include_path);
+  */
+    static function autoLoadClass($className)
+    {
+        $file = '_class_alias.php';
+        if (!file_exists($file)) {
+            file_put_contents($file, '<?php' . PHP_EOL . 'use YrPHP\Facade;');
+        }
+
+        requireCache($file);
+
+        if (!class_exists($className)) {
+            if ($name = arrayISearch($className, array_flip(Config::get('classAlias')))) {
+                file_put_contents($file, PHP_EOL . 'class ' . ucfirst(strtolower($className)) . ' extends Facade{public static $className=\'' . $name . '\';}', FILE_APPEND);
+                header('location: ' . $_SERVER['HTTP_REFERER']);
+            }
+        }
+    }
 
     static function loadConf()
     {
@@ -57,7 +84,6 @@ class App
         }
 
         if (!defined('DEBUG')) define('DEBUG', false);
-
 
         //错误信息是否显示
         if (DEBUG) {
@@ -88,17 +114,6 @@ class App
     }
 
 
-    public static function setClassAlias()
-    {
-        Config::load('class_alias', 'classAlias');
-        Config::load('interface', 'interface');
-        $classAlias = Config::get('classAlias');
-
-        foreach ($classAlias as $alias => $original) {
-            class_alias($original, $alias);
-        }
-    }
-
     /**
      * 错误处理函数
      * @param $errNo
@@ -109,7 +124,6 @@ class App
      */
     static function yrError($errNo, $errStr, $errFile, $errLine)
     {
-
         $log_file = '%s_log_' . date("Y-m-d") . '.log';//定义日志文件名;
         $template = '';
 
@@ -149,10 +163,11 @@ class App
     static function run()
     {
         self::init();
-        self::setClassAlias();
+        Config::load('class_alias', 'classAlias');
+        Config::load('interface', 'interface');
         self::loadConf();
 
-        $url = self::uri()->rsegment();
+        $url = uri::rsegment();
 
         $ctrBasePath = APP_PATH . Config::get('ctrBaseNamespace') . '/';
 
@@ -247,7 +262,7 @@ class App
             error404();
         }
 
-        if (DEBUG && !self::request()->isAjax()) {
+        if (DEBUG && !request::isAjax()) {
             echo Debug::message();
         }
     }
@@ -334,8 +349,12 @@ class App
 
     public static function __callStatic($name, $paramenters)
     {
-        if (class_exists($name))
-            return loadClass($name, $paramenters);
+        $classAlias = Config::get('classAlias');
+        if (isset($classAlias[$name])) {
+            return loadClass($classAlias[$name], $paramenters);
+        } else if ($name = arrayISearch($name, array_flip($classAlias))) {
+            return loadClass($classAlias[$name], $paramenters);
+        }
     }
 }
 

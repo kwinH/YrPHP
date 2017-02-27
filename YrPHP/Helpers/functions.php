@@ -42,7 +42,7 @@ function C($name = null, $default = null)
 function getUrl($url = '', $indexPage = true)
 {
     if (isset($_SERVER['HTTP_HOST']) && preg_match('/^((\[[0-9a-f:]+\])|(\d{1,3}(\.\d{1,3}){3})|[a-z0-9\-\.]+)(:\d+)?$/i', $_SERVER['HTTP_HOST'])) {
-        $base_url = (App::request()->isHttps() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']
+        $base_url = (\request::isHttps() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']
             . substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'], basename($_SERVER['SCRIPT_FILENAME'])));
     } else {
         $base_url = 'http://localhost/';

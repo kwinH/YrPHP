@@ -8,9 +8,6 @@
  */
 namespace YrPHP;
 
-
-use App;
-
 class Page
 {
     public $url = '';//跳转链接URL,不配置 默认为当前页
@@ -82,7 +79,7 @@ class Page
 
         if (isset($this->urlParam[$this->p])) unset($this->urlParam[$this->p]);
 
-        $this->url = empty($this->url) ? getUrl(App::uri()->getPath()) : $this->url;
+        $this->url = empty($this->url) ? getUrl(\uri::getPath()) : $this->url;
         $this->url .= '?' . (empty($this->urlParam) ? '' : http_build_query($this->urlParam) . '&');
 
         return $this;

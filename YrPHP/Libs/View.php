@@ -166,9 +166,6 @@ class View
         $this->rule['/' . $this->leftDelimiter . '(break|continue)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1;?>";//跳出循环
         $this->rule['/' . $this->leftDelimiter . '(\$.*|\+\+|\-\-)(\+\+|\-\-|\$.*)\s*' . $this->rightDelimiter . '/isU'] = "<?php \\1\\2;?>";//运算
 
-        $this->rule['/' . $this->leftDelimiter . '\s*Form::(.*)\((.*)\)\s*' . $this->rightDelimiter . '/isU'] = "<?php echo App::from()->\\1(\\2);?>";//表单
-
-
         $content = preg_replace(array_keys($this->rule), array_values($this->rule), $content);
 
         //变量替换

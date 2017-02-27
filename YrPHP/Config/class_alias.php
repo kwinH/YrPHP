@@ -25,5 +25,5 @@ return [
     'pipeline' => 'YrPHP\\Pipeline',
     'request' => 'YrPHP\\Request',
     'view' => 'YrPHP\\View',
-    'from' => 'YrPHP\\From',
+    'form' => 'YrPHP\\Form',
 ];

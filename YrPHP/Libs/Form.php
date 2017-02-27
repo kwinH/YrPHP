@@ -9,7 +9,7 @@
 namespace YrPHP;
 
 
-class From
+class Form
 {
     protected $data;
 
@@ -164,8 +164,7 @@ class From
      */
     public function text($name, $value = null, $options = [])
     {
-        return self::class;
-        // return $this->input('text', $name, $value, $options);
+         return $this->input('text', $name, $value, $options);
     }
 
 

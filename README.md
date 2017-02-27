@@ -373,7 +373,7 @@ display($fileName, $tplVars = '', $cacheId = '');
 
 
 ```php
-return \App::view()->display('name');
+return \view::display('name');
 ```
 
 >上面的 <var>name</var> 便是你的视图文件的名字 如 index.html。
@@ -382,11 +382,11 @@ return \App::view()->display('name');
 
 ### 给视图添加动态数据
 ```php
-\App::view()->assign('name','yrPHP');//赋值单个数据
+\view::assign('name','yrPHP');//赋值单个数据
 
 //等同于
 
-return \App::view()->display('name',array('name'=>'yrPHP'));
+return \view::display('name',array('name'=>'yrPHP'));
 ```
 
 
@@ -439,7 +439,7 @@ class Index extends Controller
     {
         $m = M('users');
         $all =$m->all();
-       return \App::view()->display('index',['data'=>$all]);
+       return \view::display('index',['data'=>$all]);
 
     }
 }
@@ -728,7 +728,7 @@ function index()
 
 $data['arr'] = array(1,2,3,4,5,6);
 
-return \App::view()->display('index.html',$data);
+return \view::display('index.html',$data);
 
 }
 
@@ -766,11 +766,11 @@ return \App::view()->display('index.html',$data);
 </head>
 
 <body>
-{from::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
-{from::text('name', null)}
-{from::password('password', null)}
-{from::submit('提交')}
-{from::close()}
+{=form::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
+{=form::text('name', null)}
+{=form::password('password', null)}
+{=form::submit('提交')}
+{=form::close()}
 </body>
 
 </html>
@@ -779,9 +779,9 @@ return \App::view()->display('index.html',$data);
 #### 开启表单
 
 ```
-{from::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
+{=form::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
 
-{from::close()}
+{=form::close()}
 ```
 
 默认表单使用 POST 方法，当然您也可以指定传参其他表单的方法
@@ -797,16 +797,16 @@ return \App::view()->display('index.html',$data);
 
 #### CSRF 保护
 
-YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受到 CSRF (跨网站请求伪造) 攻击。首先YrPHP会自动在用户的 session中放置随机的token，别担心这些会自动完成。如果你调用了form::open方法，这个 CSRF 参数会用隐藏字段的方式自动加到您的表单中。另外，您也可以使用 token 方法去产生这个隐藏的 CSRF 字段的 HTML 标签：
+YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受到 CSRF (跨网站请求伪造) 攻击。首先YrPHP会自动在用户的 session中放置随机的token，别担心这些会自动完成。如果你调用了=form::open方法，这个 CSRF 参数会用隐藏字段的方式自动加到您的表单中。另外，您也可以使用 token 方法去产生这个隐藏的 CSRF 字段的 HTML 标签：
 
 ```
-{form::token()}
+{=form::token()}
 ```
 
 #### 标签（Label）
 
 ```
-{form::label('name', '姓名', array('class' => 'name'))}
+{=form::label('name', '姓名', array('class' => 'name'))}
 ```
 
 > **注意：** 在建立标签时，任何您建立的表单元素名称与标签相符时，将会自动在 ID 属性建立与标签名称相同的 ID。
@@ -814,14 +814,14 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 #### 文字字段
 
 ```
-{form::text('name', '默认值', array('class' => 'input-text'))}
+{=form::text('name', '默认值', array('class' => 'input-text'))}
 ```
 > 默认ID为字段名，如上如果没有在第三个参数中指定ID，则ID为name
 
 #### 多行文本域
 
 ```
-{form::textarea('desc', '默认值', array('class' => 'input-text','size'=>50,10))}
+{=form::textarea('desc', '默认值', array('class' => 'input-text','size'=>50,10))}
 ```
 >size 50为cols,10为rows，cols和rows默认就是50*10
 
@@ -830,34 +830,34 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 #### 密码字段
 
 ```
-{form::password('name', '默认值', array('class' => 'input-text'))}
+{=form::password('name', '默认值', array('class' => 'input-text'))}
 ```
 
 #### 隐藏域
 
 ```
-{form::hidden('name', '默认值', array('class' => 'input-text'))}
+{=form::hidden('name', '默认值', array('class' => 'input-text'))}
 ```
 
 #### 复选框、单选按钮
 
 ```
-{form::checkbox('name', 'value',true)}
-{form::checkbox('name', 'value',true)}
+{=form::checkbox('name', 'value',true)}
+{=form::checkbox('name', 'value',true)}
 ```
 >第三个参数为是否默认选中
 
 #### 下拉框
 
 ```
-{form::select($name, $list = [], $selected = null, $options = [])}
+{=form::select($name, $list = [], $selected = null, $options = [])}
 ```
 
 #### 按钮
 
 ```
-{form::submit('name',['class'=>'button'])}
-{form::button('name',['class'=>'button'])}
+{=form::submit('name',['class'=>'button'])}
+{=form::button('name',['class'=>'button'])}
 ```
 
 #模型

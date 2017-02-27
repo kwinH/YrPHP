@@ -7,7 +7,6 @@
  * GitHub:https://github.com/kwinH/YrPHP
  */
 namespace YrPHP;
-use App;
 
 class Debug
 {
@@ -146,8 +145,8 @@ class Debug
 
 
         self::$info[] = '内存使用：<strong style="color:red">' . round(memory_get_usage() / 1024, 2) . ' KB</strong>';
-        self::$info[] = 'URI字符串：' . implode('/', App::uri()->segment());
-        self::$info[] = 'URI路由地址：' . implode('/', App::uri()->rsegment());
+        self::$info[] = 'URI字符串：' . implode('/', \uri::segment());
+        self::$info[] = 'URI路由地址：' . implode('/', \uri::rsegment());
         self::$info[] = '控制器地址：' . C('classPath');
         self::$info[] = '调用方法：' . C('nowAction');
         if (count(self::$info) > 0) {

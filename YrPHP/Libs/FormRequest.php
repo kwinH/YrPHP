@@ -9,23 +9,19 @@ namespace YrPHP;
 
 use Closure;
 
-
-class FormRequest
+abstract class FormRequest
 {
-    public $validate = [];
-
     function __construct(Request $request)
     {
         $this->request = $request;
-        $this->rules();
         $this->validate();
     }
 
-
-    function rules()
-    {
-        $this->validate = [];
-    }
+    /**
+     * 设置验证规则
+     * @return array
+     */
+    abstract public function rules();
 
     /**
      * @param  array $array 要验证的字段数据
@@ -57,8 +53,9 @@ class FormRequest
     {
         $res = false;
         $array = $this->request->post();
+        $validates = $this->rules();
 
-        foreach ($this->validate as $inputKey => $v) {
+        foreach ($validates as $inputKey => $v) {
 
             $inputValue = isset($array[$inputKey]) ? $array[$inputKey] : '';
 

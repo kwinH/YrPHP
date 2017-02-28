@@ -1609,10 +1609,13 @@ use YrPHP\FormRequest;
 class TestRequest extends FormRequest
 {
 
+    /**
+     * 设置验证规则
+     * @return array
+     */
     function rules()
     {
     /**
-     *
      * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域'])));
      * 验证规则:
      * required: 字段不能为空
@@ -1633,7 +1636,7 @@ class TestRequest extends FormRequest
      * extend：值域：匿名函数 function(表单值,[ '值域'])
      *
      */
-        $this->validate = ['id' => [[10, '', 'equal']]];
+        return ['id' => [[10, '', 'equal']]];
     }
 
     

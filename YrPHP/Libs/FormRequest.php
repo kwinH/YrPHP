@@ -24,7 +24,7 @@ class FormRequest
 
     function rules()
     {
-
+        $this->validate = [];
     }
 
     /**
@@ -33,8 +33,9 @@ class FormRequest
      * @param bool $auto
      * @return array
      *
-     * array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
-     *附加规则:
+     * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域'])));
+     * 验证规则:
+     * required: 字段不能为空
      * equal:值域:string|null 当值与之相等时，通过验证
      * notequal:值域:string|null 当值与之不相等时 通过验证
      * in:值域:array(1,2,3)|1,2,3 当值存在指定范围时 通过验证
@@ -43,47 +44,48 @@ class FormRequest
      * notbetween:值域:array(1,30)|1,30 当不存在指定范围时 通过验证
      * length:值域:array(10,30)|10,30 当字符长度大于等于10，小于等于30时 通过验证 || array(30)|30 当字符等于30时 通过验证
      * unique:值域:string 当该字段在数据库中不存在该值时 通过验证
-     * email： 值域：string 当值为email格式时 通过验证
-     * url： 值域：string 当值为url格式时 通过验证
-     * number: 值域：string 当值为数字格式时 通过验证
+     * email：  当值为email格式时 通过验证
+     * url：  当值为url格式时 通过验证
+     * number:  当值为数字格式时 通过验证
      * regex:值域:正则表达式 //当符合正则表达式时 通过验证
+     * phone：判断是否为手机号码
+     * verifyCode：值域:session验证码key值（默认verify）  判断验证码的确与否
+     * extend：值域：匿名函数 function(表单值,[ '值域'])
      *
      */
     function validate()
     {
+        $res = false;
         $array = $this->request->post();
-        if ($this->validate) {
 
-            foreach ($array as $inputKey => &$inputValue) {
+        foreach ($this->validate as $inputKey => $v) {
 
-                /*** 验证规则validate*****/
-                if (isset($this->validate[$inputKey])) {//判断验证规则是否存在
+            $inputValue = isset($array[$inputKey]) ? $array[$inputKey] : '';
 
-                    foreach ($this->validate[$inputKey] as $validate) {
+            foreach ($v as $validate) {
+                if (empty($validate[1]))
+                    $validate[1] = "错误:{$inputKey}验证不通过";
 
-                        if (empty($validate[1]))
-                            $validate[1] = "错误:{$inputKey}验证不通过";
+                if (!isset($validate[2]))
+                    $validate[2] = null;
 
+                $method = $validate[0];
 
-                        if ($validate[2] instanceof Closure) {
-                            $res = call_user_func($validate[2], $inputValue, $validate[0]);
-                        } else if (method_exists('\YrPHP\Validate', $validate[2])) {
-                            $res = Validate::$validate[2]($inputValue, $validate[0]);
-                        }
-
-                        if (!$res) $error[$inputKey] = $validate[1];
-                    }
+                if ($method instanceof Closure) {
+                    $res = call_user_func($method, $inputValue, $validate[2]);
+                } else if (method_exists('\YrPHP\Validate', $method)) {
+                    $res = Validate::$method($inputValue, $validate[2]);;
                 }
 
-            }
-
-            if (!empty($error)) {
-                Session::set('errors', $error);
-                $this->response($error);
-                return false;
+                if (!$res) $error[$inputKey] = $validate[1];
             }
         }
 
+        if (!empty($error)) {
+            Session::set('errors', $error);
+            $this->response($error);
+            return false;
+        }
 
         return $array;
     }

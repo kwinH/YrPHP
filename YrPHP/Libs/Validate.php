@@ -16,6 +16,18 @@ class Validate
 
     public static $rule = [];
 
+
+    /**
+     * 判断是否为空值，当数据不为空时 return true
+     * @param null $data
+     * @return bool
+     */
+    static function required($data = null)
+    {
+        if ($data) return true;
+        return false;
+    }
+
     /**
      * 当两个值相等时 return true
      * @param string $data
@@ -263,11 +275,11 @@ class Validate
      * @param Closure $paramenters
      *
      * @example
-        Validate::extend('test', function ($key, $val) {
-        if ($key > $val) return true;
-        return false;
-        });
-        var_dump(Validate::test(3, 2)); true
+    Validate::extend('test', function ($key, $val) {
+     * if ($key > $val) return true;
+     * return false;
+     * });
+     * var_dump(Validate::test(3, 2)); true
      */
     static function extend($ruleName, Closure $callback)
     {
@@ -278,7 +290,7 @@ class Validate
     static function __callStatic($name, $paramenters)
     {
         if (isset(self::$rule[$name])) {
-           return call_user_func_array(static::$rule[$name], $paramenters);
+            return call_user_func_array(static::$rule[$name], $paramenters);
         }
     }
 }

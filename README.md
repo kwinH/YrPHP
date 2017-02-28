@@ -1611,9 +1611,11 @@ class TestRequest extends FormRequest
 
     function rules()
     {
-    /*
-     * array('字段名' => array(array('验证规则(值域)', '错误提示', '附加规则')));
-     *附加规则:
+    /**
+     *
+     * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域'])));
+     * 验证规则:
+     * required: 字段不能为空
      * equal:值域:string|null 当值与之相等时，通过验证
      * notequal:值域:string|null 当值与之不相等时 通过验证
      * in:值域:array(1,2,3)|1,2,3 当值存在指定范围时 通过验证
@@ -1622,11 +1624,14 @@ class TestRequest extends FormRequest
      * notbetween:值域:array(1,30)|1,30 当不存在指定范围时 通过验证
      * length:值域:array(10,30)|10,30 当字符长度大于等于10，小于等于30时 通过验证 || array(30)|30 当字符等于30时 通过验证
      * unique:值域:string 当该字段在数据库中不存在该值时 通过验证
-     * email： 值域：string 当值为email格式时 通过验证
-     * url： 值域：string 当值为url格式时 通过验证
-     * number: 值域：string 当值为数字格式时 通过验证
+     * email：  当值为email格式时 通过验证
+     * url：  当值为url格式时 通过验证
+     * number:  当值为数字格式时 通过验证
      * regex:值域:正则表达式 //当符合正则表达式时 通过验证
-     * 匿名函数：function($inputValue, $range){}
+     * phone：判断是否为手机号码
+     * verifyCode：值域:session验证码key值（默认verify）  判断验证码的确与否
+     * extend：值域：匿名函数 function(表单值,[ '值域'])
+     *
      */
         $this->validate = ['id' => [[10, '', 'equal']]];
     }
@@ -2554,6 +2559,13 @@ $conf= array(
 ##验证类     Validate
 ```php
 <?php
+    /**
+     * 判断是否为空值，当数据不为空时 return true
+     * @param null $data
+     * @return bool
+     */
+        YrPHP\Validate::required(null);//return false
+         
        /**
          * 当两个值相等时 return true
          * @param string $data
@@ -2668,6 +2680,15 @@ $conf= array(
          * @return bool
          */
         YrPHP\Validate::verifyCode($value, $code);
+        
+        /**
+        自定义匿名函数
+        */
+     YrPHP\Validate::extend('test', function ($key, $val) {
+      if ($key > $val) return true;
+      return false;
+      });
+      var_dump(YrPHP\Validate::test(3, 2)); //true
 ```
 ##购物车类   Cart
 ```php

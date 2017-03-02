@@ -775,8 +775,8 @@ return \view::display('index.html',$data);
 
 <body>
 {=form::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
-{=form::text('name', null)}
-{=form::password('password', null)}
+{=form::text('name', ['class'=>'input-text'],'默认值')}
+{=form::password('password', ['class'=>'input-text'])}
 {=form::submit('提交')}
 {=form::close()}
 </body>
@@ -822,14 +822,14 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 #### 文字字段
 
 ```
-{=form::text('name', '默认值', array('class' => 'input-text'))}
+{=form::text('name', array('class' => 'input-text'), '默认值')}
 ```
-> 默认ID为字段名，如上如果没有在第三个参数中指定ID，则ID为name
+> 默认ID为字段名，如上如果没有在第二个参数中指定ID，则ID为name
 
 #### 多行文本域
 
 ```
-{=form::textarea('desc', '默认值', array('class' => 'input-text','size'=>50,10))}
+{=form::textarea('desc', array('class' => 'input-text','size'=>50,10), '默认值')}
 ```
 >size 50为cols,10为rows，cols和rows默认就是50*10
 
@@ -838,32 +838,33 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 #### 密码字段
 
 ```
-{=form::password('name', '默认值', array('class' => 'input-text'))}
+{=form::password('name', array('class' => 'input-text'), '默认值')}
 ```
 
 #### 隐藏域
 
 ```
-{=form::hidden('name', '默认值', array('class' => 'input-text'))}
+{=form::hidden('name', array('class' => 'input-text'), '默认值')}
 ```
 
 #### 复选框、单选按钮
 
 ```
-{=form::checkbox('name', 'value',true)}
-{=form::checkbox('name', 'value',true)}
+{=form::checkbox('name', 'value',array('class' => 'input-checkbox'),true)}
+{=form::radio('name', 'value',array('class' => 'input-radio'),true)}
 ```
->第三个参数为是否默认选中
+>第四个参数为是否默认选中
 
 #### 下拉框
 
 ```
-{=form::select($name, $list = [], $selected = null, $options = [])}
+{=form::select($name, $list = [], $options = ['class'=>'input-select'], $selected = null)}
 ```
 
 #### 按钮
 
 ```
+{=form::reset('name',['class'=>'button'])}
 {=form::submit('name',['class'=>'button'])}
 {=form::button('name',['class'=>'button'])}
 ```

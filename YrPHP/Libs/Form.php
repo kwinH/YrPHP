@@ -138,7 +138,7 @@ class Form
      *
      * @return string
      */
-    public function input($type, $name, $value = null, $options = [])
+    public function input($type, $name, $options = [], $value = null)
     {
         $options['type'] = $type;
 
@@ -158,13 +158,13 @@ class Form
      * Create a text input field.
      *
      * @param $name
-     * @param null $value
      * @param array $options
+     * @param null $value
      * @return string
      */
-    public function text($name, $value = null, $options = [])
+    public function text($name, $options = [], $value = null)
     {
-         return $this->input('text', $name, $value, $options);
+        return $this->input('text', $name, $value, $options);
     }
 
 
@@ -185,12 +185,12 @@ class Form
      * Create a hidden input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function hidden($name, $value = null, $options = [])
+    public function hidden($name, $options = [], $value = null)
     {
         return $this->input('hidden', $name, $value, $options);
     }
@@ -199,12 +199,12 @@ class Form
      * Create an e-mail input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function email($name, $value = null, $options = [])
+    public function email($name, $options = [], $value = null)
     {
         return $this->input('email', $name, $value, $options);
     }
@@ -213,12 +213,12 @@ class Form
      * Create a tel input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function tel($name, $value = null, $options = [])
+    public function tel($name, $options = [], $value = null)
     {
         return $this->input('tel', $name, $value, $options);
     }
@@ -227,12 +227,12 @@ class Form
      * Create a number input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function number($name, $value = null, $options = [])
+    public function number($name, $options = [], $value = null)
     {
         return $this->input('number', $name, $value, $options);
     }
@@ -241,12 +241,12 @@ class Form
      * Create a date input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function date($name, $value = null, $options = [])
+    public function date($name, $options = [], $value = null)
     {
 
         return $this->input('date', $name, $value, $options);
@@ -256,12 +256,12 @@ class Form
      * Create a datetime input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function datetime($name, $value = null, $options = [])
+    public function datetime($name, $options = [], $value = null)
     {
         return $this->input('datetime', $name, $value, $options);
     }
@@ -270,12 +270,12 @@ class Form
      * Create a datetime-local input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function datetimeLocal($name, $value = null, $options = [])
+    public function datetimeLocal($name, $options = [], $value = null)
     {
 
         return $this->input('datetime-local', $name, $value, $options);
@@ -285,12 +285,12 @@ class Form
      * Create a time input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function time($name, $value = null, $options = [])
+    public function time($name, $options = [], $value = null)
     {
         return $this->input('time', $name, $value, $options);
     }
@@ -299,12 +299,12 @@ class Form
      * Create a url input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function url($name, $value = null, $options = [])
+    public function url($name, $options = [], $value = null)
     {
         return $this->input('url', $name, $value, $options);
     }
@@ -327,12 +327,12 @@ class Form
      * Create a textarea input field.
      *
      * @param  string $name
-     * @param  string $value
-     * @param  array $options
+     * @param array $options
+     * @param null $value
      *
      * @return string
      */
-    public function textarea($name, $value = null, $options = [])
+    public function textarea($name, $options = [], $value = null)
     {
         if (!isset($options['name'])) {
             $options['name'] = $name;
@@ -366,12 +366,12 @@ class Form
      *
      * @param  string $name
      * @param  array $list
-     * @param  string $selected
      * @param  array $options
+     * @param  string $selected
      *
      * @return string
      */
-    public function select($name, $list = [], $selected = null, $options = [])
+    public function select($name, $list = [], $options = [], $selected = null)
     {
         $selected = $this->getValueAttribute($name, $selected);
 
@@ -404,12 +404,12 @@ class Form
      *
      * @param  string $name
      * @param  mixed $value
-     * @param  bool $checked
      * @param  array $options
+     * @param  bool $checked
      *
      * @return string
      */
-    public function checkbox($name, $value = 1, $checked = null, $options = [])
+    public function checkbox($name, $value = 1, $options = [], $checked = null)
     {
         if (old($name, isset($this->data[$name]) ? $this->data[$name] : '') == $value || $checked) {
             $options['checked'] = 'checked';
@@ -424,12 +424,12 @@ class Form
      *
      * @param  string $name
      * @param  mixed $value
-     * @param  bool $checked
      * @param  array $options
+     * @param  bool $checked
      *
      * @return string
      */
-    public function radio($name, $value = null, $checked = null, $options = [])
+    public function radio($name, $value = null, $options = [], $checked = null)
     {
         if (old($name, isset($this->data[$name]) ? $this->data[$name] : '') == $value || $checked) {
             $options['checked'] = 'checked';
@@ -472,12 +472,12 @@ class Form
      * Create a color input field.
      *
      * @param  string $name
-     * @param  string $value
      * @param  array $options
+     * @param  string $value
      *
      * @return string
      */
-    public function color($name, $value = null, $options = [])
+    public function color($name, $options = [], $value = null)
     {
         return $this->input('color', $name, $value, $options);
     }

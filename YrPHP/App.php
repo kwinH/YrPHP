@@ -302,7 +302,8 @@ class App
         $arguments = func_get_args();
         //弹出第一个参数，这是类名，剩下的都是要传给实例化类的构造函数的参数了
         $className = array_shift($arguments);
-        $key = trim($className, '\\');
+
+        $key = trim(str_replace(['/', '.'], '\\', $className), '\\');
 
         if (!isset(self::$instanceList[$key])) {
             $reflection = new ReflectionClass($className);

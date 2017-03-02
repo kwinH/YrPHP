@@ -126,8 +126,9 @@ function loadHelper($fileName)
  */
 function M($modelName = "")
 {
-    if (!empty($modelName) && class_exists(APP . '\Models\\' . $modelName)) {
-        return App::loadClass(APP . '\Models\\' . $modelName);
+    $modelName = APP . '\\' . C('modelBaseNamespace') . '\\' . str_replace(['/','.'], '\\', $modelName);
+    if (class_exists($modelName)) {
+        return App::loadClass($modelName);
     }
     return App::loadClass('YrPHP\Model', parseNaming($modelName, 2));
 }

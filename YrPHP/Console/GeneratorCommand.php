@@ -31,6 +31,6 @@ class GeneratorCommand
             $content .= '}' . PHP_EOL;
 
         }
-        file_put_contents('ide_help.php', $content);
+        file_put_contents('.ide_help.php', $content);
     }
 }

@@ -178,7 +178,7 @@ class Form
      */
     public function password($name, $options = [])
     {
-        return $this->input('password', $name, '', $options);
+        return $this->input('password', $name, $options);
     }
 
     /**

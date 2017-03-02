@@ -838,7 +838,7 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 #### 密码字段
 
 ```
-{=form::password('name', array('class' => 'input-text'), '默认值')}
+{=form::password('name', array('class' => 'input-text'))}
 ```
 
 #### 隐藏域

@@ -133,8 +133,8 @@ class Form
      *
      * @param  string $type
      * @param  string $name
-     * @param  string $value
      * @param  array $options
+     * @param  string $value
      *
      * @return string
      */
@@ -164,7 +164,7 @@ class Form
      */
     public function text($name, $options = [], $value = null)
     {
-        return $this->input('text', $name, $value, $options);
+        return $this->input('text', $name, $options, $value);
     }
 
 
@@ -185,14 +185,14 @@ class Form
      * Create a hidden input field.
      *
      * @param  string $name
-     * @param array $options
      * @param null $value
+     * @param array $options
      *
      * @return string
      */
-    public function hidden($name, $options = [], $value = null)
+    public function hidden($name, $value = null, $options = [])
     {
-        return $this->input('hidden', $name, $value, $options);
+        return $this->input('hidden', $name, $options, $value);
     }
 
     /**
@@ -206,7 +206,7 @@ class Form
      */
     public function email($name, $options = [], $value = null)
     {
-        return $this->input('email', $name, $value, $options);
+        return $this->input('email', $name, $options, $value);
     }
 
     /**
@@ -220,7 +220,7 @@ class Form
      */
     public function tel($name, $options = [], $value = null)
     {
-        return $this->input('tel', $name, $value, $options);
+        return $this->input('tel', $name, $options, $value);
     }
 
     /**
@@ -234,7 +234,7 @@ class Form
      */
     public function number($name, $options = [], $value = null)
     {
-        return $this->input('number', $name, $value, $options);
+        return $this->input('number', $name, $options, $value);
     }
 
     /**
@@ -249,7 +249,7 @@ class Form
     public function date($name, $options = [], $value = null)
     {
 
-        return $this->input('date', $name, $value, $options);
+        return $this->input('date', $name, $options, $value);
     }
 
     /**
@@ -263,7 +263,7 @@ class Form
      */
     public function datetime($name, $options = [], $value = null)
     {
-        return $this->input('datetime', $name, $value, $options);
+        return $this->input('datetime', $name, $options, $value);
     }
 
     /**
@@ -278,7 +278,7 @@ class Form
     public function datetimeLocal($name, $options = [], $value = null)
     {
 
-        return $this->input('datetime-local', $name, $value, $options);
+        return $this->input('datetime-local', $name, $options, $value);
     }
 
     /**
@@ -292,7 +292,7 @@ class Form
      */
     public function time($name, $options = [], $value = null)
     {
-        return $this->input('time', $name, $value, $options);
+        return $this->input('time', $name, $options, $value);
     }
 
     /**
@@ -306,7 +306,7 @@ class Form
      */
     public function url($name, $options = [], $value = null)
     {
-        return $this->input('url', $name, $value, $options);
+        return $this->input('url', $name, $options, $value);
     }
 
     /**
@@ -415,7 +415,7 @@ class Form
             $options['checked'] = 'checked';
         }
 
-        return $this->input('checkbox', $name, $value, $options);
+        return $this->input('checkbox', $name, $options, $value);
 
     }
 
@@ -435,7 +435,7 @@ class Form
             $options['checked'] = 'checked';
         }
 
-        return $this->input('radio', $name, $value, $options);
+        return $this->input('radio', $name, $options, $value);
 
     }
 
@@ -479,7 +479,7 @@ class Form
      */
     public function color($name, $options = [], $value = null)
     {
-        return $this->input('color', $name, $value, $options);
+        return $this->input('color', $name, $options, $value);
     }
 
     /**
@@ -492,7 +492,7 @@ class Form
      */
     public function submit($value = null, $options = [])
     {
-        return $this->input('submit', null, $value, $options);
+        return $this->input('submit', null, $options, $value);
     }
 
     /**
@@ -505,7 +505,7 @@ class Form
      */
     public function button($value = null, $options = [])
     {
-        return $this->input('button', null, $value, $options);
+        return $this->input('button', null, $options, $value);
     }
 
 }

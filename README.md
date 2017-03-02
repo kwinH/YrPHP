@@ -844,7 +844,7 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 #### 隐藏域
 
 ```
-{=form::hidden('name', array('class' => 'input-text'), '默认值')}
+{=form::hidden('name', '默认值' , array('class' => 'input-text'))}
 ```
 
 #### 复选框、单选按钮

@@ -8,8 +8,6 @@
  */
 namespace YrPHP;
 
-use App;
-
 class Model
 {
     // 当前数据库操作对象
@@ -103,6 +101,7 @@ class Model
         $this->tablePrefix = $this->dbConfig[$this->connection]['masterServer']['tablePrefix'];
 
         $this->tableName = $tableName;
+        $this->setEscapeTableName($tableName);
 
     }
 
@@ -429,19 +428,18 @@ class Model
 
     protected final function setEscapeTableName($tableName = "", $auto = true)
     {
-        if ($tableName instanceof \Closure) {
+        if (empty($tableName)) {
+            $tableName = $this->tableName;
+            if ($auto && !empty($this->tablePrefix))
+                $tableName = strpos($tableName, $this->tablePrefix) === false
+                    ? $this->tablePrefix . $tableName
+                    : $tableName;
+
+            $this->escapeTableName = $this->escapeId($tableName);
+
+        } else if ($tableName instanceof \Closure) {
             return $this->escapeTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
         }
-
-        if (empty($tableName)) $tableName = $this->tableName;
-
-        if ($auto && !empty($this->tablePrefix))
-            $tableName = strpos($tableName, $this->tablePrefix) === false
-                ? $this->tablePrefix . $tableName
-                : $tableName;
-
-
-        $this->escapeTableName = $this->escapeId($tableName);
 
     }
 

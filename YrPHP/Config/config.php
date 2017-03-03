@@ -70,7 +70,6 @@ return [
         'domain' => '',//设置域，默认为当前域名
     ],
     /*--------------------以下是cookie配置---------------------------------------*/
-    'cookiePrefix' => 'yrPHP_',
     'cookieExpire' => 7200,//有效期时长
     'cookiePath' => "/",
     'cookieDomain' => '',//设置域，默认为当前域名

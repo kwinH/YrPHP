@@ -40,6 +40,31 @@ class Request
         return $this;
     }
 
+
+    public function header($key = null, $default = null)
+    {
+        $headers = [];
+        if (!function_exists('getallheaders')) {
+            foreach ($_SERVER as $name => $value) {
+                if (substr($name, 0, 5) == 'HTTP_') {
+                    $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                }
+            }
+
+        } else {
+            $headers = getallheaders();
+        }
+
+        if (is_null($key)) return $headers;
+
+        if ($value = arrayIGet($headers, $key))
+            return $value;
+
+        return $default;
+
+    }
+
+
     public function get($key = null, $defualt = null)
     {
         $data = self::$getData;

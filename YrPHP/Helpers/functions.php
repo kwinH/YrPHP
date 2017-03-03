@@ -126,7 +126,7 @@ function loadHelper($fileName)
  */
 function M($modelName = "")
 {
-    $modelName = APP . '\\' . C('modelBaseNamespace') . '\\' . str_replace(['/','.'], '\\', $modelName);
+    $modelName = APP . '\\' . C('modelBaseNamespace') . '\\' . str_replace(['/', '.'], '\\', $modelName);
     if (class_exists($modelName)) {
         return App::loadClass($modelName);
     }
@@ -172,7 +172,7 @@ function session($key = '', $val = '')
  */
 function cookie($key = '', $val = '')
 {
-    $cookiePrefix = C('cookiePrefix');
+
     /**
      * setcookie(name, value, expire, path, domain);
      *  $_COOKIE["user"];
@@ -181,7 +181,7 @@ function cookie($key = '', $val = '')
     if (is_null($key)) {
 
         foreach ($_COOKIE as $k => $v) {
-            setcookie($cookiePrefix . $k, "", time() - 3600);
+            setcookie($k, "", time() - 3600);
         }
 
         return true;
@@ -189,26 +189,26 @@ function cookie($key = '', $val = '')
 
     if (is_array($key)) {
         foreach ($key as $k => $v) {
-            $_SESSION[$cookiePrefix . $k] = $v;
+            $_SESSION[$k] = $v;
         }
         return true;
     }
 
     if (is_null($val)) {
 
-        setcookie($cookiePrefix . $key, "", time() - 3600);
+        setcookie($key, "", time() - 3600);
         return true;
     }
 
     if (!empty($val)) {
 
-        setcookie($cookiePrefix . $key, $val, time() + C('cookieExpire'), C('cookiePath'), C('cookieDomain'));
+        setcookie($key, $val, time() + C('cookieExpire'), C('cookiePath'), C('cookieDomain'));
         return true;
     }
 
     if (!empty($key)) {
 
-        return $_COOKIE[$cookiePrefix . $key];
+        return $_COOKIE[$key];
     }
 
     return $_COOKIE;
@@ -545,6 +545,23 @@ function inIArray($value = '', $array = [])
 function arrayISearch($needle, $haystack, $strict = false)
 {
     return array_search(strtolower($needle), array_map('strtolower', $haystack), $strict); // $key = 2;
+}
+
+
+/**
+ * 不区分key值大小写获取数组中的值
+ * @param array $arr
+ * @param string $key
+ * @return mixed
+ */
+function arrayIGet(array $arr = [], $key = '')
+{
+    if (isset($arr[$key])) return $arr[$key];
+
+    $arr = array_change_key_case($arr, CASE_LOWER);
+    $key = strtolower($key);
+
+    return isset($arr[$key]) ? $arr[$key] : null;
 }
 
 /**

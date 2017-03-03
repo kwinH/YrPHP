@@ -11,7 +11,6 @@ namespace YrPHP\Middleware;
 use Closure;
 use YrPHP\IMiddleware;
 use YrPHP\Request;
-use YrPHP\Session;
 
 class VerifyCsrfToken implements IMiddleware
 {
@@ -19,8 +18,11 @@ class VerifyCsrfToken implements IMiddleware
 
     public function handler(Request $request, Closure $next)
     {
+        $token = $request->post('_token');
+        $token = $token ? $token : $request->header('X-CSRF-TOKEN');
 
-        if ($request->method() !== 'GET' && !$this->shouldPassThrough($request) && $request->post('_token') != csrfToken()) {
+        $csrfToken = csrfToken();
+        if ($request->method() !== 'GET' && !$this->shouldPassThrough($request) && $token != $csrfToken) {
             sendHttpStatus(500);
             if ($request->isAjax()) {
                 exit($request->toJson(['error' => 'CSRF验证不通过']));
@@ -31,8 +33,8 @@ class VerifyCsrfToken implements IMiddleware
             return;
         }
 
-        $token = randStr('dw', 32);
-        Session::set('_token', $token);
+        cookie('XSRF-TOKEN', $csrfToken);
+
         $next($request);
 
     }

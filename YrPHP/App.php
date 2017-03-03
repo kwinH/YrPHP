@@ -54,7 +54,7 @@ class App
         requireCache($file);
 
         if (!class_exists($className)) {
-            if ($name = arrayISearch($className, array_flip(Config::get('classAlias')))) {
+            if ($name = arrayIGet(Config::get('classAlias'),$className)){
                 file_put_contents($file, PHP_EOL . 'class ' . ucfirst(strtolower($className)) . ' extends Facade{public static $className=\'' . $name . '\';}', FILE_APPEND);
                 header('location: ' . $_SERVER['HTTP_REFERER']);
             }
@@ -69,11 +69,9 @@ class App
         if (defined('APP_MODE')) {
             Config::load('config_' . APP_MODE);
         }
-
-
+        
         date_default_timezone_set(Config::get('timezone')); //设置时区（默认中国）
-
-
+        
         error_reporting(-1); //报告所有PHP错误
         if (Config::get('logRecord')) {
             ini_set('log_errors', 1); //设置是否将脚本运行的错误信息记录到服务器错误日志或者error_log之中
@@ -109,8 +107,6 @@ class App
 
         if (file_exists($langPath)) getLang(require $langPath);
 
-        csrfToken();
-
     }
 
 
@@ -124,38 +120,38 @@ class App
      */
     static function yrError($errNo, $errStr, $errFile, $errLine)
     {
-        $log_file = '%s_log_' . date("Y-m-d") . '.log';//定义日志文件名;
+        $logFile = '%s_log_' . date("Y-m-d") . '.log';//定义日志文件名;
         $template = '';
 
         switch ($errNo) {
             case E_USER_ERROR:
                 $template .= "用户ERROR级错误，必须修复 错误编号[$errNo] $errStr ";
                 $template .= "错误位置 文件$errFile,第 $errLine 行\n";
-                $log_file = sprintf($log_file, 'error');
+                $logFile = sprintf($logFile, 'error');
 
                 break;
             case E_WARNING://运行时警告（非致命的错误）2 
             case E_USER_WARNING:
                 $template .= "用户WARNING级错误，建议修复 错误编号[$errNo] $errStr ";
                 $template .= "错误位置 文件$errFile,第 $errLine 行\n";
-                $log_file = sprintf($log_file, 'warning');
+                $logFile = sprintf($logFile, 'warning');
                 break;
 
             case E_NOTICE://运行时注意消息（可能是或者可能不是一个问题） 8
             case E_USER_NOTICE:
                 $template .= "用户NOTICE级错误，不影响系统，可不修复 错误编号[$errNo] $errStr ";
                 $template .= "错误位置 文件$errFile,第 $errLine 行\n";
-                $log_file = sprintf($log_file, 'notice');
+                $logFile = sprintf($logFile, 'notice');
                 break;
 
             default:
                 $template .= "未知错误类型: 错误编号[$errNo] $errStr  ";
                 $template .= "错误位置 文件$errFile,第 $errLine 行\n";
-                $log_file = sprintf($log_file, 'unknown');
+                $logFile = sprintf($logFile, 'unknown');
                 break;
         }
 
-        Debug::log($log_file, $template);
+        Debug::log($logFile, $template);
         return true;
     }
 
@@ -375,7 +371,7 @@ class App
         $classAlias = Config::get('classAlias');
         if (isset($classAlias[$name])) {
             return loadClass($classAlias[$name], $paramenters);
-        } else if ($name = arrayISearch($name, array_flip($classAlias))) {
+        } else if ($name = arrayIGet($classAlias,$name)) {
             return loadClass($classAlias[$name], $paramenters);
         }
     }

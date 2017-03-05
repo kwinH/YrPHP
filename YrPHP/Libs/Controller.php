@@ -10,6 +10,7 @@ namespace YrPHP;
 
 
 use App;
+use Request;
 
 abstract class Controller
 {
@@ -80,9 +81,20 @@ abstract class Controller
      */
     public function validate($rule = [])
     {
-        App::loadClass(FormRequest::class, App::loadClass(Request::class), $rule);
+        App::loadClass(FormRequest::class, App::loadClass('\YrPHP\Request'), $rule);
     }
 
+    public function errorBackTo($errors)
+    {
+        session('errors', $errors);
+        if (Request::isAjax()) {
+            exit(Request::toJson(['error' => $errors]));
+        }
+
+        if (Request::isPost()) {
+            gotoUrl(Request::referer());
+        }
+    }
 
     public function __call($method, $args)
     {

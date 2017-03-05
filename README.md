@@ -1617,7 +1617,7 @@ class TestRequest extends FormRequest
     function rules()
     {
     /**
-     * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域'])));
+     * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域','值域',...])));
      * 验证规则:
      * required: 字段不能为空
      * equal:值域:string|null 当值与之相等时，通过验证
@@ -1861,7 +1861,7 @@ function Ip2Area($ip = ''){}
  * @param  integer $len [description]
  * @return [type]        [description]
  */
-function randStr($type = 'w', $len = 8){}
+function randStr($len = 8, $type = 'wd'){}
 
 /**
  * 发送HTTP状态

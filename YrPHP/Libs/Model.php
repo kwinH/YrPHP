@@ -283,7 +283,7 @@ class Model
 
             $auto = end($args) === false ? false : true;
 
-            return $this->select($method . '(' . $field . ') as `c`')->get($tableName, $auto)->row()->c;
+            return $this->table($tableName, $auto)->select($method . '(' . $field . ') as c')->get()->row()->c;
 
         }
         return $this;

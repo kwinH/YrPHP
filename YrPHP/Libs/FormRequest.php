@@ -42,7 +42,7 @@ class FormRequest
      * @param bool $auto
      * @return array
      *
-     * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域'])));
+     * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域','值域',...])));
      * 验证规则:
      * required: 字段不能为空
      * equal:值域:string|null 当值与之相等时，通过验证
@@ -70,25 +70,24 @@ class FormRequest
         if (!$validates) $validates = $this->rules();
 
         foreach ($validates as $inputKey => $v) {
-
+            $err = "错误:{$inputKey}验证不通过";
             $inputValue = isset($array[$inputKey]) ? $array[$inputKey] : '';
 
             foreach ($v as $validate) {
-                if (empty($validate[1]))
-                    $validate[1] = "错误:{$inputKey}验证不通过";
+                $method = array_shift($validate);
 
-                if (!isset($validate[2]))
-                    $validate[2] = null;
+                if (isset($validate[0]))
+                    $err = array_shift($validate);
 
-                $method = $validate[0];
+                array_unshift($validate, $inputValue);
 
                 if ($method instanceof Closure) {
-                    $res = call_user_func($method, $inputValue, $validate[2]);
+                    $res = call_user_func_array($method, $validate);
                 } else if (method_exists('\YrPHP\Validate', $method)) {
-                    $res = Validate::$method($inputValue, $validate[2]);;
+                    $res = call_user_func_array([Validate::class, $method], $validate);
                 }
 
-                if (!$res) $error[$inputKey] = $validate[1];
+                if (!$res) $error[$inputKey] = $err;
             }
         }
 

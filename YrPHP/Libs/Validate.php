@@ -19,52 +19,52 @@ class Validate
 
     /**
      * 判断是否为空值，当数据不为空时 return true
-     * @param null $data
+     * @param null $value
      * @return bool
      */
-    static function required($data = null)
+    static function required($value = null)
     {
-        if ($data) return true;
+        if ($value) return true;
         return false;
     }
 
     /**
      * 当两个值相等时 return true
-     * @param string $data
+     * @param string $value
      * @param string $val
      * @return bool
      */
-    static function equal($data = null, $val = null)
+    static function equal($value = null, $val = null)
     {
-        if (is_null($data)) return false;
+        if (is_null($value)) return false;
 
-        if ($data == $val) return true;
+        if ($value == $val) return true;
 
         return false;
     }
 
     /**
      * 当两个不值相等时 return true
-     * @param string $data
+     * @param string $value
      * @param string $val
      * @return bool
      */
-    static function notEqual($data = null, $val = null)
+    static function notEqual($value = null, $val = null)
     {
-        if (is_null($data)) return false;
+        if (is_null($value)) return false;
 
-        if ($data != $val) return true;
+        if ($value != $val) return true;
 
         return false;
     }
 
     /**
      * 当存在指定范围时return true
-     * @param string $data
+     * @param string $value
      * @param array|string $range
      * @return bool
      */
-    static function in($data = '', $range = '')
+    static function in($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -72,7 +72,7 @@ class Validate
             return false;
         }
 
-        if (in_array($range, $data)) return true;
+        if (in_array($range, $value)) return true;
 
         return false;
     }
@@ -80,11 +80,11 @@ class Validate
 
     /**
      * 当不存在指定范围时return true
-     * @param null $data
+     * @param null $value
      * @param array|string $range
      * @return bool
      */
-    static function notIn($data = '', $range = '')
+    static function notIn($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -92,7 +92,7 @@ class Validate
             return false;
         }
 
-        if (in_array($range, $data)) return false;
+        if (in_array($range, $value)) return false;
 
         return true;
     }
@@ -100,11 +100,11 @@ class Validate
 
     /**
      * 当存在指定范围时return true
-     * @param null $data
+     * @param null $value
      * @param array|string $range
      * @return bool
      */
-    static function between($data = '', $range = '')
+    static function between($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -114,7 +114,7 @@ class Validate
 
         $max = max($range);
         $min = min($range);
-        if ($data >= $min && $data <= $max) {
+        if ($value >= $min && $value <= $max) {
             return true;
         }
 
@@ -124,11 +124,11 @@ class Validate
 
     /**
      * 当不存在指定范围时return true
-     * @param null $data
+     * @param null $value
      * @param array|string $range
      * @return bool
      */
-    static function notBetween($data = '', $range = '')
+    static function notBetween($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -138,7 +138,7 @@ class Validate
 
         $max = max($range);
         $min = min($range);
-        if ($data >= $min && $data <= $max) {
+        if ($value >= $min && $value <= $max) {
             return false;
         }
 
@@ -147,26 +147,26 @@ class Validate
 
     /**
      * 当数据库中值存在时 return false
+     * @param $val 值
      * @param $tableName 表名
      * @param $field 字段名
-     * @param $val 值
      * @return bool
      */
-    static function unique($tableName, $field, $val)
+    static function unique($value, $tableName, $field)
     {
-        $db = Model();
-        return $count = $db->where(array($field => $val))->count($tableName);
+        $db = M();
+        return !($db->where(array($field => $value))->count($tableName));
     }
 
     /**
      * 当字符长度存在指定范围时return true
-     * @param null $data 字符串
+     * @param null $value 字符串
      * @param array|string $range 范围
      * @return bool
      * length('abc',$rage = 3); strlen('abc') ==3
      * length('abc',$rage = array(5,3))==length('abc',$rage = array(3,5)) => strlen('abc') >=3 && strlen('abc') <=5
      */
-    static function length($data = '', $range = '')
+    static function length($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -176,7 +176,7 @@ class Validate
 
         $max = max($range);
         $min = min($range);
-        $strLen = strlen($data);
+        $strLen = strlen($value);
         if ($max == $min) {
             if ($strLen == $max) {
                 return true;

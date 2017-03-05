@@ -966,69 +966,69 @@ static function getQuery(){}
 class validate{
 /**
      * 判断是否为空值，当数据不为空时 return true
-     * @param null $data
+     * @param null $value
      * @return bool
      */
-static function required($data){}
+static function required($value){}
 /**
      * 当两个值相等时 return true
-     * @param string $data
+     * @param string $value
      * @param string $val
      * @return bool
      */
-static function equal($data,$val){}
+static function equal($value,$val){}
 /**
      * 当两个不值相等时 return true
-     * @param string $data
+     * @param string $value
      * @param string $val
      * @return bool
      */
-static function notEqual($data,$val){}
+static function notEqual($value,$val){}
 /**
      * 当存在指定范围时return true
-     * @param string $data
+     * @param string $value
      * @param array|string $range
      * @return bool
      */
-static function in($data,$range){}
+static function in($value,$range){}
 /**
      * 当不存在指定范围时return true
-     * @param null $data
+     * @param null $value
      * @param array|string $range
      * @return bool
      */
-static function notIn($data,$range){}
+static function notIn($value,$range){}
 /**
      * 当存在指定范围时return true
-     * @param null $data
+     * @param null $value
      * @param array|string $range
      * @return bool
      */
-static function between($data,$range){}
+static function between($value,$range){}
 /**
      * 当不存在指定范围时return true
-     * @param null $data
+     * @param null $value
      * @param array|string $range
      * @return bool
      */
-static function notBetween($data,$range){}
+static function notBetween($value,$range){}
 /**
      * 当数据库中值存在时 return false
+     * @param $val 值
      * @param $tableName 表名
      * @param $field 字段名
-     * @param $val 值
      * @return bool
      */
-static function unique($tableName,$field,$val){}
+static function unique($value,$tableName,$field){}
 /**
      * 当字符长度存在指定范围时return true
-     * @param null $data 字符串
+     * @param null $value 字符串
      * @param array|string $range 范围
      * @return bool
      * length('abc',$rage = 3); strlen('abc') ==3
      * length('abc',$rage = array(5,3))==length('abc',$rage = array(3,5)) => strlen('abc') >=3 && strlen('abc') <=5
      */
-static function length($data,$range){}
+static function length($value,$range){}
 /**
      * Email格式验证
      * @param    string $value 需要验证的值

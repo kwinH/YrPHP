@@ -396,14 +396,13 @@ function Ip2Area($ip = '')
 
 }
 
-
 /**
  * 生成随机字符
- * @param  string $type w：英文字符 d：数字 wd: dw:数字加英文字符
- * @param  integer $len [description]
- * @return [type]        [description]
+ * @param int $len
+ * @param string $type w：英文字符 d：数字 wd: dw:数字加英文字符
+ * @return string
  */
-function randStr($type = 'wd', $len = 8)
+function randStr($len = 8, $type = 'wd')
 {
     $type = strtolower($type);
 
@@ -419,7 +418,8 @@ function randStr($type = 'wd', $len = 8)
             $pool = '0123456789';
             break;
         default:
-            $pool = uniqid();
+            //$pool = uniqid();
+            $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+-={}\\|:;\'",.?/';
             break;
     }
 
@@ -610,7 +610,7 @@ function old($inputName = '', $default = null)
 function csrfToken()
 {
     if (!$token = YrPHP\Session::get('_token'))
-        $token = randStr('dw', 32);
+        $token = randStr(32);
 
     YrPHP\Session::set('_token', $token);
 

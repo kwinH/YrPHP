@@ -1152,9 +1152,9 @@ static function except($keys){}
 
 static function only($keys){}
 
-static function get($key,$defualt){}
+static function get($key,$default){}
 
-static function post($key,$defualt){}
+static function post($key,$default){}
 
 static function all($data){}
 

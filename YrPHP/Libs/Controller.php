@@ -9,6 +9,8 @@
 namespace YrPHP;
 
 
+use App;
+
 abstract class Controller
 {
     private static $instance;
@@ -70,6 +72,15 @@ abstract class Controller
             }
         }
         return $middleware;
+    }
+
+    /**
+     * 验证POST|GET提交的数据
+     * @param array $rule 验证规则
+     */
+    public function validate($rule = [])
+    {
+        App::loadClass(FormRequest::class, App::loadClass(Request::class), $rule);
     }
 
 

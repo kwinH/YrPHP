@@ -65,26 +65,26 @@ class Request
     }
 
 
-    public function get($key = null, $defualt = null)
+    public function get($key = null, $default = null)
     {
         $data = self::$getData;
 
         if (is_null($key)) {
             return $this->all($data);
         } else {
-            return isset($data[$key]) ? $data[$key] : $defualt;
+            return isset($data[$key]) ? $data[$key] : $default;
         }
 
     }
 
-    public function post($key = null, $defualt = null)
+    public function post($key = null, $default = null)
     {
         $data = self::$postData;
 
         if (is_null($key)) {
             return $this->all($data);
         } else {
-            return isset($data[$key]) ? $data[$key] : $defualt;
+            return isset($data[$key]) ? $data[$key] : $default;
         }
 
     }

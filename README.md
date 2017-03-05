@@ -1671,7 +1671,7 @@ class Index extends Controller
 
     function index(TestRequest $request, $id)
     {
-		//如果TestRequest验证没通过，则会将错误信息写入session 如果是post提交则返回上一页,如果是ajax，则返回{error:{}}, 获取错误信息：session('error')
+		//如果TestRequest验证没通过，则会将错误信息写入session 如果是post提交则返回上一页,如果是ajax，则返回{error:{}}, 获取错误信息：session('errors')
     }
 ```
 

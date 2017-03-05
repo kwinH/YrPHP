@@ -67,16 +67,16 @@ class Config
 
     /**
      * @param string $key
-     * @param null $defualt
+     * @param null $default
      * @return null
      */
-    public static function get($key = '', $defualt = null)
+    public static function get($key = '', $default = null)
     {
         if (empty($key)) return self::$config;
 
         $config = self::$config;
         foreach (explode('.', $key) as $v) {
-            if (!isset($config[$v])) return $defualt;
+            if (!isset($config[$v])) return $default;
             $config = $config[$v];
         }
         return $config;

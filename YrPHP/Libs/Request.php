@@ -268,7 +268,7 @@ class Request
         return false;
     }
 
-    public function prot()
+    public function port()
     {
         return $_SERVER['SERVER_PORT'];
     }

@@ -1152,6 +1152,8 @@ static function except($keys){}
 
 static function only($keys){}
 
+static function header($key,$default){}
+
 static function get($key,$default){}
 
 static function post($key,$default){}
@@ -1210,7 +1212,7 @@ static function isPost(){}
      */
 static function isHttps(){}
 
-static function prot(){}
+static function port(){}
 
 static function host(){}
 

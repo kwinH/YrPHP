@@ -100,8 +100,8 @@ class Model
 
         $this->tablePrefix = $this->dbConfig[$this->connection]['masterServer']['tablePrefix'];
 
-        $this->tableName = $tableName;
-        $this->setEscapeTableName($tableName);
+        if ($tableName)
+            $this->tableName = $tableName;
 
     }
 
@@ -430,23 +430,24 @@ class Model
     {
         if (empty($tableName)) {
             $tableName = $this->tableName;
-            if ($auto && !empty($this->tablePrefix))
-                $tableName = strpos($tableName, $this->tablePrefix) === false
-                    ? $this->tablePrefix . $tableName
-                    : $tableName;
-
-            $this->escapeTableName = $this->escapeId($tableName);
-
         } else if ($tableName instanceof \Closure) {
             return $this->escapeTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
         }
 
+        if ($auto && !empty($this->tablePrefix))
+            $tableName = strpos($tableName, $this->tablePrefix) === false
+                ? $this->tablePrefix . $tableName
+                : $tableName;
+
+        return $this->escapeTableName = $this->escapeId($tableName);
     }
 
     protected final function getEscapeTableName()
     {
         if (is_null($this->escapeTableName))
             $this->setEscapeTableName($this->tableName);
+
+        return $this->escapeTableName;
     }
 
     /**
@@ -967,7 +968,7 @@ class Model
             return self::$tableFileds[$this->escapeTableName];
 
 
-        $sql = "desc $this->escapeTableName";
+        $sql = 'desc ' . $this->setEscapeTableName();
 
         $result = $this->query($sql)->result();
 

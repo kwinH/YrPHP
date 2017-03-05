@@ -61,7 +61,7 @@ class View
             }
         }
 
-
+        $this->tplVars['errors'] = session('errors');
     }
 
     /**
@@ -115,7 +115,7 @@ class View
         if (!file_exists($tplFile)) die("模板文件{$tplFile}不存在！");
 
         /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
-        $comFileDir = $this->compileDir . C('ctlName').'/'.dirname($fileName);
+        $comFileDir = $this->compileDir . C('ctlName') . '/' . dirname($fileName);
 
         if (!file_exists($comFileDir)) File::mkDir($comFileDir);
 

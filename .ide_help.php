@@ -1218,13 +1218,13 @@ static function host(){}
 
 static function referer(){}
 
-static function toJson($data){}
+static function json($data){}
 }
 class response{
 
 static function redirect($url){}
 
-static function setCode($code){}
+static function status($code){}
 
 static function sendHeader($headers){}
 

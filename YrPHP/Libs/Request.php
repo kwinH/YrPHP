@@ -280,14 +280,7 @@ class Request
 
     public function referer()
     {
-        return $_SERVER['HTTP_REFERER'];
-    }
-
-
-    public function toJson(array $data)
-    {
-        header("Content-Type:application/json;charset=UTF-8");
-        exit(json_encode($data, JSON_UNESCAPED_UNICODE));
+        return isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['HTTP_HOST'];
     }
 
 }

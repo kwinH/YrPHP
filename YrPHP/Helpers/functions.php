@@ -433,7 +433,7 @@ function randStr($len = 8, $type = 'wd')
  */
 function sendHttpStatus($code)
 {
-    \Response::setCode($code);
+    \Response::status($code);
 }
 
 /**

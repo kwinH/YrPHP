@@ -244,15 +244,16 @@ class App
                         ->send($request)
                         ->through($middleware)
                         ->then(function ($request) use ($classObj, $action, $url) {
-                            array_unshift($url,$classObj,$action);
-                            $request->view = call_user_func_array('self::runMethod',$url);
+                            array_unshift($url, $classObj, $action);
+                            $request->view = call_user_func_array('self::runMethod', $url);
 
                             self::pipeline()
                                 ->send($request)
                                 ->through(Config::get('middleware.after'))
                                 ->then(function ($request) {
                                     echo $request->view;
-                                    session('errors', null);
+                                    Session::delete(Session::get('flash', []));
+                                    Session::set('flash', []);
                                 });
 
                         });

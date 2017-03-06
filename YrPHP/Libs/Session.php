@@ -17,7 +17,7 @@ class Session
 
     public static function init()
     {
-        if (is_null(self::$init)) {
+        if (is_null(static::$init)) {
             $config = Config::get('session');
 
             session_name($config['name']);
@@ -40,7 +40,7 @@ class Session
             }
 
             session_start(); // 这也是必须的，打开session，必须在session_set_save_handler后面执行
-            self::$init = true;
+            static::$init = true;
         }
     }
 
@@ -50,10 +50,10 @@ class Session
      */
     public static function set($key = '', $value = '')
     {
-        self::init();
+        static::init();
         if ($value === '' && is_array($key)) {
             foreach ($key as $k => $v) {
-                self::set($k, $v);
+                static::set($k, $v);
             }
         } else {
             $array = &$_SESSION;
@@ -74,13 +74,31 @@ class Session
 
 
     /**
+     * Flash a key / value pair to the session.
+     *
+     * @param  string $key
+     * @param  mixed $value
+     * @return void
+     */
+    public static function flash($key, $value)
+    {
+        static::init();
+        static::set($key, $value);
+        $arr = static::get('flash', []);
+        array_push($arr, $key);
+        static::set('flash', $arr);
+
+    }
+
+
+    /**
      * @param string $key
      * @param null $default
      * @return null
      */
     public static function get($key = '', $default = null)
     {
-        self::init();
+        static::init();
         if (empty($key)) return $_SESSION;
 
         $config = $_SESSION;;
@@ -94,7 +112,7 @@ class Session
 
     public static function all()
     {
-        self::init();
+        static::init();
         return $_SESSION;
     }
 
@@ -104,10 +122,10 @@ class Session
      */
     public static function delete($key)
     {
-        self::init();
+        static::init();
         if (is_array($key)) {
-            foreach ($key as $k => $v) {
-                self::delete($k);
+            foreach ($key as $v) {
+                static::delete($v);
             }
         } else {
             $array = &$_SESSION;
@@ -122,7 +140,7 @@ class Session
 
     public static function clear()
     {
-        self::init();
+        static::init();
         $_SESSION = [];
     }
 
@@ -132,7 +150,7 @@ class Session
      */
     public static function destroy()
     {
-        self::init();
+        static::init();
         session_unset();
         session_destroy();
     }

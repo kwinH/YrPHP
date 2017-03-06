@@ -1220,6 +1220,18 @@ static function referer(){}
 
 static function toJson($data){}
 }
+class response{
+
+static function redirect($url){}
+
+static function setCode($code){}
+
+static function sendHeader($headers){}
+
+static function toJson($data,$code){}
+
+static function errorBackTo($errors){}
+}
 class view{
 
 static function __construct(){}

@@ -9,6 +9,7 @@
 namespace YrPHP\Middleware;
 
 use Closure;
+use response;
 use YrPHP\IMiddleware;
 use YrPHP\Request;
 
@@ -23,10 +24,11 @@ class VerifyCsrfToken implements IMiddleware
 
         $csrfToken = csrfToken();
         if ($request->method() !== 'GET' && !$this->shouldPassThrough($request) && $token != $csrfToken) {
-            sendHttpStatus(500);
+
             if ($request->isAjax()) {
-                exit($request->toJson(['error' => 'CSRF验证不通过']));
+                response::toJson(['error' => 'CSRF验证不通过'], 500);
             } else {
+                sendHttpStatus(500);
                 require BASE_PATH . 'resource/tpl/csrf_error.php';
             }
 

@@ -10,7 +10,7 @@ namespace YrPHP;
 
 
 use App;
-use Request;
+use response;
 
 abstract class Controller
 {
@@ -86,14 +86,7 @@ abstract class Controller
 
     public function errorBackTo($errors)
     {
-        session('errors', $errors);
-        if (Request::isAjax()) {
-            exit(Request::toJson(['error' => $errors]));
-        }
-
-        if (Request::isPost()) {
-            gotoUrl(Request::referer());
-        }
+        response::errorBackTo($errors);
     }
 
     public function __call($method, $args)

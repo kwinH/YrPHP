@@ -9,5 +9,5 @@
 
 //'class_alias_name' => 'class_ original_name',
 return [
-'ide-help'=>'YrPHP\\GeneratorCommand'
+'ide-help'=>'YrPHP\\Console\\GeneratorCommand'
 ];

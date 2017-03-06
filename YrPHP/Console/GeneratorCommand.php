@@ -8,7 +8,9 @@
  * GitHub:https://github.com/kwinH/YrPHP
  */
 
-namespace YrPHP;
+namespace YrPHP\Console;
+
+use YrPHP\Config;
 
 class GeneratorCommand
 {

@@ -23,6 +23,7 @@ return [
     'verifyCode' => 'YrPHP\\VerifyCode',
     'pipeline' => 'YrPHP\\Pipeline',
     'request' => 'YrPHP\\Request',
+    'response' => 'YrPHP\\Response',
     'view' => 'YrPHP\\View',
     'form' => 'YrPHP\\Form',
 ];

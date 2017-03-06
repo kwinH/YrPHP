@@ -92,7 +92,8 @@ class FormRequest
         }
 
         if (!empty($error)) {
-            Session::set('errors', $error);
+            Session::flash('_old_input',Request::all());
+            Session::flash('errors', $error);
             $this->response($error);
             return false;
         }
@@ -103,13 +104,8 @@ class FormRequest
 
     public function response(array $errors)
     {
-        if ($this->isAjax()) {
-            exit($this->request->toJson(['error' => $errors]));
-        }
+        \response::errorBackTo($errors);
 
-        if ($this->isPost()) {
-            gotoUrl($this->request->referer());
-        }
     }
 
     public function __call($method, $args)

@@ -565,6 +565,24 @@ function arrayIGet(array $arr = [], $key = '')
 }
 
 /**
+ * 多维数组转一维数组
+ * @param array $multi
+ * @return array
+ */
+function arrToOne(array $multi = [])
+{
+    $arr = array();
+    foreach ($multi as $key => $val) {
+        if (is_array($val)) {
+            $arr = array_merge($arr, arrToOne($val));
+        } else {
+            $arr[] = $val;
+        }
+    }
+    return $arr;
+}
+
+/**
  * 数据脱敏处理隐私数据的安全保护
  * @param string $str
  * @param int $start

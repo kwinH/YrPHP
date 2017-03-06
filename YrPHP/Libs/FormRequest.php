@@ -87,7 +87,7 @@ class FormRequest
                     $res = call_user_func_array([Validate::class, $method], $validate);
                 }
 
-                if (!$res) $error[$inputKey] = $err;
+                if (!$res) $error[$inputKey][] = $err;
             }
         }
 

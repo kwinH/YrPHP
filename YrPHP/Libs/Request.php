@@ -194,7 +194,7 @@ class Request
      */
     public function getPath()
     {
-        return \uri::path;
+        return \uri::getPath();
     }
 
     public function is($rule)
@@ -223,7 +223,7 @@ class Request
      */
     public function getQuery()
     {
-        return \uri::query;
+        return \uri::getQuery();
     }
 
     /**
@@ -286,7 +286,8 @@ class Request
 
     public function toJson(array $data)
     {
-        return json_encode($data, JSON_UNESCAPED_UNICODE);
+        header("Content-Type:application/json;charset=UTF-8");
+        exit(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
 }

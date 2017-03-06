@@ -54,7 +54,7 @@ class App
         requireCache($file);
 
         if (!class_exists($className)) {
-            if ($name = arrayIGet(Config::get('classAlias'),$className)){
+            if ($name = arrayIGet(Config::get('classAlias'), $className)) {
                 file_put_contents($file, PHP_EOL . 'class ' . ucfirst(strtolower($className)) . ' extends Facade{public static $className=\'' . $name . '\';}', FILE_APPEND);
                 header('location: ' . $_SERVER['HTTP_REFERER']);
             }
@@ -69,9 +69,9 @@ class App
         if (defined('APP_MODE')) {
             Config::load('config_' . APP_MODE);
         }
-        
+
         date_default_timezone_set(Config::get('timezone')); //设置时区（默认中国）
-        
+
         error_reporting(-1); //报告所有PHP错误
         if (Config::get('logRecord')) {
             ini_set('log_errors', 1); //设置是否将脚本运行的错误信息记录到服务器错误日志或者error_log之中
@@ -199,6 +199,7 @@ class App
                     $ctrBaseNamespace[] = $v;
                     $ctrBasePath .= empty($v) ? '' : $v . '/';
                     $classObj .= '\\' . $v;
+                    unset($url[$k]);
                 } else {
                     $className = ucfirst(strtolower($v));
                     $action = empty($url[$k + 1]) ? $defaultAct : strtolower($url[$k + 1]);
@@ -243,14 +244,15 @@ class App
                         ->send($request)
                         ->through($middleware)
                         ->then(function ($request) use ($classObj, $action, $url) {
-                            $request->view = self::runMethod($classObj, $action, $url);
+                            array_unshift($url,$classObj,$action);
+                            $request->view = call_user_func_array('self::runMethod',$url);
 
                             self::pipeline()
                                 ->send($request)
                                 ->through(Config::get('middleware.after'))
                                 ->then(function ($request) {
                                     echo $request->view;
-                                    session('errors',null);
+                                    session('errors', null);
                                 });
 
                         });
@@ -372,7 +374,7 @@ class App
         $classAlias = Config::get('classAlias');
         if (isset($classAlias[$name])) {
             return loadClass($classAlias[$name], $paramenters);
-        } else if ($name = arrayIGet($classAlias,$name)) {
+        } else if ($name = arrayIGet($classAlias, $name)) {
             return loadClass($classAlias[$name], $paramenters);
         }
     }

@@ -24,6 +24,11 @@ class Request
     }
 
 
+    /**
+     * 支持连贯查询
+     * @param $keys
+     * @return $this
+     */
     public function except($keys)
     {
         $keys = is_array($keys) ? $keys : func_get_args();
@@ -57,7 +62,7 @@ class Request
 
         if (is_null($key)) return $headers;
 
-        if ($value = arrayIGet($headers, $key))
+        if ($value = Arr::arrayIGet($headers, $key))
             return $value;
 
         return $default;
@@ -93,12 +98,10 @@ class Request
     {
         $data = $data ?: array_merge(self::$getData, self::$postData);
         if ($this->onlyKey) {
-            $this->onlyKey = array_flip($this->onlyKey);
-            $data = array_intersect_key($data, $this->onlyKey);
+            Arr::only($data, $this->onlyKey);
 
         } else if ($this->exceptKey) {
-            $this->exceptKey = array_flip($this->exceptKey);
-            $data = array_diff_key($data, $this->exceptKey);
+            Arr::except($data, $this->exceptKey);
         }
 
         $this->onlyKey = $this->exceptKey = [];

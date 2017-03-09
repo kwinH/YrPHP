@@ -8,6 +8,7 @@
  * GitHub:https://github.com/kwinH/YrPHP
  */
 
+use YrPHP\Arr;
 use YrPHP\Config;
 use YrPHP\Debug;
 use YrPHP\Session;
@@ -54,7 +55,7 @@ class App
         requireCache($file);
 
         if (!class_exists($className)) {
-            if ($name = arrayIGet(Config::get('classAlias'), $className)) {
+            if ($name = Arr::arrayIGet(Config::get('classAlias'), $className)) {
                 file_put_contents($file, PHP_EOL . 'class ' . ucfirst(strtolower($className)) . ' extends Facade{public static $className=\'' . $name . '\';}', FILE_APPEND);
                 header('location: ' . $_SERVER['HTTP_REFERER']);
             }
@@ -126,27 +127,27 @@ class App
         switch ($errNo) {
             case E_USER_ERROR:
                 $template .= "用户ERROR级错误，必须修复 错误编号[$errNo] $errStr ";
-                $template .= "错误位置 文件$errFile,第 $errLine 行\n";
+                $template .= "错误位置 文件$errFile,第 $errLine 行" . PHP_EOL;
                 $logFile = sprintf($logFile, 'error');
 
                 break;
             case E_WARNING://运行时警告（非致命的错误）2 
             case E_USER_WARNING:
                 $template .= "用户WARNING级错误，建议修复 错误编号[$errNo] $errStr ";
-                $template .= "错误位置 文件$errFile,第 $errLine 行\n";
+                $template .= "错误位置 文件$errFile,第 $errLine 行" . PHP_EOL;
                 $logFile = sprintf($logFile, 'warning');
                 break;
 
             case E_NOTICE://运行时注意消息（可能是或者可能不是一个问题） 8
             case E_USER_NOTICE:
                 $template .= "用户NOTICE级错误，不影响系统，可不修复 错误编号[$errNo] $errStr ";
-                $template .= "错误位置 文件$errFile,第 $errLine 行\n";
+                $template .= "错误位置 文件$errFile,第 $errLine 行" . PHP_EOL;
                 $logFile = sprintf($logFile, 'notice');
                 break;
 
             default:
                 $template .= "未知错误类型: 错误编号[$errNo] $errStr  ";
-                $template .= "错误位置 文件$errFile,第 $errLine 行\n";
+                $template .= "错误位置 文件$errFile,第 $errLine 行" . PHP_EOL;
                 $logFile = sprintf($logFile, 'unknown');
                 break;
         }
@@ -327,15 +328,15 @@ class App
 
     /**
      * 递归解析参数
-     * @param \ReflectionMethod $rfMethod
+     * @param ReflectionMethod $rfMethod
      * @return array
      * @throws \Exception
      */
-    static function getDependencies(\ReflectionMethod $rfMethod, $params = [])
+    static function getDependencies(ReflectionMethod $rfMethod, $params = [])
     {
         $instanceParams = [];
 
-        if (!$rfMethod instanceof \ReflectionMethod) return $instanceParams;
+        if (!$rfMethod instanceof ReflectionMethod) return $instanceParams;
 
         foreach ($rfMethod->getParameters() as $param) {
             if ($dependency = $param->getClass()) {   //该参数不是对象
@@ -375,7 +376,7 @@ class App
         $classAlias = Config::get('classAlias');
         if (isset($classAlias[$name])) {
             return loadClass($classAlias[$name], $paramenters);
-        } else if ($name = arrayIGet($classAlias, $name)) {
+        } else if ($name = Arr::arrayIGet($classAlias, $name)) {
             return loadClass($classAlias[$name], $paramenters);
         }
     }

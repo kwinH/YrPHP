@@ -447,84 +447,6 @@ function gotoUrl($url = '')
     die;
 }
 
-/**
- * @param string $str 提示消息
- * @param string $url 跳转链接 默认跳转首页
- * @param int $goto 默认0 跳转$url，1调整上一页
- */
-function alert($str = "", $url = "", $goto = 0)
-{
-    if (empty($url))
-        $url = getUrl();
-
-
-    if ($goto == 1)
-        $location = "window.history.back()";
-    else
-        $location = "parent.window.location.href=\"$url\";";
-
-
-    die("<script type='text/javascript'>alert('{$str}');$location</script>");
-
-}
-
-/**
- * 不区分大小写的in_array实现
- * @param string $value
- * @param array $array
- * @return bool
- */
-function inIArray($value = '', $array = [])
-{
-    return in_array(strtolower($value), array_map('strtolower', $array));
-}
-
-/**
- * 在数组中搜索给定的值（不区分大小写），如果成功则返回相应的键名
- * @param $needle
- * @param $haystack
- * @param bool $strict
- * @return mixed
- */
-function arrayISearch($needle, $haystack, $strict = false)
-{
-    return array_search(strtolower($needle), array_map('strtolower', $haystack), $strict); // $key = 2;
-}
-
-
-/**
- * 不区分key值大小写获取数组中的值
- * @param array $arr
- * @param string $key
- * @return mixed
- */
-function arrayIGet(array $arr = [], $key = '')
-{
-    if (isset($arr[$key])) return $arr[$key];
-
-    $arr = array_change_key_case($arr, CASE_LOWER);
-    $key = strtolower($key);
-
-    return isset($arr[$key]) ? $arr[$key] : null;
-}
-
-/**
- * 多维数组转一维数组
- * @param array $multi
- * @return array
- */
-function arrToOne(array $multi = [])
-{
-    $arr = array();
-    foreach ($multi as $key => $val) {
-        if (is_array($val)) {
-            $arr = array_merge($arr, arrToOne($val));
-        } else {
-            $arr[] = $val;
-        }
-    }
-    return $arr;
-}
 
 /**
  * 数据脱敏处理隐私数据的安全保护
@@ -619,18 +541,4 @@ function parseNaming($name = '', $type = 0)
             break;
     }
 
-}
-
-/**
- *  判断是不是索引数组
- * @param $array
- * @return bool true ? 索引数组 : 不是索引数组
- */
-function isAssoc($array)
-{
-    if (is_array($array)) {
-        $keys = array_keys($array);
-        return $keys !== array_keys($keys);
-    }
-    return false;
 }

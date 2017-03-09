@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App' => $baseDir . '/YrPHP/App.php',
+    'YrPHP\\Arr' => $baseDir . '/YrPHP/Libs/Arr.php',
     'YrPHP\\Cache' => $baseDir . '/YrPHP/Libs/Cache.php',
     'YrPHP\\Cache\\File' => $baseDir . '/YrPHP/Libs/Cache/File.php',
     'YrPHP\\Cache\\ICache' => $baseDir . '/YrPHP/Libs/Cache/ICache.php',

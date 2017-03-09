@@ -26,6 +26,7 @@ class ComposerStaticInitbeb289f9886f00932c5bddf136893312
 
     public static $classMap = array (
         'App' => __DIR__ . '/../..' . '/YrPHP/App.php',
+        'YrPHP\\Arr' => __DIR__ . '/../..' . '/YrPHP/Libs/Arr.php',
         'YrPHP\\Cache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache.php',
         'YrPHP\\Cache\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/File.php',
         'YrPHP\\Cache\\ICache' => __DIR__ . '/../..' . '/YrPHP/Libs/Cache/ICache.php',

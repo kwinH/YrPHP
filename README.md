@@ -271,6 +271,28 @@ class Test extends YrPHP\Controller
 2. ***类名首字母必须大写***
 3. 必须继承Controller类，可以重写Controller类（这在扩展中再说）
 
+# 依赖注入
+```php
+<?php
+use YrPHP\Controller;
+
+class Test extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+    }
+
+    function  index(Request $request,$id,$name)
+    {
+      $data=$request->get();
+      var_export($data);
+      echo $id.$name;
+    }
+```
+>当调用控制器时会自动填充参数，如上$request为Request类，$id为URL多于字段的第一个，$name为多于字段第二个，以此类推
+>如访问example.com//test/index/1/kwin?s=2&page=3 $data=['s'=>2,'page'=>3],$id=1,$name='kwin'
+
 #配置
 
 默认的配置文件在BASE_PATH/config/config.php
@@ -1730,23 +1752,7 @@ function &getInstance(){}
 * @param string $modelName 模型类名
 * @return object
     */
-    function Model($modelName = ""){}
-
-/**********************************************************/
- /**
-* 获取输入参数 支持过滤和默认值
-* 使用方法:
-* <code>
-* I('id',0); 获取id参数 自动判断get或者post
-* I('post.name','','htmlspecialchars'); 获取$_POST['name']
-* I('get.'); 获取$_GET
-* </code>
-* @param string $name 变量的名称 支持指定类型
-* @param bool|false $default 默认值
-* @param null $filter 参数过滤方法 array|string 默认为系统配置中的defaultFilter
-* @return array
-    */
-    function I($name = '', $default = null, $filter = null){}
+    function M($modelName = ""){}
 
 /**********************************************************/
 /**
@@ -1877,30 +1883,6 @@ function sendHttpStatus($code){}
 function gotoUrl($url = ''){}
 
 /**
- * @param string $str 提示消息
- * @param string $url 跳转链接 默认跳转首页
- * @param int $goto 默认0 跳转$url，1调整上一页
- */
-function alert($str = "", $url = "", $goto = 0){}
-
-/**
- * 不区分大小写的in_array实现
- * @param string $value
- * @param array $array
- * @return bool
- */
-function inIArray($value ='', $array = []){}
-
-/**
- * 在数组中搜索给定的值（不区分大小写），如果成功则返回相应的键名
- * @param $needle
- * @param $haystack
- * @param bool $strict
- * @return mixed
- */
-function arrayISearch($needle, $haystack, $strict = false){}
-
-/**
  * 数据脱敏处理隐私数据的安全保护
  * @param string $str
  * @param int $start
@@ -1938,12 +1920,6 @@ function csrfField(){}
  */
 function parseNaming($name = '', $type = 0){}
 
-/**
- *  判断是不是索引数组
- * @param $array
- * @return bool true ? 索引数组 : 不是索引数组
- */
-function isAssoc($array){}
 ```
 
 ------------
@@ -2000,8 +1976,8 @@ function isAssoc($array){}
 
 
 #系统类库(YrPHP/Libs)
-> **所有系統类都注冊了别名，可以直接在控制器中用$this->[类名]来调用**
-> **如： \$this->encrypt->encrypt($str)**
+> **所有系統类都注冊了别名，可以直接在控制器中用`别名::方法名()`来调用**
+> **如： `crypt::encrypt($str)`**
 >
 > **当然自定义的类，在Config/class_alias.php中注册了别名，也可以这样调用**
 
@@ -2026,6 +2002,99 @@ function isAssoc($array){}
   $crypt->encrypt($str);//加密数据
   $crypt->decrypt($str);//解密数据
 ```
+
+## 数组类
+
+```php
+<?php
+/**
+ * Created by YrPHP.
+ * User: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ * GitHub:https://github.com/kwinH/YrPHP
+ */
+namespace YrPHP;
+
+class Arr
+{
+    /**
+     * 不区分大小写的in_array实现
+     * @param string $value
+     * @param array $array
+     * @return bool
+     */
+    public static function inIArray($value = '', $array = []){}
+
+    /**
+     * 在数组中搜索给定的值（不区分大小写），如果成功则返回相应的键名
+     * @param $needle
+     * @param $haystack
+     * @param bool $strict
+     * @return mixed
+     */
+    public static function arrayISearch($needle, $haystack, $strict = false){}
+
+
+    /**
+     * 不区分key值大小写获取数组中的值
+     * @param array $arr
+     * @param string $key
+     * @return mixed
+     */
+    public static function arrayIGet(array $arr = [], $key = ''){}
+
+    /**
+     * 多维数组转一维数组
+     * @param array $multi
+     * @return array
+     */
+    public static function arrToOne(array $multi = []){}
+
+
+    /**
+     *  判断是不是索引数组
+     * @param array $array
+     * @return bool true ? 索引数组 : 不是索引数组
+     */
+
+    public static function isAssoc(array  $array = []){}
+
+
+    /**
+     * 使用“点”符号从数组中获取一个项。
+     * @param array $arr
+     * @param string $key
+     * @param null $default
+     * @return mixed
+     */
+    public static function get(array $arr = [], $key = '', $default = null){}
+
+
+    /**
+     * 返回数组中指定的数组项
+     * @param array $arr 指定数组
+     * @param $onlyKey 可以为多个参数或则单个数组格式
+     * @return array
+     */
+    public static function only(array &$arr = [], $onlyKey){}
+
+
+    /**
+     * 过滤数组中指定的数组项,并返回
+     * @param array $arr 指定数组
+     * @param $exceptKey 可以为多个参数或则单个数组格式
+     * @return array
+     */
+    public static function except(array &$arr = [], $exceptKey){}
+
+
+}
+```
+
+
+
+
 
 ##文件处理类 File
 

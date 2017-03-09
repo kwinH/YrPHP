@@ -700,9 +700,9 @@ class Model
             $getAttr = [];
             foreach ($getCache as $v) {
 
-                if ($key = arrayISearch($v, $fields)) {
+                if ($key = Arr::arrayISearch($v, $fields)) {
                     $getAttr[$fields[$key]] = $type . $v . 'Attribute';
-                } else if ($key = arrayISearch(parseNaming($v, 2), $fields)) {
+                } else if ($key = Arr::arrayISearch(parseNaming($v, 2), $fields)) {
                     $getAttr[$fields[$key]] = $type . $v . 'Attribute';;
                 }
             }

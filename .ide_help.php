@@ -1,5 +1,70 @@
 <?php
 exit("This file should not be included, only analyzed by your IDE");
+class arr{
+/**
+     * 不区分大小写的in_array实现
+     * @param string $value
+     * @param array $array
+     * @return bool
+     */
+static function inIArray($value,$array){}
+/**
+     * 在数组中搜索给定的值（不区分大小写），如果成功则返回相应的键名
+     * @param $needle
+     * @param $haystack
+     * @param bool $strict
+     * @return mixed
+     */
+static function arrayISearch($needle,$haystack,$strict){}
+/**
+     * 不区分key值大小写获取数组中的值
+     * @param array $arr
+     * @param string $key
+     * @return mixed
+     */
+static function arrayIGet($arr,$key){}
+/**
+     * 多维数组转一维数组
+     * @param array $multi
+     * @return array
+     */
+static function arrToOne($multi){}
+/**
+     *  判断是不是索引数组
+     * @param array $array
+     * @return bool true ? 索引数组 : 不是索引数组
+     */
+static function isAssoc($array){}
+/**
+     * 使用“点”符号从数组中获取一个项。
+     * @param array $arr
+     * @param string $key
+     * @param null $default
+     * @return mixed
+     */
+static function get($arr,$key,$default){}
+/**
+     * 弹出指定key 并把值返回
+     * @param array $arr
+     * @param string $key
+     * @return bool|mixed
+     */
+static function pop($arr,$key){}
+/**
+     * 返回数组中指定的数组项
+     * @param array $arr 指定数组
+     * @param $onlyKey 可以为多个参数或则单个数组格式
+     * @return array
+     */
+static function only($arr,$onlyKey){}
+/**
+     * 过滤数组中指定的数组项,并返回
+     * @param array $arr 指定数组
+     * @param $exceptKey 可以为多个参数或则单个数组格式
+     * @return array
+     */
+static function except($arr,$exceptKey){}
+}
 class cart{
 
 static function __construct($params){}
@@ -88,6 +153,29 @@ static function searchSeller($rowId){}
 static function destroy(){}
 
 static function getError(){}
+}
+class config{
+
+static function __construct(){}
+/**
+     * @param string|array $key
+     * @param string $value
+     */
+static function set($key,$value){}
+/**
+     * @param string|array $key
+     */
+static function delete($key){}
+/**
+     * @param string $key
+     * @param null $default
+     * @return null
+     */
+static function get($key,$default){}
+
+static function all(){}
+
+static function load($fileName,$key){}
 }
 class crypt{
 
@@ -410,6 +498,269 @@ static function getDirSize($dirname){}
 static function bitSize($size){}
 
 static function remote_file_exists($url_file){}
+}
+class form{
+/**
+     * @param array $options
+     * @param array $data
+     * @return string
+     */
+static function open($options,$data){}
+/**
+     * @return string
+     */
+static function close(){}
+/**
+     * Create a form label element.
+     *
+     * @param  string $name
+     * @param  string $value
+     * @param  array $options
+     *
+     * @return string
+     */
+static function label($name,$value,$options){}
+/**
+     * Generate a hidden field with the current CSRF token.
+     *
+     * @return string
+     */
+static function token(){}
+/**
+     *
+     * @param $attributes
+     * @return bool|string
+     */
+static function attributesToString($attributes){}
+/**
+     * Get the ID attribute for a field name.
+     *
+     * @param  string $name
+     * @param  array $attributes
+     *
+     * @return string
+     */
+static function getIdAttribute($name,$attributes){}
+
+static function getValueAttribute($name,$value){}
+/**
+     * Create a form input field.
+     *
+     * @param  string $type
+     * @param  string $name
+     * @param  array $options
+     * @param  string $value
+     *
+     * @return string
+     */
+static function input($type,$name,$options,$value){}
+/**
+     * Create a text input field.
+     *
+     * @param $name
+     * @param array $options
+     * @param null $value
+     * @return string
+     */
+static function text($name,$options,$value){}
+/**
+     * Create a password input field.
+     *
+     * @param  string $name
+     * @param  array $options
+     *
+     * @return string
+     */
+static function password($name,$options){}
+/**
+     * Create a hidden input field.
+     *
+     * @param  string $name
+     * @param null $value
+     * @param array $options
+     *
+     * @return string
+     */
+static function hidden($name,$value,$options){}
+/**
+     * Create an e-mail input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function email($name,$options,$value){}
+/**
+     * Create a tel input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function tel($name,$options,$value){}
+/**
+     * Create a number input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function number($name,$options,$value){}
+/**
+     * Create a date input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function date($name,$options,$value){}
+/**
+     * Create a datetime input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function datetime($name,$options,$value){}
+/**
+     * Create a datetime-local input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function datetimeLocal($name,$options,$value){}
+/**
+     * Create a time input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function time($name,$options,$value){}
+/**
+     * Create a url input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function url($name,$options,$value){}
+/**
+     * Create a file input field.
+     *
+     * @param  string $name
+     * @param  array $options
+     *
+     * @return string
+     */
+static function file($name,$options){}
+/**
+     * Create a textarea input field.
+     *
+     * @param  string $name
+     * @param array $options
+     * @param null $value
+     *
+     * @return string
+     */
+static function textarea($name,$options,$value){}
+/**
+     * Create a select box field.
+     *
+     * @param  string $name
+     * @param  array $list
+     * @param  array $options
+     * @param  string $selected
+     *
+     * @return string
+     */
+static function select($name,$list,$options,$selected){}
+/**
+     * Create a checkbox input field.
+     *
+     * @param  string $name
+     * @param  mixed $value
+     * @param  array $options
+     * @param  bool $checked
+     *
+     * @return string
+     */
+static function checkbox($name,$value,$options,$checked){}
+/**
+     * Create a radio button input field.
+     *
+     * @param  string $name
+     * @param  mixed $value
+     * @param  array $options
+     * @param  bool $checked
+     *
+     * @return string
+     */
+static function radio($name,$value,$options,$checked){}
+/**
+     * Create a HTML reset input element.
+     *
+     * @param  string $value
+     * @param  array $attributes
+     *
+     * @return string
+     */
+static function reset($value,$attributes){}
+/**
+     * Create a HTML image input element.
+     *
+     * @param  string $url
+     * @param  string $name
+     * @param  array $attributes
+     *
+     * @return string
+     */
+static function image($url,$name,$attributes){}
+/**
+     * Create a color input field.
+     *
+     * @param  string $name
+     * @param  array $options
+     * @param  string $value
+     *
+     * @return string
+     */
+static function color($name,$options,$value){}
+/**
+     * Create a submit button element.
+     *
+     * @param  string $value
+     * @param  array $options
+     *
+     * @return string
+     */
+static function submit($value,$options){}
+/**
+     * Create a button element.
+     *
+     * @param  string $value
+     * @param  array $options
+     *
+     * @return string
+     */
+static function button($value,$options){}
 }
 class image{
 
@@ -872,6 +1223,167 @@ static function last(){}
 
 static function gotoPage(){}
 }
+class pipeline{
+
+static function __construct(){}
+/**
+     * 设置需要处理的对象
+     * @param $request
+     * @return $this
+     */
+static function send($request){}
+/**
+     * 需要经过哪些中间件处理
+     * @param $pipes
+     * @return $this
+     */
+static function through($pipes){}
+/**
+     * 开始流水线处理
+     * @param \Closure
+     * @return \Closure
+     */
+static function then($first){}
+/**
+     * 包装迭代对象到闭包
+     * @return \Closure
+     */
+static function getSlice(){}
+}
+class request{
+
+static function __construct(){}
+/**
+     * 支持连贯查询
+     * @param $keys
+     * @return $this
+     */
+static function except($keys){}
+
+static function only($keys){}
+
+static function header($key,$default){}
+
+static function get($key,$default){}
+
+static function post($key,$default){}
+
+static function all($data){}
+
+static function replace($data,$method){}
+
+static function merge($data,$method){}
+
+static function pop($keys,$method){}
+
+static function filter($data){}
+
+static function part($n,$no_result){}
+/**
+     * 返回路由替换过后的uri 数组
+     * @param null $n
+     * @param null $no_result
+     * @return array|mixed|null|string
+     */
+static function rpart($n,$no_result){}
+/**
+     *返回没有经过路由替换过的uri字符串
+     * @return string
+     */
+static function getPath(){}
+
+static function is($rule){}
+/**
+     * 返回经过路由替换过的uri字符串
+     * @return string
+     */
+static function getRPath(){}
+/**
+     * 在问号 ? 之后的所有字符串
+     * @return mixed
+     */
+static function getQuery(){}
+/**
+     * 判断是不是 AJAX 请求
+     * 测试请求是否包含HTTP_X_REQUESTED_WITH请求头。
+     * @return    bool
+     */
+static function isAjax(){}
+
+static function method(){}
+/**
+     * 判断是不是 POST 请求
+     * @return    bool
+     */
+static function isPost(){}
+/**
+     * 判断是否SSL协议
+     * @return boolean
+     */
+static function isHttps(){}
+
+static function port(){}
+
+static function host(){}
+
+static function referer(){}
+}
+class response{
+
+static function redirect($url){}
+
+static function status($code){}
+
+static function sendHeader($headers){}
+
+static function json($data,$code){}
+
+static function jsonp($data,$code){}
+
+static function errorBackTo($errors){}
+
+static function successBackTo($message){}
+}
+class session{
+/**
+     * 构造函数
+     */
+static function __construct(){}
+
+static function init(){}
+/**
+     * @param string|array $key
+     * @param string $value
+     */
+static function set($key,$value){}
+/**
+     * Flash a key / value pair to the session.
+     *
+     * @param  string $key
+     * @param  mixed $value
+     * @return void
+     */
+static function flash($key,$value){}
+/**
+     * @param string $key
+     * @param null $default
+     * @return null
+     */
+static function get($key,$default){}
+
+static function all(){}
+/**
+     * @param string|array $key
+     */
+static function delete($key){}
+
+static function clear(){}
+/**
+     * 销毁session
+     * @return void
+     */
+static function destroy(){}
+}
 class upload{
 
 static function __construct($config){}
@@ -1117,121 +1629,6 @@ static function interferingPixel(){}
      */
 static function interferingLine(){}
 }
-class pipeline{
-
-static function __construct(){}
-/**
-     * 设置需要处理的对象
-     * @param $request
-     * @return $this
-     */
-static function send($request){}
-/**
-     * 需要经过哪些中间件处理
-     * @param $pipes
-     * @return $this
-     */
-static function through($pipes){}
-/**
-     * 开始流水线处理
-     * @param \Closure
-     * @return \Closure
-     */
-static function then($first){}
-/**
-     * 包装迭代对象到闭包
-     * @return \Closure
-     */
-static function getSlice(){}
-}
-class request{
-
-static function __construct(){}
-
-static function except($keys){}
-
-static function only($keys){}
-
-static function header($key,$default){}
-
-static function get($key,$default){}
-
-static function post($key,$default){}
-
-static function all($data){}
-
-static function replace($data,$method){}
-
-static function merge($data,$method){}
-
-static function pop($keys,$method){}
-
-static function filter($data){}
-
-static function part($n,$no_result){}
-/**
-     * 返回路由替换过后的uri 数组
-     * @param null $n
-     * @param null $no_result
-     * @return array|mixed|null|string
-     */
-static function rpart($n,$no_result){}
-/**
-     *返回没有经过路由替换过的uri字符串
-     * @return string
-     */
-static function getPath(){}
-
-static function is($rule){}
-/**
-     * 返回经过路由替换过的uri字符串
-     * @return string
-     */
-static function getRPath(){}
-/**
-     * 在问号 ? 之后的所有字符串
-     * @return mixed
-     */
-static function getQuery(){}
-/**
-     * 判断是不是 AJAX 请求
-     * 测试请求是否包含HTTP_X_REQUESTED_WITH请求头。
-     * @return    bool
-     */
-static function isAjax(){}
-
-static function method(){}
-/**
-     * 判断是不是 POST 请求
-     * @return    bool
-     */
-static function isPost(){}
-/**
-     * 判断是否SSL协议
-     * @return boolean
-     */
-static function isHttps(){}
-
-static function port(){}
-
-static function host(){}
-
-static function referer(){}
-
-static function json($data){}
-}
-class response{
-
-static function redirect($url){}
-
-static function status($code){}
-
-static function sendHeader($headers){}
-
-static function toJson($data,$code){}
-
-static function errorBackTo($errors){}
-}
 class view{
 
 static function __construct(){}
@@ -1283,267 +1680,4 @@ static function delDir($file,$template){}
      * 析构函数 生成缓存文件
      */
 static function __destruct(){}
-}
-class form{
-/**
-     * @param array $options
-     * @param array $data
-     * @return string
-     */
-static function open($options,$data){}
-/**
-     * @return string
-     */
-static function close(){}
-/**
-     * Create a form label element.
-     *
-     * @param  string $name
-     * @param  string $value
-     * @param  array $options
-     *
-     * @return string
-     */
-static function label($name,$value,$options){}
-/**
-     * Generate a hidden field with the current CSRF token.
-     *
-     * @return string
-     */
-static function token(){}
-/**
-     *
-     * @param $attributes
-     * @return bool|string
-     */
-static function attributesToString($attributes){}
-/**
-     * Get the ID attribute for a field name.
-     *
-     * @param  string $name
-     * @param  array $attributes
-     *
-     * @return string
-     */
-static function getIdAttribute($name,$attributes){}
-
-static function getValueAttribute($name,$value){}
-/**
-     * Create a form input field.
-     *
-     * @param  string $type
-     * @param  string $name
-     * @param  array $options
-     * @param  string $value
-     *
-     * @return string
-     */
-static function input($type,$name,$options,$value){}
-/**
-     * Create a text input field.
-     *
-     * @param $name
-     * @param array $options
-     * @param null $value
-     * @return string
-     */
-static function text($name,$options,$value){}
-/**
-     * Create a password input field.
-     *
-     * @param  string $name
-     * @param  array $options
-     *
-     * @return string
-     */
-static function password($name,$options){}
-/**
-     * Create a hidden input field.
-     *
-     * @param  string $name
-     * @param null $value
-     * @param array $options
-     *
-     * @return string
-     */
-static function hidden($name,$value,$options){}
-/**
-     * Create an e-mail input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function email($name,$options,$value){}
-/**
-     * Create a tel input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function tel($name,$options,$value){}
-/**
-     * Create a number input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function number($name,$options,$value){}
-/**
-     * Create a date input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function date($name,$options,$value){}
-/**
-     * Create a datetime input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function datetime($name,$options,$value){}
-/**
-     * Create a datetime-local input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function datetimeLocal($name,$options,$value){}
-/**
-     * Create a time input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function time($name,$options,$value){}
-/**
-     * Create a url input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function url($name,$options,$value){}
-/**
-     * Create a file input field.
-     *
-     * @param  string $name
-     * @param  array $options
-     *
-     * @return string
-     */
-static function file($name,$options){}
-/**
-     * Create a textarea input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function textarea($name,$options,$value){}
-/**
-     * Create a select box field.
-     *
-     * @param  string $name
-     * @param  array $list
-     * @param  array $options
-     * @param  string $selected
-     *
-     * @return string
-     */
-static function select($name,$list,$options,$selected){}
-/**
-     * Create a checkbox input field.
-     *
-     * @param  string $name
-     * @param  mixed $value
-     * @param  array $options
-     * @param  bool $checked
-     *
-     * @return string
-     */
-static function checkbox($name,$value,$options,$checked){}
-/**
-     * Create a radio button input field.
-     *
-     * @param  string $name
-     * @param  mixed $value
-     * @param  array $options
-     * @param  bool $checked
-     *
-     * @return string
-     */
-static function radio($name,$value,$options,$checked){}
-/**
-     * Create a HTML reset input element.
-     *
-     * @param  string $value
-     * @param  array $attributes
-     *
-     * @return string
-     */
-static function reset($value,$attributes){}
-/**
-     * Create a HTML image input element.
-     *
-     * @param  string $url
-     * @param  string $name
-     * @param  array $attributes
-     *
-     * @return string
-     */
-static function image($url,$name,$attributes){}
-/**
-     * Create a color input field.
-     *
-     * @param  string $name
-     * @param  array $options
-     * @param  string $value
-     *
-     * @return string
-     */
-static function color($name,$options,$value){}
-/**
-     * Create a submit button element.
-     *
-     * @param  string $value
-     * @param  array $options
-     *
-     * @return string
-     */
-static function submit($value,$options){}
-/**
-     * Create a button element.
-     *
-     * @param  string $value
-     * @param  array $options
-     *
-     * @return string
-     */
-static function button($value,$options){}
 }

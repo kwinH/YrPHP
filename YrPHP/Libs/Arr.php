@@ -60,7 +60,7 @@ class Arr
         $arr = array();
         foreach ($multi as $key => $val) {
             if (is_array($val)) {
-                $arr = array_merge($arr, arrToOne($val));
+                $arr = array_merge($arr, static::arrToOne($val));
             } else {
                 $arr[] = $val;
             }
@@ -107,6 +107,25 @@ class Arr
             $arr = $arr[$v];
         }
         return $arr;
+    }
+
+    /**
+     * 弹出指定key 并把值返回
+     * @param array $arr
+     * @param string $key
+     * @return bool|mixed
+     */
+    public static function pop(array &$arr = [], $key = null)
+    {
+        if (is_null($key)) return array_pop($arr);
+
+        if (isset($arr[$key])) {
+            $data = $arr[$key];
+            unset($arr[$key]);
+            return $data;
+        }
+
+        return null;
     }
 
 

@@ -81,6 +81,7 @@ abstract class Controller
      */
     public function validate($rule = [])
     {
+
         App::loadClass(FormRequest::class, App::loadClass('\YrPHP\Request'), $rule);
     }
 

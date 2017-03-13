@@ -133,6 +133,7 @@ function M($modelName = "")
     return App::loadClass('YrPHP\Model', parseNaming($modelName, 2));
 }
 
+
 /**
  * 管理session
  * @param string|array $key

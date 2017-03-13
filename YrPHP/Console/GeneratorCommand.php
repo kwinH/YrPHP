@@ -35,4 +35,14 @@ class GeneratorCommand
         }
         file_put_contents('.ide_help.php', $content);
     }
+
+    function classAlias()
+    {
+        $classAlias = Config::get('classAlias');
+        $file = '<?php' . PHP_EOL . 'use YrPHP\Facade;';
+        foreach ($classAlias as $alias => $original) {
+            $file .= PHP_EOL . 'class ' . ucfirst(strtolower($alias)) . ' extends Facade{public static $className=\'' . $original . '\';}';
+        }
+        file_put_contents('_class_alias.php', $file);
+    }
 }

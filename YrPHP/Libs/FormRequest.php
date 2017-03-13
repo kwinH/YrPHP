@@ -92,7 +92,7 @@ class FormRequest
         }
 
         if (!empty($error)) {
-            Session::flash('_old_input',Request::all());
+            Session::flash('_old_input',$array);
             Session::flash('errors', $error);
             $this->response($error);
             return false;

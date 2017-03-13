@@ -126,13 +126,12 @@ function loadHelper($fileName)
  */
 function M($modelName = "")
 {
-    $modelName = APP . '\\' . C('modelBaseNamespace') . '\\' . str_replace(['/', '.'], '\\', $modelName);
-    if (class_exists($modelName)) {
-        return App::loadClass($modelName);
+    $modelClass = APP . '\\' . C('modelBaseNamespace') . '\\' . str_replace(['/', '.'], '\\', $modelName);
+    if (class_exists($modelClass)) {
+        return App::loadClass($modelClass);
     }
     return App::loadClass('YrPHP\Model', parseNaming($modelName, 2));
 }
-
 
 /**
  * 管理session

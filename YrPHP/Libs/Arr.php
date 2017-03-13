@@ -110,7 +110,7 @@ class Arr
     }
 
     /**
-     * 弹出指定key 并把值返回
+     * 弹出指定key 并把值返还
      * @param array $arr
      * @param string $key
      * @return bool|mixed

@@ -1305,7 +1305,8 @@ class Model
 
 
         $sql = "alter table {$this->escapeTableName} add ";
-        $sql .= $this->filterFieldInfo($info);
+        if (!$field = $this->filterFieldInfo($info)) return false;
+        $sql .= $field;
 
         return $this->query($sql)->result;
     }
@@ -1325,7 +1326,10 @@ class Model
         $this->table($tableName, $auto);
 
         $sql = "alter table {$this->escapeTableName} modify ";
-        $sql .= $this->filterFieldInfo($info);
+
+        if (!$field = $this->filterFieldInfo($info)) return false;
+        $sql .= $field;
+
 
         return $this->query($sql)->result;
 
@@ -1348,28 +1352,51 @@ class Model
         $newInfo = [];
         $newInfo['name'] = $info['name'];
         $newInfo['type'] = strtolower($info['type']);
-        switch ($info['type']) {
+        switch ($newInfo['type']) {
             case 'varchar':
             case 'char':
-                $newInfo['length'] = isset($info['length']) ? 100 : $info['length'];
-                $newInfo['default'] = isset($info['default']) ? 'DEFAULT "' . $info['default'] . '"' : '';
-
-                break;
-            case 'int':
-                $newInfo['length'] = isset($info['length']) ? 7 : $info['length'];
-                $newInfo['default'] = isset($info['default']) ? 'DEFAULT ' . (int)$info['default'] : 0;
-
+                $newInfo['length'] = !isset($info['length']) ? 255 : $info['length'];
+                $newInfo['default'] = 'DEFAULT "' . (isset($info['default']) ? $info['default'] : '') . '"';
                 break;
             case 'text':
+            case 'longtext':
+            case 'date':
+            case 'datetime':
+            case 'timestamp':
                 $newInfo['length'] = '';
                 $newInfo['default'] = '';
+                break;
+            case 'tinyint':
+            case 'int':
+            case 'bigint':
+                $newInfo['length'] = !isset($info['length']) ? null : $info['length'];
+                $newInfo['default'] = 'DEFAULT ' . (isset($info['default']) ? (int)$info['default'] : 0);
+                break;
+
+            case 'float':
+            case 'double':
+            case 'decimal':
+                $newInfo['length'] = !isset($info['length']) ? '10,2' :
+                    ((is_array($info['length']) && count($info['length']) == 2 && $info['length'][0] > $info['length'][1]) ? implode(',', $info['length']) : '10,2');
+
+                $newInfo['default'] = 'DEFAULT ' . (isset($info['default']) ? (int)$info['default'] : 0);
+                break;
+
+            case 'enum':
+                if (!is_array($info['value']) || empty($info['value'])) return false;
+
+                $newInfo['length'] = implode(',', array_map(function ($item) {
+                    return "'{$item}'";
+                }, $info['value']));
+                $newInfo['default'] = 'DEFAULT "' . (isset($info['default']) ? $info['default'] : reset($info['value'])) . '"';
                 break;
         }
         $newInfo['isNull'] = !empty($info['isNull']) ? ' NULL ' : ' NOT NULL ';
         $newInfo['comment'] = isset($info['comment']) ? ' ' : ' COMMENT "' . $info['comment'] . '" ';
 
-        $sql = $newInfo['name'] . ' ' . $newInfo['type'];
+        $sql = $this->escapeId($newInfo['name']) . ' ' . $newInfo['type'];
         $sql .= (!empty($newInfo['length'])) ? '(' . $newInfo['length'] . ')' . " " : ' ';
+
         $sql .= $newInfo['isNull'];
         $sql .= $newInfo['default'];
         $sql .= $newInfo['comment'];

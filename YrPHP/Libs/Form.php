@@ -124,6 +124,7 @@ class Form
         if (!$value && isset($this->data[$name]))
             $value = $this->data[$name];
 
+
         return old($name, $value);
 
     }
@@ -400,6 +401,29 @@ class Form
 
 
     /**
+     * Create a checkable input field.
+     *
+     * @param  string $type
+     * @param  string $name
+     * @param  mixed $value
+     * @param  bool $checked
+     * @param  array $options
+     *
+     * @return string
+     */
+    protected function checkable($type, $name, $value, $checked, $options)
+    {
+        if ($oldValue = old($name, isset($this->data[$name]) ? $this->data[$name] : '')) {
+            if ($oldValue == $value) $options['checked'] = 'checked';
+        } else if ($checked) {
+            $options['checked'] = 'checked';
+        }
+
+        $options['value'] = $value;
+        return $this->input($type, $name, $options, $value);
+    }
+
+    /**
      * Create a checkbox input field.
      *
      * @param  string $name
@@ -411,12 +435,7 @@ class Form
      */
     public function checkbox($name, $value = 1, $options = [], $checked = null)
     {
-        if (old($name, isset($this->data[$name]) ? $this->data[$name] : '') == $value || $checked) {
-            $options['checked'] = 'checked';
-        }
-
-        return $this->input('checkbox', $name, $options, $value);
-
+        return $this->checkable('checkbox', $name, $value, $checked, $options);
     }
 
     /**
@@ -431,12 +450,7 @@ class Form
      */
     public function radio($name, $value = null, $options = [], $checked = null)
     {
-        if (old($name, isset($this->data[$name]) ? $this->data[$name] : '') == $value || $checked) {
-            $options['checked'] = 'checked';
-        }
-
-        return $this->input('radio', $name, $options, $value);
-
+        return $this->checkable('radio', $name, $value, $checked, $options);
     }
 
     /**

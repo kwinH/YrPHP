@@ -90,6 +90,11 @@ abstract class Controller
         response::errorBackTo($errors);
     }
 
+    public function successBackTo($errors)
+    {
+        response::successBackTo($errors);
+    }
+
     public function __call($method, $args)
     {
         error404();

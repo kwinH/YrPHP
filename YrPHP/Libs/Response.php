@@ -108,6 +108,8 @@ class Response
 
     public function errorBackTo($errors)
     {
+        var_dump(\Request::all());
+        file_put_contents('D:/test.txt',json_encode(\Request::all()),FILE_APPEND);
         Session::flash('_old_input', \Request::all());
         Session::flash('errors', $errors);
         if (\Request::isAjax()) {

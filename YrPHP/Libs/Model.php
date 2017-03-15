@@ -199,9 +199,9 @@ class Model
             if (Arr::isAssoc($value)) {
                 $val = '';
                 foreach ($value as $k => $v) {
-                    $val .= $this->escapeId($k) . '=' . $this->escape($v).',';
+                    $val .= $this->escapeId($k) . '=' . $this->escape($v) . ',';
                 }
-                return trim($val,',');
+                return trim($val, ',');
             } else {
                 return '(' . array_reduce($value, function ($result, $item) {
                     return $result . ($result ? ',' : '') . $this->escape($item);
@@ -866,9 +866,9 @@ class Model
      * @param bool $auto 是否自动添加表前缀
      * @return int 受影响行数
      */
-    function replace($data = [], $tableName = "", $auto = true)
+    function replace($data = [])
     {
-        $this->insert($data, $tableName, $auto, $act = 'REPLACE');
+        return $this->insert($data, $act = 'REPLACE');
     }
 
 
@@ -917,9 +917,9 @@ class Model
      * @param array $data 添加的数据
      * @return int 受影响行数
      */
-    function replaces($filed = [], $data = [])
+    function replaces($data = [])
     {
-        $this->inserts($filed, $data, $act = 'REPLACE');
+        return $this->inserts($data, $act = 'REPLACE');
     }
 
 
@@ -1197,7 +1197,7 @@ class Model
             return true;
         } catch (\Exception $err) {
             $this->rollback();
-            return (object)['code'=>$err->getCode(),'message'=>$err->getMessage()];
+            return (object)['code' => $err->getCode(), 'message' => $err->getMessage()];
         }
 //        finally {
 //            return $this;

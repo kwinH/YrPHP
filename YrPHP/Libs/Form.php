@@ -413,7 +413,8 @@ class Form
      */
     protected function checkable($type, $name, $value, $checked, $options)
     {
-        if ($oldValue = old($name, isset($this->data[$name]) ? $this->data[$name] : '')) {
+        $oldValue = old($name, isset($this->data[$name]) ? $this->data[$name] : null);
+        if (!is_null($oldValue)) {
             if ($oldValue == $value) $options['checked'] = 'checked';
         } else if ($checked) {
             $options['checked'] = 'checked';

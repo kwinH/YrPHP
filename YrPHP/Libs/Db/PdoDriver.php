@@ -98,10 +98,10 @@ class PdoDriver extends PDO implements IDBDriver
             echo '<pre>';
             // var_export($e);
             $errmsg = $e->getMessage();
-            $errorSql = 'ERROR SQL: ' . $sql . $errmsg;
+            $errorSql = 'ERROR SQL: ' . $sql .PHP_EOL. $errmsg;
 
 
-            throw  new \Exception($errorSql);
+            throw  new \Exception($errorSql,$e->getCode());
 
         } finally {
             Debug::stop();

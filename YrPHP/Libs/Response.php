@@ -94,13 +94,13 @@ class Response
 
     public function json(array $data = [], $code = 200)
     {
-        $this->status($code)->sendHeader(['Content-Type' => ':application/json;charset=UTF-8']);
+        $this->status($code)->sendHeader(['Content-Type' => 'application/json;charset=UTF-8']);
         exit(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
     public function jsonp(array $data = [], $code = 200)
     {
-        $this->status($code)->sendHeader(['Content-Type' => ':text/javascript;charset=UTF-8']);
+        $this->status($code)->sendHeader(['Content-Type' => 'text/javascript;charset=UTF-8']);
 
         exit(\request::get('callback', 'callback')
             . '(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ')');

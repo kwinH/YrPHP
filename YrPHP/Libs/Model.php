@@ -196,12 +196,12 @@ class Model
     public function escape($value = '')
     {
         if (is_array($value)) {
-            if (isAssoc($value)) {
+            if (Arr::isAssoc($value)) {
                 $val = '';
                 foreach ($value as $k => $v) {
-                    $val .= $this->escapeId($k) . '=' . $this->escape($v);
+                    $val .= $this->escapeId($k) . '=' . $this->escape($v).',';
                 }
-                return $val;
+                return trim($val,',');
             } else {
                 return '(' . array_reduce($value, function ($result, $item) {
                     return $result . ($result ? ',' : '') . $this->escape($item);
@@ -967,11 +967,12 @@ class Model
         if (isset(self::$tableFileds[$this->escapeTableName]))
             return self::$tableFileds[$this->escapeTableName];
 
-
-        $sql = 'desc ' . $this->setEscapeTableName();
+        $escapeTableName = $this->getEscapeTableName();
+        $sql = 'desc ' . $this->getEscapeTableName();
 
         $result = $this->query($sql)->result();
 
+        $this->escapeTableName = $escapeTableName;
 
         foreach ($result as $k => $row) {
             // $row["Field"] = strtolower($row["Field"]);
@@ -1190,16 +1191,17 @@ class Model
         try {
             $this->startTrans();
 
-            $callback();
-            $this->commit();
+            $callback($this);
 
+            $this->commit();
+            return true;
         } catch (\Exception $err) {
             $this->rollback();
-            //   throw  new \Exception($err->getMessage());
-
-        } finally {
-            return $this;
+            return (object)['code'=>$err->getCode(),'message'=>$err->getMessage()];
         }
+//        finally {
+//            return $this;
+//        }
 
 
     }

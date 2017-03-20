@@ -139,8 +139,8 @@ class Debug
     {
 
         $mess = "";
-        $mess .= '<div style="clear:both;font-size:12px;width:97%;margin:10px;padding:10px;background:#ddd;border:1px solid #009900;z-index:100">';
-        $mess .= '<div style="float:left;width:100%;"><span style="float:left;width:200px;"><b>运行信息</b>( <font color="red">' . self::spent(STARTTIME, microtime(true)) . ' </font>秒):</span><span onclick="this.parentNode.parentNode.style.display=\'none\'" style="cursor:pointer;float:right;width:35px;background:#500;border:1px solid #555;color:white">关闭X</span></div><br>';
+        $mess .= '<div style="clear:both;font-size:12px;width:97%;margin:10px;padding:10px;background:#ddd;border:1px solid #009900;z-index:100;position: fixed;left: 0;bottom: 0;">';
+        $mess .= '<div style="float:left;width:100%;"><span style="float:left;width:200px;"><b>运行信息</b>( <font color="red">' . self::spent(STARTTIME, microtime(true)) . ' </font>秒):</span><span onclick="_debug_details=document.getElementById(\'_debug_details\');if(_debug_details.style.display==\'none\'){_debug_details.style.display=\'inline\';this.innerHTML=\'隐藏X\';}else{_debug_details.style.display=\'none\';this.innerHTML=\'详情√\';}" style="cursor:pointer;float:right;width:35px;background:#500;border:1px solid #555;color:white">详情√</span></div><br/><div id="_debug_details" style="display:none">';
         $mess .= '<ul style="margin:0px;padding:0 10px 0 10px;list-style:none">';
 
 
@@ -171,7 +171,7 @@ class Debug
         }
 
         $mess .= '</ul>';
-        $mess .= '</div>';
+        $mess .= '</div></div>';
 
         return $mess;
     }

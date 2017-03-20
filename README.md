@@ -1136,7 +1136,10 @@ $db->find(1);
 ```
 
 **GET**
->**get($tableName = "", $auto = true)**
+>**get(\$tableName = "", $auto = true)**
+>
+>生产最后的SQL一句
+>
 >string $tableName 表名
 >$auto 是否自动添加表前缀**
 
@@ -1149,11 +1152,9 @@ $this->get([表名]，[是否自动添加前缀bool]);
 
 **SELECT|FIELD**
 
->**select($field =[])**
+>**select($field =[],[...])**
 >
->**field($field =[])**
->
->$field string|array 字段
+>$field string|array 字段 ,多个参数
 
 ------------
 
@@ -1282,7 +1283,6 @@ $this->count('users');
 $this->select('count(*) as count')->get('users')->row()->count;
 //生成的SQL语句
 //SELECT COUNT(*) as `count` FROM  `yrp_users`
-
 ```
 
 **最大值MAX**

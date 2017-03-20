@@ -124,13 +124,14 @@ function loadHelper($fileName)
  * @param string $modelName 模型类名
  * @return YrPHP\Model
  */
-function M($modelName = "")
+function M($modelName = "", $connection = null)
 {
     $modelClass = APP . '\\' . C('modelBaseNamespace') . '\\' . str_replace(['/', '.'], '\\', $modelName);
     if (class_exists($modelClass)) {
         return App::loadClass($modelClass);
     }
-    return App::loadClass('YrPHP\Model', parseNaming($modelName, 2));
+
+    return App::loadClass('YrPHP\Model', parseNaming($modelName, 2), $connection);
 }
 
 
@@ -290,7 +291,7 @@ function error404($msg = '', $url = '', $time = 3)
  * @param $url 一个远程文件
  * @return bool
  */
-function clientDown($url)
+function clientDown($url, $savePath = null)
 {
     if (empty($url)) return false;
 
@@ -298,7 +299,7 @@ function clientDown($url)
     ob_start();
     ob_clean();
 
-    if (function_exists('curl_init')) {
+    if (function_exists('curl_init') && !file_exists($url)) {
         $ch = curl_init();
         $timeout = 5;
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -311,17 +312,18 @@ function clientDown($url)
     }
 
     echo $content;
-
-    //file_put_contents($fileName, $content);//保存到服务器
-    header('Content-Description: File Download');
-    header('Content-type: App.octet-stream');
-    header('Content-Transfer-Encoding: binary');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-    header('Pragma: public');
-    header('Content-Length: ' . ob_get_length());
-    header('Content-Disposition: attachment; filename=' . $fileName);
-
+    if (is_null($savePath)) {
+        header('Content-Description: File Download');
+        header('Content-type: App.octet-stream');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . ob_get_length());
+        header('Content-Disposition: attachment; filename=' . $fileName);
+    } else {
+        file_put_contents($fileName, $content);//保存到服务器
+    }
 }
 
 /**
@@ -443,7 +445,7 @@ function sendHttpStatus($code)
 function gotoUrl($url = '')
 {
     if (is_null($url)) $url = getUrl();
-    header('Location:'.$url);
+    header('Location:' . $url);
     die;
 }
 

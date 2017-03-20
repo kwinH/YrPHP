@@ -49,7 +49,7 @@ static function get($arr,$key,$default){}
      * @param string $key
      * @return bool|mixed
      */
-static function pop($arr,$key){}
+static function pop($arr,$key,$default){}
 /**
      * 返回数组中指定的数组项
      * @param array $arr 指定数组
@@ -500,6 +500,12 @@ static function bitSize($size){}
 static function remote_file_exists($url_file){}
 }
 class form{
+
+static function date($name,$options,$value){}
+
+static function html($name,$options,$value){}
+
+static function uploadJs($name,$options,$value){}
 /**
      * @param array $options
      * @param array $data
@@ -613,16 +619,6 @@ static function tel($name,$options,$value){}
      */
 static function number($name,$options,$value){}
 /**
-     * Create a date input field.
-     *
-     * @param  string $name
-     * @param array $options
-     * @param null $value
-     *
-     * @return string
-     */
-static function date($name,$options,$value){}
-/**
      * Create a datetime input field.
      *
      * @param  string $name
@@ -692,6 +688,18 @@ static function textarea($name,$options,$value){}
      * @return string
      */
 static function select($name,$list,$options,$selected){}
+/**
+     * Create a checkable input field.
+     *
+     * @param  string $type
+     * @param  string $name
+     * @param  mixed $value
+     * @param  bool $checked
+     * @param  array $options
+     *
+     * @return string
+     */
+static function checkable($type,$name,$value,$checked,$options){}
 /**
      * Create a checkbox input field.
      *
@@ -844,7 +852,7 @@ static function __destruct(){}
 }
 class model{
 
-static function __construct($tableName){}
+static function __construct($tableName,$connection){}
 
 static function connection($name){}
 
@@ -891,11 +899,6 @@ static function condition($where,$logical,$type){}
 static function select($field){}
 /**
      * @param array $field
-     * @return $this
-     */
-static function field($field){}
-/**
-     * @param array $field
      * @param string $tableName
      * @param bool $auto
      * @return $this
@@ -908,9 +911,9 @@ static function except($field){}
      */
 static function table($tableName,$auto){}
 
-static function setEscapeTableName($tableName,$auto){}
+static function setTempTableName($tableName,$auto){}
 
-static function getEscapeTableName(){}
+static function getTempTableName(){}
 /**
      * 获得表名
      * @return null|string
@@ -921,7 +924,7 @@ static function buildSql(){}
 /**
      * @return $this
      */
-static function get(){}
+static function get($tableName,$auto){}
 /**
      * 以主键为条件 查询
      * @param int $id 查询的条件主键值
@@ -1013,6 +1016,12 @@ static function result($assoc){}
      */
 static function delete($where){}
 /**
+     * 添加数据 如果主键冲突 则修改
+     * @param $data
+     * @return bool|int
+     */
+static function duplicateKey($data){}
+/**
      * 添加单条数据
      * @param array $data 添加的数据
      * @param string $tableName 数据库表名
@@ -1028,7 +1037,7 @@ static function insert($data,$act){}
      * @param bool $auto 是否自动添加表前缀
      * @return int 受影响行数
      */
-static function replace($data,$tableName,$auto){}
+static function replace($data){}
 /**
      * 预处理，添加多条数据
      * @param array $data 添加的数据 单条：[filed=>val]| 多条：[[filed=>val],[filed=>val]]
@@ -1042,7 +1051,7 @@ static function inserts($data,$act){}
      * @param array $data 添加的数据
      * @return int 受影响行数
      */
-static function replaces($filed,$data){}
+static function replaces($data){}
 /**
      * @param  array $array 要验证的字段数据
      * @param  string $tableName 数据表名
@@ -1326,6 +1335,8 @@ static function port(){}
 
 static function host(){}
 
+static function currentUrl(){}
+
 static function referer(){}
 }
 class response{
@@ -1340,9 +1351,9 @@ static function json($data,$code){}
 
 static function jsonp($data,$code){}
 
-static function errorBackTo($errors){}
+static function errorBackTo($errors,$url){}
 
-static function successBackTo($message){}
+static function successBackTo($message,$url){}
 }
 class session{
 /**

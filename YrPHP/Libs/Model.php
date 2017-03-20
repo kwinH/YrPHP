@@ -51,14 +51,18 @@ class Model
         'on' => '',
     ];
 
-    //表名称
+    /**
+     * 默认表名称
+     * @var null
+     */
     protected $tableName = null;
 
     /**
-     * 转义后的表名
+     * 临时表名
      * @var null
      */
-    private $escapeTableName = null;
+    protected $tempTableName = null;
+
 
     //拼接后的sql语句
     protected $sql;
@@ -82,9 +86,9 @@ class Model
 
     private $PreProcessStatus = true;
 
-    private static $tableFileds = [];
+    private static $tableFields = [];
 
-    public function __construct($tableName = '')
+    public function __construct($tableName = null, $connection = null)
     {
         if (defined('APP_MODE') && file_exists(APP_PATH . "Config/database_" . APP_MODE . ".php")) {
             $this->dbConfig = requireCache(APP_PATH . "Config/database_" . APP_MODE . ".php");
@@ -92,16 +96,19 @@ class Model
             $this->dbConfig = requireCache(APP_PATH . "Config/database.php");
         }
 
+        if ($tableName)
+            $this->tableName = $tableName;
+
+        if (!is_null($connection)) {
+            $this->connection = $connection;
+        } else if (is_null($this->connection)) {
+            $this->connection = $this->dbConfig['defaultConnection'];
+        }
 
         $this->openCache = C('openCache');
 
-        if (is_null($this->connection))
-            $this->connection = $this->dbConfig['defaultConnection'];
-
         $this->tablePrefix = $this->dbConfig[$this->connection]['masterServer']['tablePrefix'];
 
-        if ($tableName)
-            $this->tableName = $tableName;
 
     }
 
@@ -109,6 +116,8 @@ class Model
     public function connection($name)
     {
         $this->connection = $name;
+        $this->tablePrefix = $this->dbConfig[$this->connection]['masterServer']['tablePrefix'];
+        return $this;
     }
 
     public function getConnection()
@@ -118,25 +127,19 @@ class Model
 
     public function getConnectionInstance()
     {
+        $this->slaveServer = [];
         $db = $this->dbConfig[$this->connection];
-
-
         $this->masterServer = self::getInstance($db['masterServer']);
 
         if (empty($db['slaveServer'])) {
-
             $this->slaveServer[] = $this->masterServer;
-
         } else {
-
             if (!is_array($db['slaveServer'])) $db['slaveServer'] = array($db['slaveServer']);
 
             foreach ($db['slaveServer'] as $v) {
-
                 $this->slaveServer[] = self::getInstance($v);
             }
         }
-
 
     }
 
@@ -147,10 +150,15 @@ class Model
      */
     public static function getInstance($dbConfig)
     {
-        $startTime = time();
-        if (is_object(self::$object)) {
-            $obj = self::$object;
+        $startTime = microtime(true);
+        $key = md5(json_encode($dbConfig));
+        if (is_object(self::$object[$key])) {
+            $obj = self::$object[$key];
         } else {
+            if (empty($dbConfig['dsn'])) {
+                $dbConfig['dsn'] = $dbConfig['dbType'] . ":host=" . $dbConfig['dbHost'] . ";port=" . $dbConfig['dbPort'] . ";dbname=" . $dbConfig['dbName'];
+            }
+
             switch ($dbConfig['dbDriver']) {
                 case 'mysqli' :
                     break;
@@ -158,19 +166,20 @@ class Model
                     break;
                 default :
                     // self::$object = new pdo_driver($dbConfig);
-                    self::$object = Db\PdoDriver::getInstance($dbConfig);
+                    self::$object[$key] = Db\PdoDriver::getInstance($dbConfig);
 
             }
 
-            if (self::$object instanceof Db\IDBDriver) {
-                $obj = self::$object;
+            if (self::$object[$key] instanceof Db\IDBDriver) {
+                $obj = self::$object[$key];
             } else {
                 die('错误：必须实现db\Driver接口');
             }
 
+            $endTime = microtime(true);
+            Debug::addMsg(['sql' => '数据库连接时间(' . $dbConfig['dsn'] . ')', 'time' => Debug::spent($startTime, $endTime)], 2);
         }
-        $endTime = time();
-        Debug::addMsg(['sql' => '数据库连接时间', 'time' => Debug::spent($startTime, $endTime)], 2);
+
         return $obj;
     }
 
@@ -185,9 +194,10 @@ class Model
             }), ',');
         } else {
             $field = explode('.', $field);
-            $field[0] = "`{$field[0]}`";
 
-            if (isset($field[1])) $field[0] .= ".`{$field[1]}`";
+            if (isset($field[1])) {
+                $field[0] = "`{$this->tablePrefix}{$field[0]}`.`{$field[1]}`";
+            }
 
             return $field[0];
         }
@@ -372,16 +382,10 @@ class Model
      */
     public final function select($field = [])
     {
-        $this->field($field);
-        return $this;
-    }
+        if (func_num_args() > 1) {
+            $field = func_get_args();
+        }
 
-    /**
-     * @param array $field
-     * @return $this
-     */
-    public final function field($field = [])
-    {
         if (is_array($field)) {
             $fieldArr = $field;
         } else {
@@ -395,8 +399,10 @@ class Model
         $this->methods['field'] .= ',' . $field;
         $this->methods['field'] = trim($this->methods['field'], ',');
 
+
         return $this;
     }
+
 
     /**
      * @param array $field
@@ -422,16 +428,17 @@ class Model
      */
     public final function table($tableName = "", $auto = true)
     {
-        $this->setEscapeTableName($tableName, $auto);
+        $this->setTempTableName($tableName, $auto);
         return $this;
     }
 
-    protected final function setEscapeTableName($tableName = "", $auto = true)
+
+    protected final function setTempTableName($tableName = "", $auto = true)
     {
         if (empty($tableName)) {
             $tableName = $this->tableName;
         } else if ($tableName instanceof \Closure) {
-            return $this->escapeTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
+            return $this->tempTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
         }
 
         if ($auto && !empty($this->tablePrefix))
@@ -439,15 +446,22 @@ class Model
                 ? $this->tablePrefix . $tableName
                 : $tableName;
 
-        return $this->escapeTableName = $this->escapeId($tableName);
+        $tableName = preg_split('/\s+|as/', $tableName);
+        if (isset($tableName[1])) {
+            $this->tempTableName = "`{$tableName[0]}` `{$this->tablePrefix}{$tableName[1]}`";
+        } else {
+            $this->tempTableName = "`{$tableName[0]}`";
+        }
+
+        return $this->tempTableName;
     }
 
-    protected final function getEscapeTableName()
+    protected final function getTempTableName()
     {
-        if (is_null($this->escapeTableName))
-            $this->setEscapeTableName($this->tableName);
+        if (is_null($this->tempTableName))
+            $this->setTempTableName($this->tableName);
 
-        return $this->escapeTableName;
+        return $this->tempTableName;
     }
 
     /**
@@ -461,19 +475,17 @@ class Model
 
     public function buildSql()
     {
-        $this->getEscapeTableName();
+        $this->getTempTableName();
 
         $field = $this->methods['field'] ? $this->methods['field'] : '*';
         $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]} " : "";
         $group = $this->methods["group"] != "" ? " GROUP BY {$this->methods["group"]}" : "";
         $having = $this->methods["having"] != "" ? "{$this->methods["having"]}" : "";
 
-        $this->sql = "SELECT $field FROM  {$this->escapeTableName}";
+        $this->sql = "SELECT $field FROM  {$this->tempTableName} ";
 
-        if (is_array($this->methods['join'])) {
-            foreach ($this->methods['join'] as $v) {
-                $this->sql .= " " . $v . " ";
-            }
+        foreach ((array)$this->methods['join'] as $v) {
+            $this->sql .= " " . $v . " ";
         }
 
         $this->sql .= "{$this->methods['where']}{$group}{$having}{$order}{$this->methods['limit']}";
@@ -485,8 +497,12 @@ class Model
     /**
      * @return $this
      */
-    public final function get()
+    public final function get($tableName = "", $auto = true)
     {
+        if ($tableName) {
+            $this->setTempTableName($tableName, $auto);
+        }
+
         $this->buildSql();
         return $this;
     }
@@ -530,7 +546,7 @@ class Model
             'join' => [],
             'on' => '',
         ];
-        $this->escapeTableName = null;
+        $this->tempTableName = null;
     }
 
     /**
@@ -576,7 +592,7 @@ class Model
     {
         $table = $auto ? $this->tablePrefix . $table : $table;
         $table = preg_split('/\s+as\s+|\s+/', $table);
-        $tableAlias = isset($table[1]) ? $this->escapeId($table[1]) : '';
+        $tableAlias = isset($table[1]) ? $this->escapeId($this->tablePrefix . $table[1]) : '';
         $table = $this->escapeId($table[0]);
 
         if ($type != '') {
@@ -599,9 +615,7 @@ class Model
         $this->methods['on'] = '';
         $this->condition($cond, 'and', 'on');
 
-        $join = $type . 'JOIN ' . $table . ' ' . $tableAlias . ' ON ' . $this->methods['on'];
-        $this->methods['join'] = $join;
-
+        $this->methods['join'][] = $type . 'JOIN ' . $table . ' ' . $tableAlias . $this->methods['on'];
 
         return $this;
     }
@@ -799,7 +813,6 @@ class Model
     {
         $re = $this->cache($assoc, 'row');
 
-
         return isset($re[0]) ? $re[0] : false;
     }
 
@@ -824,17 +837,54 @@ class Model
      */
     public final function delete($where = "")
     {
-        $this->getEscapeTableName();
+        $this->getTempTableName();
         if (!empty($where)) $this->where($where);
 
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
-        $this->sql = "DELETE FROM {$this->escapeTableName} {$where} {$limit}";
+        $this->sql = "DELETE FROM {$this->tempTableName} {$where} {$limit}";
 
         $re = $this->query($this->sql)->result();
 
         return $re;
+    }
+
+    /**
+     * 添加数据 如果主键冲突 则修改
+     * @param $data
+     * @return bool|int
+     */
+    public function duplicateKey($data)
+    {
+        if (empty($data)) $data = \request::post();
+
+        if (!$data)
+            return false;
+
+        $data = $this->check($data);
+
+        if ($data === false) return false;
+
+        $this->getTempTableName();
+
+        $fields = array_keys($data);
+
+        if ($this->PreProcessStatus == true) {
+            $values = $this->setDataPreProcessFill($fields, $data);
+            $data = $values === false ? $data : $values;
+        } else {
+            $this->PreProcessStatus = true;
+        }
+
+
+        $escapeData = $this->escape($data);
+
+        $this->sql = 'INSERT  INTO ' . $this->tempTableName . ' set ' . $escapeData . ' on duplicate key update ' . $escapeData;
+
+        $re = $this->query($this->sql, $data);
+
+        return $re->getLastId();
     }
 
     /**
@@ -880,7 +930,7 @@ class Model
      */
     function inserts($data = [], $act = 'INSERT')
     {
-        $this->getEscapeTableName();
+        $this->getTempTableName();
         if (is_array($data[0])) {
             $fields = array_keys($data[0]);
         } else {
@@ -902,11 +952,10 @@ class Model
             return $res .= ',:' . $item;
         }), ',');
 
-        $this->sql = "{$act}  INTO " . $this->escapeTableName . "(" . $field . ")  VALUES(" . $value . ") ";
+        $this->sql = "{$act}  INTO " . $this->tempTableName . "(" . $field . ")  VALUES(" . $value . ") ";
 
 
         $re = $this->query($this->sql, $data);
-
 
         return $re->getLastId();
     }
@@ -934,18 +983,15 @@ class Model
     public final function check($array)
     {
         if ($this->_validate) {
-
             $tableField = $this->tableField();
 
-            foreach ($array as $key => &$value) {
+            if ($tableField === false) return false;
 
+            foreach ($array as $key => &$value) {
                 if (!in_array(strtolower($key), array_map('strtolower', $tableField))) {//判断字段是否存在 不存在则舍弃
                     unset($array[$key]);
                 }
-
-
             }
-
         }
 
         if (!get_magic_quotes_gpc()) {
@@ -964,15 +1010,15 @@ class Model
      */
     public final function tableField()
     {
-        if (isset(self::$tableFileds[$this->escapeTableName]))
-            return self::$tableFileds[$this->escapeTableName];
+        if (isset(self::$tableFields[$this->tempTableName]))
+            return self::$tableFields[$this->tempTableName];
 
-        $escapeTableName = $this->getEscapeTableName();
-        $sql = 'desc ' . $this->getEscapeTableName();
+        $tempTableName = $this->getTempTableName();
+        $sql = 'desc ' . $this->getTempTableName();
 
         $result = $this->query($sql)->result();
 
-        $this->escapeTableName = $escapeTableName;
+        $this->tempTableName = $tempTableName;
 
         foreach ($result as $k => $row) {
             // $row["Field"] = strtolower($row["Field"]);
@@ -990,9 +1036,9 @@ class Model
             if (!array_key_exists("pri", $fields)) {
                 $fields["pri"] = array_shift($fields);
             }
-            self::$tableFileds[$this->tableName] = $fields;
+            self::$tableFields[$this->tableName] = $fields;
 
-            return self::$tableFileds[$this->tableName];
+            return self::$tableFields[$this->tableName];
         }
 
         return false;
@@ -1051,7 +1097,7 @@ class Model
      */
     public final function update($data = [], $where = "")
     {
-        $this->getEscapeTableName();
+        $this->getTempTableName();
 
         if (empty($data))
             $data = \request::post();
@@ -1080,7 +1126,7 @@ class Model
 
         $data = $this->escape($data);
 
-        $this->sql = "UPDATE " . $this->escapeTableName . " SET " . $data . " " . $where . " " . $limit;
+        $this->sql = "UPDATE " . $this->tempTableName . " SET " . $data . " " . $where . " " . $limit;
 
 
         $re = $this->query($this->sql)->result();
@@ -1237,7 +1283,7 @@ class Model
     {
         $this->table($tableName, $auto);
 
-        $sql = "CREATE TABLE IF NOT EXISTS {$this->escapeTableName} (`$key` INT NOT NULL AUTO_INCREMENT  primary key) ENGINE = {$engine};";
+        $sql = "CREATE TABLE IF NOT EXISTS {$this->tempTableName} (`$key` INT NOT NULL AUTO_INCREMENT  primary key) ENGINE = {$engine};";
         $this->query($sql);
 
     }
@@ -1253,7 +1299,7 @@ class Model
     {
         $this->table($tableName, $auto);
 
-        $sql = " DROP TABLE IF EXISTS $this->escapeTableName";
+        $sql = " DROP TABLE IF EXISTS $this->tempTableName";
         return $this->query($sql)->result;
     }
 
@@ -1268,7 +1314,7 @@ class Model
     {
         $this->table($tableName, $auto);
 
-        $sql = "desc $this->escapeTableName";
+        $sql = "desc $this->tempTableName";
 
         $info = $this->query($sql)->result();
 
@@ -1289,7 +1335,7 @@ class Model
 
         $this->table($tableName, $auto);
 
-        $sql = "desc {$this->escapeTableName} $field";
+        $sql = "desc {$this->tempTableName} $field";
         $info = $this->query($sql)->row();
         return $info;
     }
@@ -1306,7 +1352,7 @@ class Model
         $this->table($tableName, $auto);
 
 
-        $sql = "alter table {$this->escapeTableName} add ";
+        $sql = "alter table {$this->tempTableName} add ";
         if (!$field = $this->filterFieldInfo($info)) return false;
         $sql .= $field;
 
@@ -1327,7 +1373,7 @@ class Model
 
         $this->table($tableName, $auto);
 
-        $sql = "alter table {$this->escapeTableName} modify ";
+        $sql = "alter table {$this->tempTableName} modify ";
 
         if (!$field = $this->filterFieldInfo($info)) return false;
         $sql .= $field;
@@ -1418,7 +1464,7 @@ class Model
     {
         $this->table($tableName, $auto);
 
-        $sql = "alter table {$this->escapeTableName} drop column $field";
+        $sql = "alter table {$this->tempTableName} drop column $field";
         return $this->query($sql)->result;
 
     }

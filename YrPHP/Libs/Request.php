@@ -281,6 +281,11 @@ class Request
         return $_SERVER['HTTP_HOST'];
     }
 
+    function currentUrl()
+    {
+        return ($this->isHttps() ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER["REQUEST_URI"];
+    }
+
     public function referer()
     {
         return isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['HTTP_HOST'];

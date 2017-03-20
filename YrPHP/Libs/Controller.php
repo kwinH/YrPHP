@@ -85,14 +85,14 @@ abstract class Controller
         App::loadClass(FormRequest::class, App::loadClass('\YrPHP\Request'), $rule);
     }
 
-    public function errorBackTo($errors)
+    public function errorBackTo($message, $url = null)
     {
-        response::errorBackTo($errors);
+        response::errorBackTo($message, $url);
     }
 
-    public function successBackTo($errors)
+    public function successBackTo($message, $url = null)
     {
-        response::successBackTo($errors);
+        response::successBackTo($message, $url);
     }
 
     public function __call($method, $args)

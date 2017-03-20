@@ -115,7 +115,7 @@ class Arr
      * @param string $key
      * @return bool|mixed
      */
-    public static function pop(array &$arr = [], $key = null)
+    public static function pop(array &$arr = [], $key = null, $default = null)
     {
         if (is_null($key)) return array_pop($arr);
 
@@ -125,7 +125,7 @@ class Arr
             return $data;
         }
 
-        return null;
+        return $default;
     }
 
 

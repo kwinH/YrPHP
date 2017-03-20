@@ -106,22 +106,25 @@ class Response
             . '(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ')');
     }
 
-    public function errorBackTo($errors)
+    public function errorBackTo($errors, $url = null)
     {
-        var_dump(\Request::all());
-        file_put_contents('D:/test.txt',json_encode(\Request::all()),FILE_APPEND);
+
         Session::flash('_old_input', \Request::all());
         Session::flash('errors', $errors);
         if (\Request::isAjax()) {
             exit($this->json(['error' => $errors]));
         }
 
+
         if (\Request::isPost()) {
-            $this->redirect('referer');
+            if (is_null($url)) $url = 'referer';
+        } else {
+            if (is_null($url)) $url = \Request::currentUrl();
         }
+        $this->redirect($url);
     }
 
-    public function successBackTo($message)
+    public function successBackTo($message, $url = null)
     {
         Session::flash('success', $message);
 
@@ -130,8 +133,11 @@ class Response
         }
 
         if (\Request::isPost()) {
-            $this->redirect('referer');
+            if (is_null($url)) $url = 'referer';
+        } else {
+            if (is_null($url)) $url = \Request::currentUrl();
         }
+        $this->redirect($url);
     }
 
 }

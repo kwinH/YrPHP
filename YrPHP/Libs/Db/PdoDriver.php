@@ -8,8 +8,10 @@
  */
 namespace YrPHP\Db;
 
+use Exception;
 use PDO;
 use PDOException;
+use PDOStatement;
 use YrPHP\Debug;
 
 class PdoDriver extends PDO implements IDBDriver
@@ -72,40 +74,36 @@ class PdoDriver extends PDO implements IDBDriver
      */
     function query($sql, $parameters = array())
     {
-        $errmsg = '';
+        $errorMsg = '';
         Debug::start();
 
         $this->sql = $sql;
         try {
-            $result = parent::prepare($sql);
+            $this->PDOStatement = parent::prepare($sql);
             if (empty($parameters)) {
-                $this->result = $result->execute();
+                $this->result = $this->PDOStatement->execute();
             } else {
                 if (is_array($parameters[0])) {
 
                     foreach ($parameters as $v) {
-                        $this->result = $result->execute($v);
+                        $this->result = $this->PDOStatement->execute($v);
                     }
 
                 } else {
-                    $this->result = $result->execute($parameters);
+                    $this->result = $this->PDOStatement->execute($parameters);
                 }
             }
-            $this->PDOStatement = $result;
 
-        } catch (\PDOException $e) {
-
+        } catch (PDOException $e) {
             echo '<pre>';
-            // var_export($e);
-            $errmsg = $e->getMessage();
-            $errorSql = 'ERROR SQL: ' . $sql .PHP_EOL. $errmsg;
+            $errorMsg = $e->getMessage();
+            $errorSql = 'ERROR SQL: ' . $sql . PHP_EOL . $errorMsg;
 
-
-            throw  new \Exception($errorSql,$e->getCode());
+            throw  new Exception($errorSql, $e->getCode());
 
         } finally {
             Debug::stop();
-            Debug::addMsg(array('sql' => trim($sql) . ($parameters ? json_encode($parameters) : ''), 'time' => Debug::spent(), 'error' => $errmsg), 2);
+            Debug::addMsg(array('sql' => trim($sql) . ($parameters ? json_encode($parameters) : ''), 'time' => Debug::spent(), 'error' => $errorMsg), 2);
         }
 
         return $this;
@@ -118,15 +116,20 @@ class PdoDriver extends PDO implements IDBDriver
      */
     function row($assoc = false)
     {
-        if (empty($this->PDOStatement)) {
-            return false;
-        }
-        if ($assoc) {
-            return $this->PDOStatement->fetch(PDO::FETCH_ASSOC);
+        try {
+            if (!$this->PDOStatement instanceof PDOStatement)
+                throw  new Exception('errors');
 
-        } else {
-            return $this->PDOStatement->fetch(PDO::FETCH_OBJ);
+            if ($assoc) {
+                return $this->PDOStatement->fetch(PDO::FETCH_ASSOC);
+
+            } else {
+                return $this->PDOStatement->fetch(PDO::FETCH_OBJ);
+            }
+        } catch (Exception $e) {
+            return $this->result;
         }
+
     }
 
 
@@ -138,16 +141,17 @@ class PdoDriver extends PDO implements IDBDriver
      */
     function result($assoc = false)
     {
-        if (preg_match('/^(update|delete|insert)/i', $this->sql, $matches))
+        try {
+            if (!$this->PDOStatement instanceof PDOStatement)
+                throw  new Exception('errors');
+
+            if ($assoc) {
+                return $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                return $this->PDOStatement->fetchAll(PDO::FETCH_OBJ);
+            }
+        } catch (Exception $e) {
             return $this->result;
-
-        if (empty($this->PDOStatement)) return false;
-
-        if ($assoc) {
-            return $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
-
-        } else {
-            return $this->PDOStatement->fetchAll(PDO::FETCH_OBJ);
         }
     }
 

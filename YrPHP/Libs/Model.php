@@ -196,10 +196,12 @@ class Model
             $field = explode('.', $field);
 
             if (isset($field[1])) {
-                $field[0] = "`{$this->tablePrefix}{$field[0]}`.`{$field[1]}`";
+                return "`{$this->tablePrefix}{$field[0]}`.`{$field[1]}`";
+            } else {
+                return "`{$field[0]}`";
             }
 
-            return $field[0];
+
         }
     }
 
@@ -946,6 +948,7 @@ class Model
 
 
         $field = $this->escapeId($fields);
+
         //$value = trim(str_repeat('?,', count($fields)), ',');
 
         $value = trim(array_reduce($fields, function ($res, $item) {

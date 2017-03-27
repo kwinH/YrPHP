@@ -7,7 +7,7 @@ class arr{
      * @param array $array
      * @return bool
      */
-static function inIArray($value,$array){}
+static function inIArray($value='',$array=array()){}
 /**
      * 在数组中搜索给定的值（不区分大小写），如果成功则返回相应的键名
      * @param $needle
@@ -15,26 +15,26 @@ static function inIArray($value,$array){}
      * @param bool $strict
      * @return mixed
      */
-static function arrayISearch($needle,$haystack,$strict){}
+static function arrayISearch($needle,$haystack,$strict=false){}
 /**
      * 不区分key值大小写获取数组中的值
      * @param array $arr
      * @param string $key
      * @return mixed
      */
-static function arrayIGet($arr,$key){}
+static function arrayIGet($arr=array(),$key=''){}
 /**
      * 多维数组转一维数组
      * @param array $multi
      * @return array
      */
-static function arrToOne($multi){}
+static function arrToOne($multi=array()){}
 /**
      *  判断是不是索引数组
      * @param array $array
      * @return bool true ? 索引数组 : 不是索引数组
      */
-static function isAssoc($array){}
+static function isAssoc($array=array()){}
 /**
      * 使用“点”符号从数组中获取一个项。
      * @param array $arr
@@ -42,39 +42,39 @@ static function isAssoc($array){}
      * @param null $default
      * @return mixed
      */
-static function get($arr,$key,$default){}
+static function get($arr=array(),$key='',$default=NULL){}
 /**
      * 弹出指定key 并把值返回
      * @param array $arr
      * @param string $key
      * @return bool|mixed
      */
-static function pop($arr,$key,$default){}
+static function pop($arr=array(),$key=NULL,$default=NULL){}
 /**
      * 返回数组中指定的数组项
      * @param array $arr 指定数组
      * @param $onlyKey 可以为多个参数或则单个数组格式
      * @return array
      */
-static function only($arr,$onlyKey){}
+static function only($arr=array(),$onlyKey){}
 /**
      * 过滤数组中指定的数组项,并返回
      * @param array $arr 指定数组
      * @param $exceptKey 可以为多个参数或则单个数组格式
      * @return array
      */
-static function except($arr,$exceptKey){}
+static function except($arr=array(),$exceptKey){}
 }
 class cart{
 
-static function __construct($params){}
+static function __construct($params=array()){}
 /**
      * 返回一个包含了购物车中所有信息的数组
      * @param null $mallMode 商城模式 true多商家(二维数组) false单商家（一维数组）默认为配置中的模式,当为单商家时，不管设置什么都返回一维数组
      * @param null $seller 返回指定商家下的所以产品，默认为null，返回所以商家，单商家下无效
      * @return array
      */
-static function getContents($mallMode,$seller){}
+static function getContents($mallMode=NULL,$seller=NULL){}
 /**
      * 返回一个包含了购物车中所有信息的数组
      * @return array
@@ -86,26 +86,26 @@ static function contents(){}
      * @param bool $accumulation 是否累加
      * @return bool|string
      */
-static function insert($items,$accumulation){}
+static function insert($items=array(),$accumulation=true){}
 /**
      * 添加单条购物车项目
      * @param array $items
      * @param bool $accumulation 是否累加
      * @return bool|string
      */
-static function _insert($item,$accumulation){}
+static function _insert($item=array(),$accumulation=false){}
 /**
      * 根据配置保存数据
      * @param array $cartContent
      * @return array
      */
-static function saveCart($cartContent){}
+static function saveCart($cartContent=NULL){}
 /**
      * 更新购物车中的项目 必须包含 rowId
      * @param $item 修改多个可为二维数组
      * @return bool
      */
-static function update($items){}
+static function update($items=array()){}
 /**
      * 修改单条项目
      * @param $item
@@ -117,30 +117,30 @@ static function _update($item){}
      * @param null|array $rowId
      * @return bool
      */
-static function remove($rowId){}
+static function remove($rowId=NULL){}
 /**
      * 获得一条购物车的项目
      * @param null $rowId
      * @return bool|array
      */
-static function getItem($rowId){}
+static function getItem($rowId=NULL){}
 /**
      * 显示购物车中总共的项目数量
      * @param null $seller 商家标识符 单商家模式下无效
      * @return int
      */
-static function totalItems($seller){}
+static function totalItems($seller=NULL){}
 /**
      * 显示购物车中总共的商品数量
      * @param null $seller 商家标识符 单商家模式下无效
      * @return int
      */
-static function totalQty($seller){}
+static function totalQty($seller=NULL){}
 /**
      * 显示购物车中的总计金额  商家标识符 单商家模式下无效
      * @return int
      */
-static function total($seller){}
+static function total($seller=NULL){}
 /**
      * 根据rowId 查找商家
      * @param $key
@@ -161,7 +161,7 @@ static function __construct(){}
      * @param string|array $key
      * @param string $value
      */
-static function set($key,$value){}
+static function set($key='',$value=''){}
 /**
      * @param string|array $key
      */
@@ -171,11 +171,11 @@ static function delete($key){}
      * @param null $default
      * @return null
      */
-static function get($key,$default){}
+static function get($key='',$default=NULL){}
 
 static function all(){}
 
-static function load($fileName,$key){}
+static function load($fileName='',$key=NULL){}
 }
 class crypt{
 
@@ -193,46 +193,46 @@ static function __construct(){}
      * [setUrl description]
      * @param string $url [description]
      */
-static function setUrl($url){}
+static function setUrl($url=''){}
 /**
      * @param string $option
      * @param string $value
      * @return $this
      */
-static function setOptions($option,$value){}
+static function setOptions($option='',$value=''){}
 /**
      * @param bool $verify 是否验证证书 默认false不验证
      * @param string $path 验证证书时，证书路径
      * @return $this
      */
-static function sslVerify($verify,$path){}
+static function sslVerify($verify=false,$path=''){}
 /**
      * 传递一个连接中需要的用户名和密码
      * @param array|string $userPassword 格式为：array('userName','password') 或则, "username:password"
      */
-static function setUserPassword($userPassword){}
+static function setUserPassword($userPassword=''){}
 /**
      * @param array $header //请求头
      */
-static function setHeader($header){}
+static function setHeader($header=array()){}
 /**
      * 启用时会发送一个常规的POST请求，默认类型为：App/x-www-form-urlencoded，就像表单提交的一样
      * @param array|string $data
      * @param string $enctype App|multipart  默认为application，文件上传请用multipart
      */
-static function post($data,$enctype){}
+static function post($data=array(),$enctype='App'){}
 /**
      * 启用时会发送一个常规的GET请求
      * @param array|string $data array('user'=>'admin','pass'=>'admin') | admin&admin
      * @return $this
      */
-static function get($data){}
+static function get($data=array()){}
 /**
      * 启用时会发送一个常规的DELETE请求
      * @param array $data
      * @return array
      */
-static function delete($data){}
+static function delete($data=array()){}
 /**
      * 启用时会发送一个常规的PUT请求
      * @param array $data
@@ -243,23 +243,23 @@ static function put($data){}
      * 获得cookies
      * @param string $path 定义Cookie存储路径 必须使用绝对路径
      */
-static function getCookie($path){}
+static function getCookie($path=''){}
 /**
      * 设定HTTP请求中"Cookie: "部分的内容。多个cookie用分号分隔，分号后带一个空格(例如， "fruit=apple; colour=red")。
      * @param string|array $cookies 定义Cookie的值
      */
-static function setCookie($cookies){}
+static function setCookie($cookies=array()){}
 /**
      * 取出cookie，一起提交给服务器
      * @param string $path 定义Cookie存储路径 必须使用绝对路径
      */
-static function setCookieFile($path){}
+static function setCookieFile($path=''){}
 /**
      * 执行一个cURL会话 返回执行的结果
      * @param bool $debug 是否开启调试模式 如果为true将打印调试信息
      * @return mixed
      */
-static function exec($debug){}
+static function exec($debug=false){}
 
 static function getInfo(){}
 
@@ -279,7 +279,7 @@ static function stop(){}
      * @param    string $msg 调试消息字符串
      * @param    int $type 消息的类型
      */
-static function addMsg($msg,$type){}
+static function addMsg($msg,$type=0){}
 /**
      * 已经实例化的自定义类集合
      * @return array
@@ -303,7 +303,7 @@ static function message(){}
 /**
      *返回同一脚本中两次获取时间的差值
      */
-static function spent($startTime,$stopTime){}
+static function spent($startTime=NULL,$stopTime=NULL){}
 /**
      * 记录日志 保存到项目runtime下
      * @param $fileName 文件名
@@ -319,7 +319,7 @@ class file{
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-static function createFile($aimUrl,$overWrite){}
+static function createFile($aimUrl,$overWrite=false){}
 /**
      * 递归删除文件夹或文件
      *
@@ -340,7 +340,7 @@ static function unlinkFile($aimUrl){}
      * @param  string $aimUrl
      * @return  viod
      */
-static function mkDir($aimUrl,$mode){}
+static function mkDir($aimUrl,$mode=511){}
 /**
      * 移动文件
      *
@@ -349,7 +349,7 @@ static function mkDir($aimUrl,$mode){}
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-static function moveFile($fileUrl,$aimUrl,$overWrite){}
+static function moveFile($fileUrl,$aimUrl,$overWrite=false){}
 /**
      * 移动文件夹
      *
@@ -358,7 +358,7 @@ static function moveFile($fileUrl,$aimUrl,$overWrite){}
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-static function mv($oldDir,$aimDir,$overWrite){}
+static function mv($oldDir,$aimDir,$overWrite=false){}
 /**
      * 复制文件
      *
@@ -367,7 +367,7 @@ static function mv($oldDir,$aimDir,$overWrite){}
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-static function copyFile($fileUrl,$aimUrl,$overWrite){}
+static function copyFile($fileUrl,$aimUrl,$overWrite=false){}
 /**
      * 复制文件或则文件夹
      *
@@ -376,7 +376,7 @@ static function copyFile($fileUrl,$aimUrl,$overWrite){}
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-static function cp($oldDir,$aimDir,$overWrite){}
+static function cp($oldDir,$aimDir,$overWrite=false){}
 /**
      * 修改文件名
      *$path 需要修改的文件路径
@@ -414,7 +414,7 @@ static function readFile2array($filename){}
      * @param    string $fileexts 转换的文件格式
      * @return    string    如果原字符集和目标字符集相同则返回false，否则为true
      */
-static function dirIconv($in_charset,$out_charset,$dir,$fileexts){}
+static function dirIconv($in_charset,$out_charset,$dir,$fileexts='php|html|htm|shtml|shtm|js|txt|xml'){}
 /**
      * 根据关键词列出目录下所有文件
      *
@@ -423,7 +423,7 @@ static function dirIconv($in_charset,$out_charset,$dir,$fileexts){}
      * @param    array $list 增加的文件列表
      * @return    array    所有满足条件的文件
      */
-static function dirList($path,$key,$list){}
+static function dirList($path,$key='',$list=array()){}
 /**
      * 根据关键词列出目录下所有文件
      *
@@ -432,7 +432,7 @@ static function dirList($path,$key,$list){}
      * @param    array $list 增加的文件列表
      * @return    array    所有满足条件的文件
      */
-static function search($path,$key,$list){}
+static function search($path,$key='',$list=array()){}
 /**
      * 转化 \ 为 /
      *
@@ -467,7 +467,7 @@ static function getFileInfo($filename){}
      * @param    int $atime 访问时间
      * @return    array    不是目录时返回false，否则返回 true
      */
-static function dirTouch($path,$mtime,$atime){}
+static function dirTouch($path,$mtime='TIME',$atime='TIME'){}
 /**
      * 目录列表
      *
@@ -476,7 +476,7 @@ static function dirTouch($path,$mtime,$atime){}
      * @param    array $dirs 传入的目录
      * @return    array    返回目录及子目录列表
      */
-static function dirTree($dir,$parentid,$dirs){}
+static function dirTree($dir,$parentid=0,$dirs=array()){}
 /**
      * 目录列表
      *
@@ -501,17 +501,19 @@ static function remote_file_exists($url_file){}
 }
 class form{
 
-static function date($name,$options,$value){}
+static function date($name,$options=array(),$value=NULL){}
 
-static function html($name,$options,$value){}
+static function html($name,$options=array(),$value=NULL){}
 
-static function uploadJs($name,$options,$value){}
+static function _uploadImg($onclick='',$html=''){}
+
+static function uploadImg($name,$options=array(),$value){}
 /**
      * @param array $options
      * @param array $data
      * @return string
      */
-static function open($options,$data){}
+static function open($options=array(),$data=array()){}
 /**
      * @return string
      */
@@ -525,7 +527,7 @@ static function close(){}
      *
      * @return string
      */
-static function label($name,$value,$options){}
+static function label($name,$value=NULL,$options=array()){}
 /**
      * Generate a hidden field with the current CSRF token.
      *
@@ -548,7 +550,7 @@ static function attributesToString($attributes){}
      */
 static function getIdAttribute($name,$attributes){}
 
-static function getValueAttribute($name,$value){}
+static function getValueAttribute($name,$value=NULL){}
 /**
      * Create a form input field.
      *
@@ -559,7 +561,7 @@ static function getValueAttribute($name,$value){}
      *
      * @return string
      */
-static function input($type,$name,$options,$value){}
+static function input($type,$name,$options=array(),$value=NULL){}
 /**
      * Create a text input field.
      *
@@ -568,7 +570,7 @@ static function input($type,$name,$options,$value){}
      * @param null $value
      * @return string
      */
-static function text($name,$options,$value){}
+static function text($name,$options=array(),$value=NULL){}
 /**
      * Create a password input field.
      *
@@ -577,7 +579,7 @@ static function text($name,$options,$value){}
      *
      * @return string
      */
-static function password($name,$options){}
+static function password($name,$options=array()){}
 /**
      * Create a hidden input field.
      *
@@ -587,7 +589,7 @@ static function password($name,$options){}
      *
      * @return string
      */
-static function hidden($name,$value,$options){}
+static function hidden($name,$value=NULL,$options=array()){}
 /**
      * Create an e-mail input field.
      *
@@ -597,7 +599,7 @@ static function hidden($name,$value,$options){}
      *
      * @return string
      */
-static function email($name,$options,$value){}
+static function email($name,$options=array(),$value=NULL){}
 /**
      * Create a tel input field.
      *
@@ -607,7 +609,7 @@ static function email($name,$options,$value){}
      *
      * @return string
      */
-static function tel($name,$options,$value){}
+static function tel($name,$options=array(),$value=NULL){}
 /**
      * Create a number input field.
      *
@@ -617,7 +619,7 @@ static function tel($name,$options,$value){}
      *
      * @return string
      */
-static function number($name,$options,$value){}
+static function number($name,$options=array(),$value=NULL){}
 /**
      * Create a datetime input field.
      *
@@ -627,7 +629,7 @@ static function number($name,$options,$value){}
      *
      * @return string
      */
-static function datetime($name,$options,$value){}
+static function datetime($name,$options=array(),$value=NULL){}
 /**
      * Create a datetime-local input field.
      *
@@ -637,7 +639,7 @@ static function datetime($name,$options,$value){}
      *
      * @return string
      */
-static function datetimeLocal($name,$options,$value){}
+static function datetimeLocal($name,$options=array(),$value=NULL){}
 /**
      * Create a time input field.
      *
@@ -647,7 +649,7 @@ static function datetimeLocal($name,$options,$value){}
      *
      * @return string
      */
-static function time($name,$options,$value){}
+static function time($name,$options=array(),$value=NULL){}
 /**
      * Create a url input field.
      *
@@ -657,7 +659,7 @@ static function time($name,$options,$value){}
      *
      * @return string
      */
-static function url($name,$options,$value){}
+static function url($name,$options=array(),$value=NULL){}
 /**
      * Create a file input field.
      *
@@ -666,7 +668,7 @@ static function url($name,$options,$value){}
      *
      * @return string
      */
-static function file($name,$options){}
+static function file($name,$options=array()){}
 /**
      * Create a textarea input field.
      *
@@ -676,7 +678,7 @@ static function file($name,$options){}
      *
      * @return string
      */
-static function textarea($name,$options,$value){}
+static function textarea($name,$options=array(),$value=NULL){}
 /**
      * Create a select box field.
      *
@@ -687,7 +689,7 @@ static function textarea($name,$options,$value){}
      *
      * @return string
      */
-static function select($name,$list,$options,$selected){}
+static function select($name,$list=array(),$options=array(),$selected=NULL){}
 /**
      * Create a checkable input field.
      *
@@ -710,7 +712,7 @@ static function checkable($type,$name,$value,$checked,$options){}
      *
      * @return string
      */
-static function checkbox($name,$value,$options,$checked){}
+static function checkbox($name,$value=1,$options=array(),$checked=NULL){}
 /**
      * Create a radio button input field.
      *
@@ -721,7 +723,7 @@ static function checkbox($name,$value,$options,$checked){}
      *
      * @return string
      */
-static function radio($name,$value,$options,$checked){}
+static function radio($name,$value=NULL,$options=array(),$checked=NULL){}
 /**
      * Create a HTML reset input element.
      *
@@ -730,7 +732,7 @@ static function radio($name,$value,$options,$checked){}
      *
      * @return string
      */
-static function reset($value,$attributes){}
+static function reset($value,$attributes=array()){}
 /**
      * Create a HTML image input element.
      *
@@ -740,7 +742,7 @@ static function reset($value,$attributes){}
      *
      * @return string
      */
-static function image($url,$name,$attributes){}
+static function image($url,$name=NULL,$attributes=array()){}
 /**
      * Create a color input field.
      *
@@ -750,7 +752,7 @@ static function image($url,$name,$attributes){}
      *
      * @return string
      */
-static function color($name,$options,$value){}
+static function color($name,$options=array(),$value=NULL){}
 /**
      * Create a submit button element.
      *
@@ -759,7 +761,7 @@ static function color($name,$options,$value){}
      *
      * @return string
      */
-static function submit($value,$options){}
+static function submit($value=NULL,$options=array()){}
 /**
      * Create a button element.
      *
@@ -768,11 +770,11 @@ static function submit($value,$options){}
      *
      * @return string
      */
-static function button($value,$options){}
+static function button($value=NULL,$options=array()){}
 }
 class image{
 
-static function __construct($imgPath){}
+static function __construct($imgPath=NULL){}
 
 static function open($imgPath){}
 
@@ -796,7 +798,7 @@ static function thumb($config){}
      * @param  integer $width 图像保存宽度 默认为裁剪区域宽度
      * @param  integer $height 图像保存高度 默认为裁剪区域高度
      */
-static function cut($w,$h,$position,$width,$height){}
+static function cut($w,$h,$position=1,$width=NULL,$height=NULL){}
 /**
      * 为图片添加文字水印
      * @param    string $water array('str'=>'ok','font'=>'msyh.ttf','color'=>'#ffffff','size'=>20,'angle'=>0,)
@@ -808,7 +810,7 @@ static function cut($w,$h,$position,$width,$height){}
      *                                指定位置 array(100,100) | array('x'=>100,'y'=>100)
      * @return    mixed
      */
-static function text($water,$position){}
+static function text($water=array(),$position=0){}
 /**
      * 添加水印图片
      * @param  string $water 水印图片路径
@@ -821,7 +823,7 @@ static function text($water,$position){}
      * @param  integer $alpha 水印透明度
      * @param  integer $waterConf array('width'=>100,'height'=>100) 调整水印大小 默认调用原图
      */
-static function watermark($water,$position,$alpha,$waterConf){}
+static function watermark($water,$position=0,$alpha=100,$waterConf=array()){}
 /**
      * 保存图像
      * @param  string $imgname 图像保存名称
@@ -829,19 +831,19 @@ static function watermark($water,$position,$alpha,$waterConf){}
      * @param  integer $quality 图像质量
      * @param  boolean $interlace 是否对JPEG类型图像设置隔行扫描
      */
-static function save($imgPath,$type,$quality,$interlace){}
+static function save($imgPath,$type=NULL,$quality=80,$interlace=true){}
 /**
      * 客服端下载
      * @param null $downFileName 文件名 默认为原文件名
      * @param null $type 图像类型（gif,jpeg,jpg,png） 为空则按原图类型
      */
-static function down($downFileName,$type){}
+static function down($downFileName=NULL,$type=NULL){}
 /**
      * 直接在浏览器显示图片
      * @param null $type 图像类型（gif,jpeg,jpg,png） 为空则按原图类型
      * @return bool
      */
-static function show($type){}
+static function show($type=NULL){}
 /**
      * 获得图片的基本信息
      * @return array(dirname,basename,extension,filename,width,height,type,mime)
@@ -852,7 +854,7 @@ static function __destruct(){}
 }
 class model{
 
-static function __construct($tableName,$connection){}
+static function __construct($tableName=NULL,$connection=NULL){}
 
 static function connection($name){}
 
@@ -866,17 +868,17 @@ static function getConnectionInstance(){}
      */
 static function getInstance($dbConfig){}
 
-static function escapeId($field){}
+static function escapeId($field=''){}
 
-static function escape($value){}
+static function escape($value=''){}
 /**
      * 设置缓存
      * @param array $config
      * @return $this
      */
-static function setCache($status){}
+static function setCache($status=true){}
 
-static function setOptions($attributes){}
+static function setOptions($attributes=array()){}
 /**
      * 利用__call方法实现一些特殊的Model方法
      * @access public
@@ -891,27 +893,27 @@ static function __call($method,$args){}
      * @param string $type where | having
      * @return $this
      */
-static function condition($where,$logical,$type){}
+static function condition($where='',$logical='and',$type='where'){}
 /**
      * @param array $field
      * @return $this
      */
-static function select($field){}
+static function select($field=array()){}
 /**
      * @param array $field
      * @param string $tableName
      * @param bool $auto
      * @return $this
      */
-static function except($field){}
+static function except($field=array()){}
 /**
      * @param string $tableName
      * @param int $auto 1 自动添加前缀
      * @return $this
      */
-static function table($tableName,$auto){}
+static function table($tableName='',$auto=true){}
 
-static function setTempTableName($tableName,$auto){}
+static function setTempTableName($tableName='',$auto=true){}
 
 static function getTempTableName(){}
 /**
@@ -924,19 +926,19 @@ static function buildSql(){}
 /**
      * @return $this
      */
-static function get($tableName,$auto){}
+static function get($tableName='',$auto=true){}
 /**
      * 以主键为条件 查询
      * @param int $id 查询的条件主键值
      * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
      * @return mixed
      */
-static function find($id,$assoc){}
+static function find($id=0,$assoc=false){}
 /**
      * @param bool $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
      * @return mixed
      */
-static function all($assoc){}
+static function all($assoc=false){}
 /**
      * 清除上次组合的SQL记录，避免重复组合
      */
@@ -948,7 +950,7 @@ static function cleanLastSql(){}
      * @param mixed $length 查询数量
      * @return $this
      */
-static function limit($offset,$length){}
+static function limit($offset,$length=NULL){}
 /**
      * 指定分页
      * @access public
@@ -956,7 +958,7 @@ static function limit($offset,$length){}
      * @param mixed $listRows 每页数量
      * @return $this
      */
-static function page($page,$listRows){}
+static function page($page,$listRows=NULL){}
 /**
      * @param $table 表名称
      * @param $cond  连接条件
@@ -964,7 +966,7 @@ static function page($page,$listRows){}
      * @param bool $auto 是否自动添加表前缀
      * @return $this
      */
-static function join($table,$cond,$type,$auto){}
+static function join($table='',$cond=array(),$type='',$auto=true){}
 /**
      * 临时关闭预处理功能
      * @return $this
@@ -986,7 +988,7 @@ static function setDataPreProcessFill($filed,$data){}
      * @param string $type
      * @return array
      */
-static function getDataPreProcessAttr($type){}
+static function getDataPreProcessAttr($type='get'){}
 
 static function getMutatedAttributes(){}
 
@@ -997,24 +999,24 @@ static function cacheMutatedAttributes($class){}
      * $openCache  bool|true 是否开启缓存
      * @return mixed 返回数据
      */
-static function cache($assoc,$row){}
+static function cache($assoc=false,$row='result'){}
 /**
      * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
      * @return mixed
      */
-static function row($assoc){}
+static function row($assoc=false){}
 /**
      * 返回数据集合
      * @param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object 。
      * @return mixed
      */
-static function result($assoc){}
+static function result($assoc=false){}
 /**
      * @param string $tableName //数据库表名
      * @param string|array $where 条件
      * @return int 返还受影响行数
      */
-static function delete($where){}
+static function delete($where=''){}
 /**
      * 添加数据 如果主键冲突 则修改
      * @param $data
@@ -1029,7 +1031,7 @@ static function duplicateKey($data){}
      * @param string $act
      * @return int 受影响行数
      */
-static function insert($data,$act){}
+static function insert($data=array(),$act='INSERT'){}
 /**
      * 添加单条数据 如已存在则替换
      * @param array $data 添加的数据
@@ -1037,21 +1039,21 @@ static function insert($data,$act){}
      * @param bool $auto 是否自动添加表前缀
      * @return int 受影响行数
      */
-static function replace($data){}
+static function replace($data=array()){}
 /**
      * 预处理，添加多条数据
      * @param array $data 添加的数据 单条：[filed=>val]| 多条：[[filed=>val],[filed=>val]]
      * @param string $act
      * @return int 受影响行数
      */
-static function inserts($data,$act){}
+static function inserts($data=array(),$act='INSERT'){}
 /**
      * 预处理添加多条数据 如已存在则替换
      * @param array $filed 字段
      * @param array $data 添加的数据
      * @return int 受影响行数
      */
-static function replaces($data){}
+static function replaces($data=array()){}
 /**
      * @param  array $array 要验证的字段数据
      * @param  string $tableName 数据表名
@@ -1077,7 +1079,7 @@ static function rowCount(){}
      * @param array $parameters array|''
      * @return $this|\PDOStatement
      */
-static function query($sql,$parameters){}
+static function query($sql='',$parameters=array()){}
 /**
      * @param array $data 更改的数据
      * @param string $tableName 数据库表名
@@ -1085,7 +1087,7 @@ static function query($sql,$parameters){}
      * @param bool $auto 是否自动添加表前缀
      * @return int 返回受影响行数
      */
-static function update($data,$where){}
+static function update($data=array(),$where=''){}
 /**
      * 所有sql语句
      * @return array
@@ -1140,21 +1142,21 @@ static function __destruct(){}
      * @param string $engine 引擎 默认InnoDB
      * @param bool $auto 是否自动添加表前缀
      */
-static function createTable($tableName,$key,$engine,$auto){}
+static function createTable($tableName='',$key='id',$engine='InnoDB',$auto=true){}
 /**
      * 删除表
      * @param string $tableName 数据库表名
      * @param bool $auto 是否自动添加表前缀
      * @return mixed
      */
-static function dropTable($tableName,$auto){}
+static function dropTable($tableName='',$auto=true){}
 /**
      * 检测表是否存在，也可以获取表中所有字段的信息(表里所有字段的信息)
      * @param string $tableName 要查询的表名
      * @param bool $auto 是否自动添加表前缀
      * @return mixed
      */
-static function checkTable($tableName,$auto){}
+static function checkTable($tableName='',$auto=true){}
 /**
      * 检测字段是否存在，也可以获取字段信息(只能是一个字段)
      * @param string $field 字段名
@@ -1162,14 +1164,14 @@ static function checkTable($tableName,$auto){}
      * @param bool $auto 是否自动添加表前缀
      * @return mixed
      */
-static function checkField($field,$tableName,$auto){}
+static function checkField($field='',$tableName='',$auto=true){}
 /**
      * @param array $info 字段信息数组
      * @param string $tableName 表名
      * @param bool $auto 是否自动添加表前缀
      * @return array 字段信息
      */
-static function addField($info,$tableName,$auto){}
+static function addField($info=array(),$tableName='',$auto=true){}
 /**
      * 修改字段
      * 不能修改字段名称，只能修改
@@ -1178,9 +1180,9 @@ static function addField($info,$tableName,$auto){}
      * @param bool $auto 是否自动添加表前缀
      * @return mixed
      */
-static function editField($info,$tableName,$auto){}
+static function editField($info=array(),$tableName='',$auto=true){}
 
-static function filterFieldInfo($info){}
+static function filterFieldInfo($info=array()){}
 /**
      * 删除字段
      * 如果返回了字段信息则说明删除失败，返回false，则为删除成功
@@ -1189,7 +1191,7 @@ static function filterFieldInfo($info){}
      * @param bool $auto
      * @return mixed
      */
-static function dropField($field,$tableName,$auto){}
+static function dropField($field='',$tableName='',$auto=true){}
 /**
      * 获取指定表中指定字段的信息(多字段)
      * @param array $field
@@ -1197,13 +1199,13 @@ static function dropField($field,$tableName,$auto){}
      * @param bool $auto
      * @return array
      */
-static function getFieldInfo($field,$tableName,$auto){}
+static function getFieldInfo($field=array(),$tableName='',$auto=true){}
 }
 class page{
 
-static function __construct($config){}
+static function __construct($config=array()){}
 
-static function init($config){}
+static function init($config=array()){}
 /**
      * 显示
      */
@@ -1271,30 +1273,30 @@ static function except($keys){}
 
 static function only($keys){}
 
-static function header($key,$default){}
+static function header($key=NULL,$default=NULL){}
 
-static function get($key,$default){}
+static function get($key=NULL,$default=NULL){}
 
-static function post($key,$default){}
+static function post($key=NULL,$default=NULL){}
 
-static function all($data){}
+static function all($data=NULL){}
 
-static function replace($data,$method){}
+static function replace($data,$method='get'){}
 
-static function merge($data,$method){}
+static function merge($data,$method='get'){}
 
-static function pop($keys,$method){}
+static function pop($keys,$method='get'){}
 
-static function filter($data){}
+static function filter($data=array()){}
 
-static function part($n,$no_result){}
+static function part($n=NULL,$no_result=NULL){}
 /**
      * 返回路由替换过后的uri 数组
      * @param null $n
      * @param null $no_result
      * @return array|mixed|null|string
      */
-static function rpart($n,$no_result){}
+static function rpart($n=NULL,$no_result=NULL){}
 /**
      *返回没有经过路由替换过的uri字符串
      * @return string
@@ -1347,13 +1349,13 @@ static function status($code){}
 
 static function sendHeader($headers){}
 
-static function json($data,$code){}
+static function json($data=array(),$code=200){}
 
-static function jsonp($data,$code){}
+static function jsonp($data=array(),$code=200){}
 
-static function errorBackTo($errors,$url){}
+static function errorBackTo($errors,$url=NULL){}
 
-static function successBackTo($message,$url){}
+static function successBackTo($message,$url=NULL){}
 }
 class session{
 /**
@@ -1366,7 +1368,7 @@ static function init(){}
      * @param string|array $key
      * @param string $value
      */
-static function set($key,$value){}
+static function set($key='',$value=''){}
 /**
      * Flash a key / value pair to the session.
      *
@@ -1380,7 +1382,7 @@ static function flash($key,$value){}
      * @param null $default
      * @return null
      */
-static function get($key,$default){}
+static function get($key='',$default=NULL){}
 
 static function all(){}
 /**
@@ -1397,23 +1399,23 @@ static function destroy(){}
 }
 class upload{
 
-static function __construct($config){}
+static function __construct($config=array()){}
 
-static function init($config){}
+static function init($config=array()){}
 /**
      * 上传文件
      * @param 文件信息数组 $field ，上传文件的表单名称  默认是 $_FILES数组
      */
-static function upload($field){}
+static function upload($field=''){}
 
-static function uploadMulti($files){}
+static function uploadMulti($files=array()){}
 
-static function uploadOne($file){}
+static function uploadOne($file=array()){}
 /**
      *检查文件大小是否合法
      * @param integer $fileSize 数据
      */
-static function checkSize($fileSize){}
+static function checkSize($fileSize=0){}
 /**
      * 返回文件拓展后缀
      * @param $filename
@@ -1424,15 +1426,15 @@ static function getExtension($filename){}
      * @param array $file
      * @return bool
      */
-static function checkFileType($file){}
+static function checkFileType($file=array()){}
 
-static function getFileInfo($inputName){}
+static function getFileInfo($inputName=NULL){}
 /**
      * 根据错误代码获得上传出错信息
      * @param null $errorNum
      * @return string
      */
-static function getError($errorCode){}
+static function getError($errorCode=NULL){}
 /**
      * | MIME TYPES
     | -------------------------------------------------------------------
@@ -1442,7 +1444,7 @@ static function getError($errorCode){}
      * @param string $ext
      * @return bool
      */
-static function checkMimes($ext){}
+static function checkMimes($ext=''){}
 }
 class uri{
 
@@ -1458,18 +1460,18 @@ static function parseUrl(){}
      * @param null $no_result
      * @return array|mixed|null|string
      */
-static function rsegment($n,$no_result){}
+static function rsegment($n=NULL,$no_result=NULL){}
 
-static function rpart($n,$no_result){}
+static function rpart($n=NULL,$no_result=NULL){}
 /**
      * 路由验证
      * @return mixed|string
      */
 static function parseRoutes(){}
 
-static function segment($n,$no_result){}
+static function segment($n=NULL,$no_result=NULL){}
 
-static function part($n,$no_result){}
+static function part($n=NULL,$no_result=NULL){}
 /**
      *返回没有经过路由替换过的uri字符串
      * @return string
@@ -1492,49 +1494,49 @@ class validate{
      * @param null $value
      * @return bool
      */
-static function required($value){}
+static function required($value=NULL){}
 /**
      * 当两个值相等时 return true
      * @param string $value
      * @param string $val
      * @return bool
      */
-static function equal($value,$val){}
+static function equal($value=NULL,$val=NULL){}
 /**
      * 当两个不值相等时 return true
      * @param string $value
      * @param string $val
      * @return bool
      */
-static function notEqual($value,$val){}
+static function notEqual($value=NULL,$val=NULL){}
 /**
      * 当存在指定范围时return true
      * @param string $value
      * @param array|string $range
      * @return bool
      */
-static function in($value,$range){}
+static function in($value='',$range=''){}
 /**
      * 当不存在指定范围时return true
      * @param null $value
      * @param array|string $range
      * @return bool
      */
-static function notIn($value,$range){}
+static function notIn($value='',$range=''){}
 /**
      * 当存在指定范围时return true
      * @param null $value
      * @param array|string $range
      * @return bool
      */
-static function between($value,$range){}
+static function between($value='',$range=''){}
 /**
      * 当不存在指定范围时return true
      * @param null $value
      * @param array|string $range
      * @return bool
      */
-static function notBetween($value,$range){}
+static function notBetween($value='',$range=''){}
 /**
      * 当数据库中值存在时 return false
      * @param $val 值
@@ -1551,7 +1553,7 @@ static function unique($value,$tableName,$field){}
      * length('abc',$rage = 3); strlen('abc') ==3
      * length('abc',$rage = array(5,3))==length('abc',$rage = array(3,5)) => strlen('abc') >=3 && strlen('abc') <=5
      */
-static function length($value,$range){}
+static function length($value='',$range=''){}
 /**
      * Email格式验证
      * @param    string $value 需要验证的值
@@ -1577,14 +1579,14 @@ static function regex($value,$rules){}
      * 判断是否为手机号码
      * @param    string $value 手机号码
      */
-static function phone($value){}
+static function phone($value=''){}
 /**
      * 判断验证码的确与否
      * @param string $value 值
      * @param string $code session中的key
      * @return bool
      */
-static function verifyCode($value,$code){}
+static function verifyCode($value='',$code='verify'){}
 /**
      * @param $name
      * @param Closure $paramenters
@@ -1602,15 +1604,15 @@ static function __callStatic($name,$paramenters){}
 }
 class verifyCode{
 
-static function __construct($config){}
+static function __construct($config=array()){}
 
-static function init($config){}
+static function init($config=array()){}
 /**
      * @param string $code 验证码key,用于session获取，默认verify
      * @param bool $line 是否显示干扰线
      * @param bool $pixel 是否显示干扰点
      */
-static function show($code,$line,$pixel){}
+static function show($code='verify',$line=true,$pixel=true){}
 
 static function setText_bak(){}
 
@@ -1628,7 +1630,7 @@ static function setBackColor(){}
      * 获得随机色
      * @return int
      */
-static function getRandColor($alpha){}
+static function getRandColor($alpha=false){}
 /**
      * 添加干扰点
      * @return $this
@@ -1648,16 +1650,16 @@ static function __construct(){}
      * @param    string $tpl_var 需要一个字符串参数作为关联数组下标，要和模板中的变量名对应
      * @param    mixed $value 需要一个标量类型的值，用来分配给模板中变量的值
      */
-static function assign($tplVar,$value){}
+static function assign($tplVar,$value=NULL){}
 /**
      * 加载指定目录下的模板文件，并将替换后的内容生成组合文件存放到另一个指定目录下
      * @param    string $fileName 提供模板文件的文件名
      * @param    array $tpl_var 需要一个字符串参数作为关联数组下标，要和模板中的变量名对应
      * @param    string 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
      */
-static function display($fileName,$tplVars,$cacheId){}
+static function display($fileName,$tplVars='',$cacheId=''){}
 
-static function buildTplFile($fileName,$tplVars){}
+static function buildTplFile($fileName,$tplVars=''){}
 
 static function getComFileName($fileName){}
 
@@ -1670,7 +1672,7 @@ static function blockExtends(){}
      * 静态化
      * @param    string $cacheId 缓存ID 当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
      */
-static function init($cacheId){}
+static function init($cacheId=''){}
 /**
      *  生成静态文件
      */
@@ -1680,13 +1682,13 @@ static function setCache(){}
      * @param    string $template 当$file为目录时 清除指定模版（类名_方法）
      * @param    string $cacheId 清除指定模版ID
      */
-static function clearCache($template,$cacheId){}
+static function clearCache($template='',$cacheId=''){}
 /**
      * 清空文件夹 默认清空所有文件
      * @param    string $file 目录或则目录地址 当是目录时 清空目录内所有文件
      * @param    string $template 当$file为目录时 清除指定模版（类名_方法）
      */
-static function delDir($file,$template){}
+static function delDir($file,$template=''){}
 /**
      * 析构函数 生成缓存文件
      */

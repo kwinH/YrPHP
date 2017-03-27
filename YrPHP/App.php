@@ -193,11 +193,11 @@ class App
 
         } else {
             //(PATHINFO 模式)
-            $ctrBaseNamespace = [];
+            $module = '';
             foreach ($url as $k => $v) {
                 $v = ucfirst(strtolower($v));
                 if (is_dir($ctrBasePath . $v)) {
-                    $ctrBaseNamespace[] = $v;
+                    $module .= $v . '/';
                     $ctrBasePath .= empty($v) ? '' : $v . '/';
                     $classObj .= '\\' . $v;
                     unset($url[$k]);
@@ -216,17 +216,20 @@ class App
 
         }
 
+        $url = array_values($url);
+
         $classObj .= '\\' . $className;
         $classPath = $ctrBasePath . $className . '.php';
-        $ctrBaseNamespace[] = $className;
-        $className = implode('/', $ctrBaseNamespace);
         $nowAction = $classObj . '::' . $action;
 
         Config::set([
             'classPath' => $classPath,
+            'module' => trim($module, '/'),
             'ctlName' => $className,
+            'classObj' => $classObj,
             'actName' => $action,
             'nowAction' => $nowAction,
+            'param' => $url,
             'Lang' => Session::get('Lang')
         ]);
 

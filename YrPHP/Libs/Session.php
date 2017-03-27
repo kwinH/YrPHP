@@ -24,7 +24,7 @@ class Session
 
             //    ini_set('session.save_handler', $config['saveHandler']);
 
-            if ($config['saveHandler'] == 'file' && !$config['savePath'])
+            if ($config['saveHandler'] == 'files' && !$config['savePath'])
                 File::mkDir($config['savePath']);
 
             session_save_path($config['savePath']);

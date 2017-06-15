@@ -121,7 +121,7 @@ class App
      */
     static function yrError($errNo, $errStr, $errFile, $errLine)
     {
-        $logFile = '%s_log_' . date("Y-m-d") . '.log';//定义日志文件名;
+        $logFile = '%s_log_' . date("Y-m-d");//定义日志文件名;
         $template = '';
 
         switch ($errNo) {
@@ -152,7 +152,7 @@ class App
                 break;
         }
 
-        Debug::log($logFile, $template);
+        Debug::log($template, $logFile);
         return true;
     }
 

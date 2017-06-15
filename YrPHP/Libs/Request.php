@@ -161,9 +161,13 @@ class Request
         if (is_string($filters)) {
             $filters = explode('|', $filters);
         }
+
         foreach ($filters as $filter) {
             if (function_exists($filter)) {
-                $data = $filter($data);
+                if (is_array($data))
+                    array_map($filter, $data);
+                else
+                    $data = $filter($data);
             }
         }
 

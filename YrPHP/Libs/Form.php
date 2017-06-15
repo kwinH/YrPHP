@@ -385,10 +385,16 @@ class Form
         $html = [];
 
         foreach ($list as $value => $display) {
+            $optionAttr = '';
+            if (is_array($display)) {
+                $optionAttr = $display;
+                $display = Arr::pop($optionAttr, 'value');
+                $optionAttr = $this->attributesToString($optionAttr);
+            }
             if ($value == $selected) {
-                $html[] = '<option value=' . $value . ' selected>' . $display . '</option>';
+                $html[] = '<option value="' . $value . '"  ' . $optionAttr . ' selected>' . $display . '</option>';
             } else {
-                $html[] = '<option value=' . $value . '>' . $display . '</option>';
+                $html[] = '<option value="' . $value . '"  ' . $optionAttr . '>' . $display . '</option>';
             }
         }
 

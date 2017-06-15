@@ -13,7 +13,7 @@ class View
     protected $templateDir;  //定义通过模板引擎组合后文件存放目录
     protected $comFileName;  //编译好的模版文件名
     protected $compileDir; //定义编译文件存放目录
-
+    protected $ctlFile;//控制器文件
     protected $caching = true;   //bool 设置缓存是否开启
     protected $cacheLifeTime = 3600;  //定义缓存时间
     protected $cacheDir;      //定义生成的缓存文件路径
@@ -33,17 +33,7 @@ class View
 
     public function __construct()
     {
-        $this->templateDir = C('setTemplateDir');       //定义模板文件存放的目录
-        $this->compileDir = C('setCompileDir');      //定义通过模板引擎组合后文件存放目录
-        $this->caching = C('caching');     //缓存开关 1开启，0为关闭
-        $this->cacheLifeTime = C('cacheLifetime');  //设置缓存的时间 0代表永久缓存
-        $this->cacheDir = C('setCacheDir');      //设置缓存的目录
-        $this->leftDelimiter = C('leftDelimiter');          //在模板中嵌入动态数据变量的左定界符号
-        $this->rightDelimiter = C('rightDelimiter'); //模板文件中使用的“右”分隔符号
-
-        $this->ctlFile = C('classPath');//控制器文件
-        $this->cacheSubDir = C('ctlName'); //定义生成的缓存文件的子目录默认为控制器名
-        $this->cacheFileName = C('actName');//定义生成的缓存文件名 默认为方法名
+        $this->setConfig();
 
         $this->leftDelimiter = preg_quote($this->leftDelimiter, '/');//转义正则表达式字符
         $this->rightDelimiter = preg_quote($this->rightDelimiter, '/');//转义正则表达式字符
@@ -62,6 +52,28 @@ class View
         }
 
         $this->tplVars['errors'] = session('errors');
+    }
+
+    public function setConfig($config = [])
+    {
+        if (empty($config)) {
+            $this->templateDir = C('setTemplateDir');       //定义模板文件存放的目录
+            $this->compileDir = C('setCompileDir');      //定义通过模板引擎组合后文件存放目录
+            $this->caching = C('caching');     //缓存开关 1开启，0为关闭
+            $this->cacheLifeTime = C('cacheLifetime');  //设置缓存的时间 0代表永久缓存
+            $this->cacheDir = C('setCacheDir');      //设置缓存的目录
+            $this->leftDelimiter = C('leftDelimiter');          //在模板中嵌入动态数据变量的左定界符号
+            $this->rightDelimiter = C('rightDelimiter'); //模板文件中使用的“右”分隔符号
+
+            $this->ctlFile = C('classPath');//控制器文件
+            $this->cacheSubDir = C('cacheSubDir', C('ctlName')); //定义生成的缓存文件的子目录默认为控制器名
+            $this->cacheFileName = C('cacheFileName', C('actName'));//定义生成的缓存文件名 默认为方法名
+        } else {
+            foreach ($config as $k => $v) {
+                $this->$k = $v;
+            }
+        }
+        return $this;
     }
 
     /**
@@ -86,7 +98,7 @@ class View
         //缓存静态文件
         $this->init($cacheId);
 
-        $this->buildTplFile($fileName, $tplVars, true);
+        $this->buildTplFile($fileName, $tplVars);
         $this->blockExtends();
 
         extract($this->tplVars);
@@ -115,7 +127,7 @@ class View
         if (!file_exists($tplFile)) die("模板文件{$tplFile}不存在！");
 
         /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
-        $comFileDir = $this->compileDir . C('ctlName') . '/' . dirname($fileName);
+        $comFileDir = $this->compileDir . C('ctlName') . (strpos($fileName, '/') === false ? '' : '/' . dirname($fileName));
 
         if (!file_exists($comFileDir)) File::mkDir($comFileDir);
 
@@ -229,7 +241,6 @@ class View
         ob_start();
         if (self::$callNumber) return;
 
-
         if ($this->caching) {
             //self::$cacheId[] = $cacheId;
             $cacheDir = rtrim($this->cacheDir, '/') . '/' . $this->cacheSubDir;
@@ -261,9 +272,9 @@ class View
 
         if (file_exists($this->comFileName) && $this->caching) {
             if (!file_exists($this->cacheFile)) {
-                file_put_contents($this->cacheFile, $this->cacheContent);
+                File::vi($this->cacheFile, $this->cacheContent);
             } elseif ($this->cacheLifeTime != 0 && filemtime($this->cacheFile) + $this->cacheLifeTime < time()) {
-                file_put_contents($this->cacheFile, $this->cacheContent);
+                File::vi($this->cacheFile, $this->cacheContent);
             }
         }
 

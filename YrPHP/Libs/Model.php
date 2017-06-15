@@ -259,7 +259,6 @@ class Model
      */
     public function __call($method, $args)
     {
-        if (empty($args[0])) return $this;
         $method = strtolower($method);
         if (in_array($method, array("order", "group"), true)) {
             // 连贯操作的实现
@@ -287,15 +286,33 @@ class Model
 
             $this->condition($args[0], isset($args[1]) ? $args[1] : "and", 'having');
 
-        } else if (in_array($method, array('count', 'sum', 'min', 'max', 'avg'))) {
+        } else if ($method == 'count') {
+            $obj = $this;
+            if (count($args)) {
+                $auto = end($args) === false ? false : true;
+                $obj = $obj->table($args[0], $auto);
+            }
+            return $obj->select($method . '(*) as c')->get()->row()->c;
 
-            $tableName = isset($args[0]) ? $args[0] : '';
+        } else if (in_array($method, array('sum', 'min', 'max', 'avg'))) {
+            $obj = $this;
+            switch (count($args)) {
+                case 1:
+                    $field = $args[0];
+                    break;
+                case 2:
+                    $field = $args[0];
+                    $obj = $obj->table($args[1], true);
+                    break;
+                case 3:
+                    $field = $args[0];
+                    $obj = $obj->table($args[1], (boolean)$args[2]);
+                    break;
+                default:
+                    throw  new \Exception('参数错误');
+            }
 
-            $field = isset($args[1]) ? $args[1] : '*';
-
-            $auto = end($args) === false ? false : true;
-
-            return $this->table($tableName, $auto)->select($method . '(' . $field . ') as c')->get()->row()->c;
+            return $obj->select($method . '(' . $field . ') as c')->get()->row()->c;
 
         }
         return $this;
@@ -979,8 +996,7 @@ class Model
      * @param  array $array 要验证的字段数据
      * @param  string $tableName 数据表名
      * @param bool $auto
-     * @return array
-     *
+     * @return array|bool
      */
 
     public final function check($array)
@@ -990,16 +1006,14 @@ class Model
 
             if ($tableField === false) return false;
 
-            foreach ($array as $key => &$value) {
-                if (!in_array(strtolower($key), array_map('strtolower', $tableField))) {//判断字段是否存在 不存在则舍弃
-                    unset($array[$key]);
-                }
+            foreach ($array as $key => $value) {
+                //判断字段是否存在 不存在则舍弃
+                if (!Arr::inIArray($key, $tableField)) unset($array[$key]);
             }
         }
 
-        if (!get_magic_quotes_gpc()) {
+        if (!get_magic_quotes_gpc())
             $array = array_map('addslashes', $array);//回调过滤数据($data);
-        }
 
         return $array;
     }
@@ -1105,12 +1119,10 @@ class Model
         if (empty($data))
             $data = \request::post();
 
-        if (!$data)
-            return false;
 
         $data = $this->check($data);
 
-        if ($data === false) return false;
+        if (!$data) return false;
 
         if (!empty($where))
             $this->where($where);

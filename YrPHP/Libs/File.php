@@ -28,7 +28,7 @@ class File
             self::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
-        self::createDir($aimDir);
+        self::mkDir($aimDir);
         touch($aimUrl);
         return true;
     }
@@ -116,7 +116,7 @@ class File
             self::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
-        self::createDir($aimDir);
+        self::mkDir($aimDir);
         rename($fileUrl, $aimUrl);
         return true;
     }
@@ -140,7 +140,7 @@ class File
             return false;
         }
         if (!file_exists($aimDir)) {
-            self::createDir($aimDir);
+            self::mkDir($aimDir);
         }
         @$dirHandle = opendir($oldDir);
         if (!$dirHandle) {

@@ -283,6 +283,10 @@ class App
         self::loadConf();
 
         $class = Config::get('commands.' . $argv[1]);
+
+        if (is_null($class))
+            $class = $ctrBasePath = APP . '\\' . Config::get('ctrBaseNamespace') . '\\' . ucfirst(strtolower($argv[1]));
+
         $method = $argv[2];
 
         if (class_exists($class)) {

@@ -18,34 +18,38 @@ class Image
 
     public function __construct($imgPath = null)
     {
-        if (file_exists($imgPath))
+        if (file_exists($imgPath)) {
             $this->open($imgPath);
+        }
     }
-
 
     public function open($imgPath)
     {
-        if ($this->img !== false) imagedestroy($this->img);
+        if ($this->img !== false) {
+            imagedestroy($this->img);
+        }
 
         $this->imgPath = $imgPath;
         //检测图像文件
-        if (!is_file($imgPath)) die('不存在的图像文件');
+        if (!is_file($imgPath)) {
+            throw  new \Exception('不存在的图像文件');
+        }
 
         //获取图像信息
-        $info = getimagesize($imgPath);
+        $this->info = getimagesize($imgPath);
 
         //检测图像合法性
-        if (false === $info || (IMAGETYPE_GIF === $info[2] && empty($info['bits']))) {
-            die('非法图像文件');
+        if (false === $this->info || (IMAGETYPE_GIF === $this->info[2] && empty($this->info['bits']))) {
+            throw new \Exception('非法图像文件');
         }
 
         $pathInfo = pathinfo($imgPath);//array(dirname,basename,extension,filename)
         //设置图像信息
         $this->info = array_merge($pathInfo, array(
-            'width' => $info[0],
-            'height' => $info[1],
-            'type' => image_type_to_extension($info[2], false),
-            'mime' => $info['mime'],
+            'width' => $this->info[0],
+            'height' => $this->info[1],
+            'type' => image_type_to_extension($this->info[2], false),
+            'mime' => $this->info['mime'],
 
         ));
 
@@ -58,21 +62,21 @@ class Image
         switch ($imgType) {
             case 'gif':                    //gif
             case 1:
-                $img = imagecreatefromgif($imgPath);
+                $imgResource = imagecreatefromgif($imgPath);
                 break;
             case 'jpeg':                    //jpg
             case 2:
-                $img = imagecreatefromjpeg($imgPath);
+                $imgResource = imagecreatefromjpeg($imgPath);
                 break;
             case 'png':                    //png
             case 3:
-                $img = imagecreatefrompng($imgPath);
+                $imgResource = imagecreatefrompng($imgPath);
                 break;
             default:
                 return false;
                 break;
         }
-        return $img;
+        return $imgResource;
     }
 
     /**
@@ -174,7 +178,7 @@ class Image
                 if (is_array($position)) {
                     list($x, $y) = $position;
                 } else {
-                    die('不支持的文字位置类型');
+                    throw  new \Exception('不支持的文字位置类型');
                 }
                 break;
         }
@@ -219,19 +223,24 @@ class Image
                 $color[3] = 0;
             }
         } elseif (!is_array($color)) {
-            die('错误的颜色值');
+            throw  new \Exception('错误的颜色值');
         }
-        if (!isset($color[0])) $color[0] = 0;
-        if (!isset($color[1])) $color[1] = $color[2] = $color[0];
+        if (!isset($color[0])) {
+            $color[0] = 0;
+        }
+
+        if (!isset($color[1])) {
+            $color[1] = $color[2] = $color[0];
+        }
 
         $color = imagecolorallocatealpha($this->img, $color[0], $color[1], $color[2], $color[3]);//为图像分配颜色
 
         //获取文字信息
-        $info = imagettfbbox($size, $angle, $font, $water['str']);
-        $minx = min($info[0], $info[2], $info[4], $info[6]);
-        $maxx = max($info[0], $info[2], $info[4], $info[6]);
-        $miny = min($info[1], $info[3], $info[5], $info[7]);
-        $maxy = max($info[1], $info[3], $info[5], $info[7]);
+        $fontInfo = imagettfbbox($size, $angle, $font, $water['str']);
+        $minx = min($fontInfo[0], $fontInfo[2], $fontInfo[4], $fontInfo[6]);
+        $maxx = max($fontInfo[0], $fontInfo[2], $fontInfo[4], $fontInfo[6]);
+        $miny = min($fontInfo[1], $fontInfo[3], $fontInfo[5], $fontInfo[7]);
+        $maxy = max($fontInfo[1], $fontInfo[3], $fontInfo[5], $fontInfo[7]);
 
         /* 计算文字初始坐标和尺寸 */
         $x = $minx;
@@ -295,7 +304,6 @@ class Image
     }
 
 
-
     /**
      * 添加水印图片
      * @param  string $water 水印图片路径
@@ -311,8 +319,12 @@ class Image
     public function watermark($water, $position = 0, $alpha = 100, $waterConf = array())
     {
         //资源检测
-        if (empty($this->img)) die('没有可以被添加水印的图像资源');
-        if (!is_file($water)) die('水印图像不存在');
+        if (empty($this->img)) {
+            throw new \Exception('没有可以被添加水印的图像资源');
+        }
+        if (!is_file($water)) {
+            throw new \Exception('水印图像不存在');
+        }
 
         //获取水印图像信息
         $waterInfo = getimagesize($water);
@@ -433,22 +445,20 @@ class Image
         imageinterlace($this->img, $interlace);
         switch ($type) {
             case 'gif':                    //gif
-                $img = imageGIF($this->img, $imgPath);
+                imagegif($this->img, $imgPath);
                 break;
             case 'jpeg'://jpg
             case 'jpg':
-                $img = imageJPEG($this->img, $imgPath, $quality);
+                imagejpeg($this->img, $imgPath, $quality);
                 break;
             case 'png':                    //png
-                $img = imagePng($this->img, $imgPath);
+                imagepng($this->img, $imgPath);
                 break;
             default:
                 return false;
                 break;
         }
-        imagejpeg($this->img, 'F://test.jpg');
 
-        //imagedestroy($this->img);
     }
 
     /**
@@ -478,16 +488,16 @@ class Image
         switch ($type) {
             case 'gif':                    //gif
                 header('Content-Type: image/gif');
-                $img = imageGIF($this->img);
+                imagegif($this->img);
                 break;
             case 'jpeg'://jpg
             case 'jpg':
                 header('Content-Type: image/jpeg');
-                $img = imageJPEG($this->img);
+                imagejpeg($this->img);
                 break;
             case 'png':                    //png
                 header('Content-Type: image/png');
-                $img = imagePng($this->img);
+                imagepng($this->img);
                 break;
             default:
                 return false;

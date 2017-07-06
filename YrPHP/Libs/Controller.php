@@ -65,10 +65,10 @@ abstract class Controller
                 continue;
             }
             $actName = C('actName');
-
-            if (isset($v['only']) && in_array($actName, $v['only'])) {
-                $middleware[] = $k;
-            } elseif (isset($v['except']) && !in_array($actName, $v['except'])) {
+            if (
+                (isset($v['only']) && in_array($actName, $v['only']))
+                || (isset($v['except']) && !in_array($actName, $v['except']))
+            ) {
                 $middleware[] = $k;
             }
         }

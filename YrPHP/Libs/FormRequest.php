@@ -67,7 +67,9 @@ class FormRequest
         $res = false;
         $array = $this->request->all();
 
-        if (!$validates) $validates = $this->rules();
+        if (!$validates) {
+            $validates = $this->rules();
+        }
 
         foreach ($validates as $inputKey => $v) {
             $err = "错误:{$inputKey}验证不通过";
@@ -76,9 +78,9 @@ class FormRequest
             foreach ($v as $validate) {
                 $method = array_shift($validate);
 
-                if (isset($validate[0]))
+                if (isset($validate[0])) {
                     $err = array_shift($validate);
-
+                }
                 array_unshift($validate, $inputValue);
 
                 if ($method instanceof Closure) {
@@ -87,12 +89,14 @@ class FormRequest
                     $res = call_user_func_array([Validate::class, $method], $validate);
                 }
 
-                if (!$res) $error[$inputKey][] = $err;
+                if (!$res) {
+                    $error[$inputKey][] = $err;
+                }
             }
         }
 
         if (!empty($error)) {
-            Session::flash('_old_input',$array);
+            Session::flash('_old_input', $array);
             Session::flash('errors', $error);
             $this->response($error);
             return false;

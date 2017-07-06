@@ -22,9 +22,9 @@ class File
      */
     static public function createFile($aimUrl, $overWrite = false)
     {
-        if (file_exists($aimUrl) && $overWrite == false) {
+        if (file_exists($aimUrl) && !$overWrite) {
             return false;
-        } elseif (file_exists($aimUrl) && $overWrite == true) {
+        } elseif (file_exists($aimUrl) && $overWrite) {
             self::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
@@ -42,10 +42,15 @@ class File
     static public function rm($aimDir)
     {
         $aimDir = str_replace('', '/', $aimDir);
-        if (is_file($aimDir)) return self::unlinkFile($aimDir);
+        if (is_file($aimDir)) {
+            return self::unlinkFile($aimDir);
+        }
+
         $aimDir = substr($aimDir, -1) == '/' ? $aimDir : $aimDir . '/';
 
-        if (!is_dir($aimDir)) return false;
+        if (!is_dir($aimDir)) {
+            return false;
+        }
 
         $dirHandle = opendir($aimDir);
         while (false !== ($file = readdir($dirHandle))) {
@@ -70,9 +75,9 @@ class File
      */
     static public function unlinkFile($aimUrl)
     {
-        if (file_exists($aimUrl))
+        if (file_exists($aimUrl)) {
             return unlink($aimUrl);
-
+        }
         return false;
     }
 
@@ -131,7 +136,10 @@ class File
      */
     static public function mv($oldDir, $aimDir, $overWrite = false)
     {
-        if (is_file($oldDir)) return self::moveFile($oldDir, $aimDir, $overWrite);
+        if (is_file($oldDir)) {
+            return self::moveFile($oldDir, $aimDir, $overWrite);
+        }
+
         $aimDir = str_replace('', '/', $aimDir);
         $aimDir = substr($aimDir, -1) == '/' ? $aimDir : $aimDir . '/';
         $oldDir = str_replace('', '/', $oldDir);
@@ -174,9 +182,9 @@ class File
         if (!file_exists($fileUrl)) {
             return false;
         }
-        if (file_exists($aimUrl) && $overWrite == false) {
+        if (file_exists($aimUrl) && !$overWrite) {
             return false;
-        } elseif (file_exists($aimUrl) && $overWrite == true) {
+        } elseif (file_exists($aimUrl) && $overWrite) {
             self::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
@@ -197,7 +205,10 @@ class File
     static public function cp($oldDir, $aimDir, $overWrite = false)
     {
         $aimDir = str_replace('', '/', $aimDir);
-        if (is_file($oldDir)) return self::copyFile($oldDir, $aimDir, $overWrite);
+        if (is_file($oldDir)) {
+            return self::copyFile($oldDir, $aimDir, $overWrite);
+        }
+
         $aimDir = substr($aimDir, -1) == '/' ? $aimDir : $aimDir . '/';
         $oldDir = str_replace('', '/', $oldDir);
         $oldDir = substr($oldDir, -1) == '/' ? $oldDir : $oldDir . '/';
@@ -250,7 +261,9 @@ class File
     {
         $path = pathinfo($filename, PATHINFO_DIRNAME);
 
-        if (!is_dir($path)) self::mkDir($path);
+        if (!is_dir($path)) {
+            self::mkDir($path);
+        }
 
         if (function_exists('file_put_contents')) {
             file_put_contents($filename, $str);
@@ -307,8 +320,10 @@ class File
      */
     static public function dirIconv($in_charset, $out_charset, $dir, $fileexts = 'php|html|htm|shtml|shtm|js|txt|xml')
     {
-        if ($in_charset == $out_charset)
+        if ($in_charset == $out_charset) {
             return false;
+        }
+
         $list = self::dirList($dir);
         foreach ($list as $v) {
             if (preg_match("/\.($fileexts)/i", $v) && is_file($v)) {
@@ -403,10 +418,10 @@ class File
      */
     static public function dirPath($path)
     {
-        return realpath($path) . '/';
-        $path = str_replace('\\', '/', $path);
-        if (substr($path, -1) != '/')
+        $path = str_replace('\\', '/', realpath($path));
+        if (substr($path, -1) != '/') {
             $path = $path . '/';
+        }
         return $path;
     }
 
@@ -418,9 +433,9 @@ class File
      */
     static public function fileExt($filename)
     {
-        if (file_exists($filename))
+        if (file_exists($filename)) {
             return pathinfo($filename, PATHINFO_EXTENSION);
-
+        }
         return false;
     }
 
@@ -437,9 +452,9 @@ class File
      */
     static public function getFileInfo($filename)
     {
-        if (file_exists($filename))
+        if (file_exists($filename)) {
             return array_merge(pathinfo($filename), stat($filename));
-
+        }
         return false;
     }
 
@@ -453,12 +468,13 @@ class File
      */
     static public function dirTouch($path, $mtime = TIME, $atime = TIME)
     {
-        if (!is_dir($path))
+        if (!is_dir($path)) {
             return false;
-
+        }
         $path = self::dirPath($path);
-        if (!is_dir($path))
+        if (!is_dir($path)) {
             touch($path, $mtime, $atime);
+        }
         $files = glob($path . '*');
         foreach ($files as $v) {
             is_dir($v) ? self::dirTouch($v, $mtime, $atime) : touch($v, $mtime, $atime);
@@ -477,8 +493,9 @@ class File
     static public function dirTree($dir, $parentid = 0, $dirs = array())
     {
         global $id;
-        if ($parentid == 0)
+        if ($parentid == 0) {
             $id = 0;
+        }
         $list = glob($dir . '*');
         foreach ($list as $v) {
             if (is_dir($v)) {
@@ -501,7 +518,7 @@ class File
         $d = dir($dir);
         $dirs = array();
         while (false !== ($entry = $d->read())) {
-            if ($entry != '.' and $entry != '..' and is_dir($dir . '/' . $entry)) {
+            if ($entry != '.' && $entry != '..' && is_dir($dir . '/' . $entry)) {
                 $dirs[] = $entry;
             }
         }
@@ -516,14 +533,19 @@ class File
      */
     static public function getDirSize($dirname)
     {
-        if (!file_exists($dirname) or !is_dir($dirname))
+        if (!file_exists($dirname) || !is_dir($dirname)) {
             return false;
-        if (!$handle = opendir($dirname))
+        }
+
+        if (!$handle = opendir($dirname)) {
             return false;
+        }
+
         $size = 0;
         while (false !== ($file = readdir($handle))) {
-            if ($file == "." or $file == "..")
+            if ($file == "." || $file == "..") {
                 continue;
+            }
             $file = $dirname . "/" . $file;
             if (is_dir($file)) {
                 $size += self::getDirSize($file);
@@ -542,31 +564,39 @@ class File
      */
     static public function bitSize($size)
     {
-        if (!preg_match("/^[0-9]+$/", $size))
+        if (!preg_match("/^[0-9]+$/", $size)) {
             return 0;
+        }
         $type = array("B", "KB", "MB", "GB", "TB", "PB");
 
         $j = 0;
         while ($size >= 1024) {
-            if ($j >= 5)
+            if ($j >= 5) {
                 return $size . $type [$j];
+            }
             $size = $size / 1024;
             $j++;
         }
         return $size . $type [$j];
     }
 
-    static public function remote_file_exists($url_file)
+    static public function remoteFileExists($url_file)
     {
         $url_file = trim($url_file);
-        if (empty($url_file)) return false;
+        if (empty($url_file)) {
+            return false;
+        }
         $url_arr = parse_url($url_file);
-        if (!is_array($url_arr) || empty($url_arr)) return false;
+        if (!is_array($url_arr) || empty($url_arr)) {
+            return false;
+        }
         $host = $url_arr['host'];
         $path = $url_arr['path'] . "?" . $url_arr['query'];
         $port = isset($url_arr['port']) ? $url_arr['port'] : "80";
         $fp = fsockopen($host, $port, $err_no, $err_str, 30);
-        if (!$fp) return false;
+        if (!$fp) {
+            return false;
+        }
         $request_str = "GET " . $path . " HTTP/1.1\r\n";
         $request_str .= "Host:" . $host . "\r\n";
         $request_str .= "Connection:Close\r\n\r\n";
@@ -574,9 +604,13 @@ class File
         //fread replace fgets
         $first_header = fread($fp, 128);
         fclose($fp);
-        if (trim($first_header) == "") return false;
+        if (trim($first_header) == "") {
+            return false;
+        }
         //check $url_file "Content-Location"
-        if (!preg_match("/200/", $first_header) || preg_match("/Location:/", $first_header)) return false;
+        if (!preg_match("/200/", $first_header) || preg_match("/Location:/", $first_header)) {
+            return false;
+        }
         return true;
     }
 

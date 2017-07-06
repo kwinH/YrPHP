@@ -24,9 +24,9 @@ class Session
 
             //    ini_set('session.save_handler', $config['saveHandler']);
 
-            if ($config['saveHandler'] == 'files' && !$config['savePath'])
+            if ($config['saveHandler'] == 'files' && !$config['savePath']) {
                 File::mkDir($config['savePath']);
-
+            }
             session_save_path($config['savePath']);
 
             ini_set('session.gc_maxlifetime', $config['expire']);
@@ -99,14 +99,18 @@ class Session
     public static function get($key = '', $default = null)
     {
         static::init();
-        if (empty($key)) return $_SESSION;
-
-        $config = $_SESSION;;
-        foreach (explode('.', $key) as $v) {
-            if (!isset($config[$v])) return $default;
-            $config = $config[$v];
+        if (empty($key)) {
+            return $_SESSION;
         }
-        return $config;
+
+        $session = $_SESSION;
+        foreach (explode('.', $key) as $v) {
+            if (!isset($session[$v])) {
+                return $default;
+            }
+            $session = $session[$v];
+        }
+        return $session;
     }
 
 

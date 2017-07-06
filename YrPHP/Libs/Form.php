@@ -119,11 +119,13 @@ class Form
 
     public function getValueAttribute($name, $value = null)
     {
-        if (!$name) return $value;
+        if (!$name) {
+            return $value;
+        }
 
-        if (!$value && isset($this->data[$name]))
+        if (!$value && isset($this->data[$name])) {
             $value = $this->data[$name];
-
+        }
 
         return old($name, $value);
 
@@ -143,14 +145,14 @@ class Form
     {
         $options['type'] = $type;
 
-        if (!isset($options['name']))
+        if (!isset($options['name'])) {
             $options['name'] = $name;
-
+        }
         $options['id'] = $this->getIdAttribute($name, $options);
 
-        if (!in_array($type, ['file', 'password', 'checkbox', 'radio']))
+        if (!in_array($type, ['file', 'password', 'checkbox', 'radio'])) {
             $options['value'] = $this->getValueAttribute($name, $value);
-
+        }
 
         return '<input' . $this->attributesToString($options) . '>';
     }
@@ -421,7 +423,9 @@ class Form
     {
         $oldValue = old($name, isset($this->data[$name]) ? $this->data[$name] : null);
         if (!is_null($oldValue)) {
-            if ($oldValue == $value) $options['checked'] = 'checked';
+            if ($oldValue == $value) {
+                $options['checked'] = 'checked';
+            }
         } else if ($checked) {
             $options['checked'] = 'checked';
         }

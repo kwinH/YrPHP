@@ -83,16 +83,20 @@ function getLang($key = null, $value = null)
     static $lang = array();
     // 批量设置
     if (is_array($key)) {
-        $lang = array_merge($lang, $key);
+        return array_merge($lang, $key);
+    }
+    if (!empty($key) && !empty($value)) {
+        $lang[$key] = $value;
+    }
+
+    if (empty($key)) {
         return $lang;
     }
-    if (!empty($key) && !empty($value)) $lang[$key] = $value;
-    if (empty($key)) return '';
-    //if (empty($key)) return $Lang;
 
-    if (isset($lang[$key])) return $lang[$key];
-    return $key;
-
+    if (isset($lang[$key])) {
+        return $lang[$key];
+    }
+    return null;
 }
 
 
@@ -116,7 +120,9 @@ function loadHelper($fileName)
 {
     $filePath = APP_PATH . 'Helpers/' . $fileName . '.php';
 
-    if (file_exists($filePath)) requireCache($filePath);
+    if (file_exists($filePath)) {
+        requireCache($filePath);
+    }
 }
 
 /**
@@ -224,7 +230,9 @@ function cookie($key = '', $val = '')
  */
 function mySerialize($obj = '')
 {
-    if (empty($obj)) return false;
+    if (empty($obj)) {
+        return false;
+    }
     $data = serialize($obj);
 
     if (C('cacheCompress')) {
@@ -240,7 +248,9 @@ function mySerialize($obj = '')
  */
 function myUnSerialize($txt = '')
 {
-    if (empty($txt)) return false;
+    if (empty($txt)) {
+        return false;
+    }
     if (C('cacheCompress')) {
         $txt = gzuncompress($txt);
     }
@@ -259,7 +269,7 @@ function requireCache($filename)
     static $_importFiles = array();
     if (!isset($_importFiles[$filename])) {
         if (file_exists($filename)) {
-            $_importFiles[$filename] = require $filename;;
+            $_importFiles[$filename] = require $filename;
         } else {
             $_importFiles[$filename] = false;
         }
@@ -293,7 +303,9 @@ function error404($msg = '', $url = '', $time = 3)
  */
 function clientDown($url, $savePath = null)
 {
-    if (empty($url)) return false;
+    if (empty($url)) {
+        return false;
+    }
 
     $fileName = basename($url);
     ob_start();
@@ -334,7 +346,9 @@ function clientDown($url, $savePath = null)
  */
 function getMonthTime($month, $year = '')
 {
-    if (empty($year)) $year = date('Y');
+    if (empty($year)) {
+        $year = date('Y');
+    }
 
     $date['firstDay'] = strtotime($year . '-' . $month . '-1');
     $date['firstDayFormat'] = date('Y-m-d', $date['firstDay']);
@@ -368,9 +382,9 @@ function getClientIp()
     或者使用正则方式：$ip = preg_match("/[d.]
     {7,15}/", $ip, $matches) ? $matches[0] : $unknown;
     */
-    if (false !== strpos($ip, ','))
+    if (false !== strpos($ip, ',')) {
         $ip = reset(explode(',', $ip));
-
+    }
     return $ip;
 }
 
@@ -391,7 +405,9 @@ function Ip2Area($ip = '')
     $re = curl_exec($ch);
     $area = json_decode($re, true);
     $area['ip'] = $ip;
-    if (!is_array($area) || $area['ret'] == -1) return false;//'未知地区'
+    if (!is_array($area) || $area['ret'] == -1) {
+        return false;//'未知地区'
+    }
     return $area;
     return $area['country'] . '  ' . $area['province'] . '  ' . $area['city'];
 
@@ -444,7 +460,9 @@ function sendHttpStatus($code)
  */
 function gotoUrl($url = '')
 {
-    if (is_null($url)) $url = getUrl();
+    if (is_null($url)) {
+        $url = getUrl();
+    }
     header('Location:' . $url);
     die;
 }
@@ -480,9 +498,13 @@ function desensitize($str = '', $start = 0, $length = 0, $replacement = '*')
  */
 function old($inputName = '', $default = null)
 {
-    if (!$oldInput = YrPHP\Session::get('_old_input')) return $default;
+    if (!$oldInput = YrPHP\Session::get('_old_input')) {
+        return $default;
+    }
 
-    if (empty($inputName)) return $oldInput;
+    if (empty($inputName)) {
+        return $oldInput;
+    }
 
     return isset($oldInput[$inputName]) ? $oldInput[$inputName] : $default;
 
@@ -495,9 +517,9 @@ function old($inputName = '', $default = null)
  */
 function csrfToken()
 {
-    if (!$token = YrPHP\Session::get('_token'))
+    if (!$token = YrPHP\Session::get('_token')) {
         $token = randStr(32);
-
+    }
     YrPHP\Session::set('_token', $token);
 
     return $token;
@@ -511,11 +533,10 @@ function csrfField()
 {
     $csrfToken = csrfToken();
 
-    $html = <<< HTML
+    return <<< HTML
 <input type="hidden" name="_token" value="{$csrfToken}">
 HTML;
 
-    return $html;
 }
 
 
@@ -541,6 +562,8 @@ function parseNaming($name = '', $type = 0)
         case 2:
             return strtolower(trim(preg_replace("/[A-Z]/", "_\\0", $name), "_"));
             break;
+        default:
+            return $name;
     }
 
 }

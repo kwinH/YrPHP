@@ -15,7 +15,7 @@ class Crypt
     {
         $mode = C('cryptMode');
         switch ($mode){
-            case "des3":
+            case 'des3':
             $this->class = loadClass('YrPHP\Crypt\DES3');
                 break;
             default:

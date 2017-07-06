@@ -15,7 +15,7 @@ use YrPHP\Request;
 
 class VerifyCsrfToken implements IMiddleware
 {
-    protected $except = [];
+    protected $excepts = [];
 
     public function handler(Request $request, Closure $next)
     {
@@ -43,7 +43,7 @@ class VerifyCsrfToken implements IMiddleware
 
     protected function shouldPassThrough($request)
     {
-        foreach ($this->except as $except) {
+        foreach ($this->excepts as $except) {
             if ($except !== '/') {
                 $except = trim($except, '/');
             }

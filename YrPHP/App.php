@@ -33,7 +33,9 @@ class App
         //注册自动加载函数
         spl_autoload_register('self::autoLoadClass');
 
-        if (!file_exists(APP)) Structure::run();
+        if (!file_exists(APP)) {
+            Structure::run();
+        }
 
     }
 
@@ -82,7 +84,9 @@ class App
             set_error_handler(array('App', "yrError"));
         }
 
-        if (!defined('DEBUG')) define('DEBUG', false);
+        if (!defined('DEBUG')) {
+            define('DEBUG', false);
+        }
 
         //错误信息是否显示
         if (DEBUG) {
@@ -94,19 +98,23 @@ class App
         if (isset($_GET['Lang'])) {
             Session::set('Lang', 'en');
         } else {
-            if (!Session::get('Lang')) Session::set('Lang', 'en');
+            if (!Session::get('Lang')) {
+                Session::set('Lang', 'en');
+            }
         }
 
         if (isset($_GET['country'])) {
             Session::set('country', strtoupper($_GET['country']));
         } else {
-            if (!Session::get('country'))
+            if (!Session::get('country')) {
                 Session::set('country', reset(explode(',', $_SERVER["HTTP_ACCEPT_LANGUAGE"])));
+            }
         }
-
         $langPath = APP_PATH . 'Lang/lang_' . Session::get('Lang') . '.php';
 
-        if (file_exists($langPath)) getLang(require $langPath);
+        if (file_exists($langPath)) {
+            getLang(require $langPath);
+        }
 
     }
 
@@ -272,9 +280,14 @@ class App
         }
     }
 
-    static function cli($argv)
+    /**
+     * @param array $argv
+     */
+    static function cli($argv = array())
     {
-        if (count($argv) < 3) exit('Parameter error');
+        if (count($argv) < 3) {
+            exit('Parameter error');
+        }
 
         self::init();
         Config::load('class_alias', 'classAlias');
@@ -283,9 +296,9 @@ class App
         self::loadConf();
 
         $class = Config::get('commands.' . $argv[1]);
-
-        if (is_null($class))
-            $class = $ctrBasePath = APP . '\\' . Config::get('ctrBaseNamespace') . '\\' . ucfirst(strtolower($argv[1]));
+        if (is_null($class)) {
+            $class = APP . '\\' . Config::get('ctrBaseNamespace') . '\\' . ucfirst(strtolower($argv[1]));
+        }
 
         $method = $argv[2];
 
@@ -323,7 +336,9 @@ class App
             if (is_null($constructor)) {
                 self::$instanceList[$key] = $reflection->newInstanceArgs();
             } else {
-                if (!$arguments) $arguments = self::getDependencies($constructor);
+                if (!$arguments) {
+                    $arguments = self::getDependencies($constructor);
+                }
 
                 self::$instanceList[$key] = $reflection->newInstanceArgs($arguments);
             }
@@ -342,7 +357,9 @@ class App
     {
         $instanceParams = [];
 
-        if (!$rfMethod instanceof ReflectionMethod) return $instanceParams;
+        if (!$rfMethod instanceof ReflectionMethod) {
+            return $instanceParams;
+        }
 
         foreach ($rfMethod->getParameters() as $param) {
             if ($dependency = $param->getClass()) {   //该参数不是对象
@@ -380,9 +397,7 @@ class App
     public static function __callStatic($name, $paramenters)
     {
         $classAlias = Config::get('classAlias');
-        if (isset($classAlias[$name])) {
-            return loadClass($classAlias[$name], $paramenters);
-        } else if ($name = Arr::arrayIGet($classAlias, $name)) {
+        if (isset($classAlias[$name]) || $name = Arr::arrayIGet($classAlias, $name)) {
             return loadClass($classAlias[$name], $paramenters);
         }
     }

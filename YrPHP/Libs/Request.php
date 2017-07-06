@@ -60,11 +60,13 @@ class Request
             $headers = getallheaders();
         }
 
-        if (is_null($key)) return $headers;
+        if (is_null($key)) {
+            return $headers;
+        }
 
-        if ($value = Arr::arrayIGet($headers, $key))
+        if ($value = Arr::arrayIGet($headers, $key)) {
             return $value;
-
+        }
         return $default;
 
     }
@@ -117,6 +119,8 @@ class Request
             case 'get':
                 self::$getData = $data;
                 break;
+            default:
+                return false;
         }
 
         return $data;
@@ -131,6 +135,8 @@ class Request
             case 'get':
                 self::$getData = array_merge(self::$getData, $data);
                 break;
+            default:
+                return false;
         }
     }
 
@@ -164,10 +170,11 @@ class Request
 
         foreach ($filters as $filter) {
             if (function_exists($filter)) {
-                if (is_array($data))
+                if (is_array($data)) {
                     array_map($filter, $data);
-                else
+                } else {
                     $data = $filter($data);
+                }
             }
         }
 
@@ -264,11 +271,11 @@ class Request
      */
     public function isHttps()
     {
-        if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
-            return true;
-        } elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            return true;
-        } elseif (!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off') {
+        if (
+            (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            || (!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off')
+        ) {
             return true;
         }
 

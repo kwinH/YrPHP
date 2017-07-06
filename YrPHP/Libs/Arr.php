@@ -42,7 +42,9 @@ class Arr
      */
     public static function arrayIGet(array $arr = [], $key = '')
     {
-        if (isset($arr[$key])) return $arr[$key];
+        if (isset($arr[$key])) {
+            return $arr[$key];
+        }
 
         $arr = array_change_key_case($arr, CASE_LOWER);
         $key = strtolower($key);
@@ -58,7 +60,7 @@ class Arr
     public static function arrToOne(array $multi = [])
     {
         $arr = array();
-        foreach ($multi as $key => $val) {
+        foreach ($multi as $val) {
             if (is_array($val)) {
                 $arr = array_merge($arr, static::arrToOne($val));
             } else {
@@ -103,7 +105,9 @@ class Arr
         }
 
         foreach (explode('.', $key) as $v) {
-            if (!isset($arr[$v])) return $default;
+            if (!isset($arr[$v])) {
+                return $default;
+            }
             $arr = $arr[$v];
         }
         return $arr;
@@ -117,7 +121,9 @@ class Arr
      */
     public static function pop(array &$arr = [], $key = null, $default = null)
     {
-        if (is_null($key)) return array_pop($arr);
+        if (is_null($key)) {
+            return array_pop($arr);
+        }
 
         if (isset($arr[$key])) {
             $data = $arr[$key];
@@ -143,9 +149,7 @@ class Arr
         }
 
         $onlyKey = array_flip($onlyKey);
-
-        $arr = array_intersect_key($arr, $onlyKey);
-        return $arr;
+        return array_intersect_key($arr, $onlyKey);
     }
 
 
@@ -163,9 +167,7 @@ class Arr
         }
 
         $exceptKey = array_flip($exceptKey);
-        $arr = array_diff_key($arr, $exceptKey);
-
-        return $arr;
+        return array_diff_key($arr, $exceptKey);
     }
 
 

@@ -28,7 +28,9 @@ class VerifyCode
 
     function __construct($config = array())
     {
-        if (!session_id()) session_start();
+        if (!session_id()) {
+            session_start();
+        }
 // 验证码长度、图片宽度、高度是实例化类时必需的数据
         $this->init($config);
     }
@@ -51,56 +53,18 @@ class VerifyCode
     {
         $this->setText();
         $_SESSION[$code] = strtolower($this->randStr);
-        if ($pixel) $this->interferingPixel();
-        if ($line) $this->interferingLine();
+        if ($pixel) {
+            $this->interferingPixel();
+        }
+
+        if ($line) {
+            $this->interferingLine();
+        }
 
         header('Content-Type: image/jpeg');
-        $img = imageJPEG($this->img);
+        imagejpeg($this->img);
     }
 
-    private function setText_bak()
-    {
-        $this->getStr();
-        //获取文字信息
-        $angle = 0;
-        $rect = imagettfbbox($this->size, $angle, $this->font, $this->randStr);
-
-
-        $minX = min(array($rect[0], $rect[2], $rect[4], $rect[6]));
-        $maxX = max(array($rect[0], $rect[2], $rect[4], $rect[6]));
-        $minY = min(array($rect[1], $rect[3], $rect[5], $rect[7]));
-        $maxY = max(array($rect[1], $rect[3], $rect[5], $rect[7]));
-
-        $fontInfo = array(
-            "left" => abs($minX) - 1,
-            "top" => abs($minY) - 1,
-            "width" => $maxX - $minX,
-            "height" => $maxY - $minY,
-            "box" => $rect
-        );
-
-        $x = $minX;
-        $y = abs($minY);
-        $w = $maxX - $minX;
-        $h = $maxY - $minY;
-
-        $y += $this->height / 2;
-        $x += $this->width - $w;
-
-        if ($this->width < $fontInfo['width'] + $fontInfo['left']) $this->width = $fontInfo['width'] + $fontInfo['left'];
-        if ($this->height < $fontInfo['height']) $this->height = $fontInfo['height'];
-
-        $this->setBackColor();
-
-        $x = mt_rand($fontInfo['left'], $this->width - $fontInfo['width']);
-        $y = mt_rand($fontInfo['top'], $this->height - $fontInfo['height'] + $fontInfo['top']);
-
-
-        $color = $this->getRandColor();
-        // imagettftext($this->img, $this->size, $angle, $x, $y, $color, $this->font, $this->randStr);
-
-        return $this;
-    }
 
     private function setText()
     {
@@ -167,8 +131,6 @@ class VerifyCode
                 $str = $str2;
                 break;
             case 3:
-                $str = $str3;
-                break;
             case 4:
                 $str = $str3;
                 break;
@@ -201,8 +163,14 @@ class VerifyCode
             die('错误的颜色值');
         }
 
-        if (!isset($color[0])) $color[0] = 0;
-        if (!isset($color[1])) $color[1] = $color[2] = $color[0];
+        if (!isset($color[0])) {
+            $color[0] = 0;
+        }
+
+        if (!isset($color[1])) {
+            $color[1] = $color[2] = $color[0];
+        }
+
         $this->img = imagecreatetruecolor($this->width, $this->height);
         // 调整默认颜色
         $color = imagecolorallocatealpha($this->img, $color[0], $color[1], $color[2], $color[3]);//为图像分配颜色

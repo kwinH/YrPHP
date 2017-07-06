@@ -24,7 +24,9 @@ class Validate
      */
     static function required($value = null)
     {
-        if ($value) return true;
+        if ($value) {
+            return true;
+        }
         return false;
     }
 
@@ -36,9 +38,13 @@ class Validate
      */
     static function equal($value = null, $val = null)
     {
-        if (is_null($value)) return false;
+        if (is_null($value)) {
+            return false;
+        }
 
-        if ($value == $val) return true;
+        if ($value == $val) {
+            return true;
+        }
 
         return false;
     }
@@ -51,9 +57,13 @@ class Validate
      */
     static function notEqual($value = null, $val = null)
     {
-        if (is_null($value)) return false;
+        if (is_null($value)) {
+            return false;
+        }
 
-        if ($value != $val) return true;
+        if ($value != $val) {
+            return true;
+        }
 
         return false;
     }
@@ -72,7 +82,9 @@ class Validate
             return false;
         }
 
-        if (in_array($range, $value)) return true;
+        if (in_array($range, $value)) {
+            return true;
+        }
 
         return false;
     }
@@ -92,8 +104,9 @@ class Validate
             return false;
         }
 
-        if (in_array($range, $value)) return false;
-
+        if (in_array($range, $value)) {
+            return false;
+        }
         return true;
     }
 
@@ -194,11 +207,7 @@ class Validate
      */
     static function email($value)
     {
-        $rules = "/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/";
-
-        if (!preg_match($rules, $value)) return false;
-
-        return true;
+        return filter_var($value, FILTER_VALIDATE_EMAIL);
     }
 
     /**
@@ -209,8 +218,9 @@ class Validate
     {
 
         $rules = '/^(http|https)\:\/\/([\w-]+\.)+[\w-]+(\/[\w-.\/?%&=]*)?$/';
-        if (!preg_match($rules, $value)) return false;
-
+        if (!preg_match($rules, $value)) {
+            return false;
+        }
         return true;
     }
 
@@ -231,10 +241,7 @@ class Validate
      */
     static function regex($value, $rules)
     {
-        if (!preg_match($rules, $value)) return false;
-
-        return true;
-
+        return preg_match($rules, $value);
     }
 
 
@@ -244,12 +251,7 @@ class Validate
      */
     static function phone($value = '')
     {
-
-        $rules = '/^1\d{10}$/';
-        if (!preg_match($rules, $value)) return false;
-
-        return true;
-
+        return preg_match('/^1\d{10}$/', $value);
     }
 
 
@@ -262,9 +264,13 @@ class Validate
     static function verifyCode($value = '', $code = 'verify')
     {
 
-        if (!session_id()) return false;
+        if (!session_id()) {
+            return false;
+        }
 
-        if (strtolower(session($code)) != strtolower($value)) return false;
+        if (strtolower(session($code)) != strtolower($value)) {
+            return false;
+        }
 
         return true;
 

@@ -55,7 +55,7 @@ class Page
     public $nextLink = '下一页';//你希望在分页中显示“下一页”链接的名字 如果不想显示该标签 则设置为FALSE即可
     public $nextTagClose = "";//在下一页外围包裹开始标签
 
-    ////自定义其他页“数字”链接  如果不想显示该标签 将rollPage设置为0即可
+    //自定义其他页“数字”链接  如果不想显示该标签 将rollPage设置为0即可
     public $otherTagOpen = '';//在其他“数字”链接外围包裹开始标签
     public $otherTagClose = '';//在其他“数字”链接外围包裹结束标签
 
@@ -77,7 +77,9 @@ class Page
 
         $this->urlParam = empty($this->urlParam) ? $_GET : $this->urlParam;//参数
 
-        if (isset($this->urlParam[$this->p])) unset($this->urlParam[$this->p]);
+        if (isset($this->urlParam[$this->p])) {
+            unset($this->urlParam[$this->p]);
+        }
 
         $this->url = empty($this->url) ? getUrl(\uri::getPath()) : $this->url;
         $this->url .= '?' . (empty($this->urlParam) ? '' : http_build_query($this->urlParam) . '&');
@@ -106,8 +108,9 @@ class Page
      */
     private function first()
     {
-        if ($this->nowPage > 1)
+        if ($this->nowPage > 1) {
             return $this->firstTagOpen . '<a href="' . $this->url . $this->p . '=1">' . $this->firstLink . '</a>' . $this->firstTagClose;
+        }
     }
 
     /**
@@ -167,26 +170,28 @@ class Page
 
     /**
      * 最后一页
+     * @return string
      */
     private function last()
     {
-        if ($this->nowPage < $this->totalPages)
+        if ($this->nowPage < $this->totalPages) {
             return $this->lastTagOpen . '<a href="' . $this->url . $this->p . '=' . $this->totalPages . '">' . $this->lastLink . '</a>' . $this->lastTagClose;
+        }
     }
 
     private function gotoPage()
     {
 
-        $html = $this->gotoPageOpen . "<select onchange='javascript:location=\"{$this->url}{$this->p}=\"+this.value'>";
+        $html = $this->gotoTagOpen . "<select onchange='javascript:location=\"{$this->url}{$this->p}=\"+this.value'>";
 
         for ($i = 0; $i <= $this->totalPages; $i++) {
-            if ($i == $this->nowPage) $status = 'selected';
+            if ($i == $this->nowPage) {
+                $status = 'selected';
+            }
             $html .= '<option value="' . $i . '" ' . $status . '>' . $i . '</option>';
             $status = '';
         }
 
-        $html .= '</select>' . $this->gotoPageClose;
-
-        return $html;
+        return $html . '</select>' . $this->gotoTagClose;
     }
 }

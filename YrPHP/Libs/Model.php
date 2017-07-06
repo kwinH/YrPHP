@@ -64,8 +64,8 @@ class Model
     protected $tempTableName = null;
 
 
-    //拼接后的sql语句
-    protected $sql;
+    //要被预处理和执行的 SQL 语句
+    protected $statement;
     //错误信息
     protected $error = [];
 
@@ -96,9 +96,9 @@ class Model
             $this->dbConfig = requireCache(APP_PATH . "Config/database.php");
         }
 
-        if ($tableName)
+        if ($tableName) {
             $this->tableName = $tableName;
-
+        }
         if (!is_null($connection)) {
             $this->connection = $connection;
         } else if (is_null($this->connection)) {
@@ -128,15 +128,17 @@ class Model
     public function getConnectionInstance()
     {
         $this->slaveServer = [];
-        $db = $this->dbConfig[$this->connection];
-        $this->masterServer = self::getInstance($db['masterServer']);
+        $dbConf = $this->dbConfig[$this->connection];
+        $this->masterServer = self::getInstance($dbConf['masterServer']);
 
-        if (empty($db['slaveServer'])) {
+        if (empty($dbConf['slaveServer'])) {
             $this->slaveServer[] = $this->masterServer;
         } else {
-            if (!is_array($db['slaveServer'])) $db['slaveServer'] = array($db['slaveServer']);
+            if (!is_array($dbConf['slaveServer'])) {
+                $dbConf['slaveServer'] = array($dbConf['slaveServer']);
+            }
 
-            foreach ($db['slaveServer'] as $v) {
+            foreach ($dbConf['slaveServer'] as $v) {
                 $this->slaveServer[] = self::getInstance($v);
             }
         }
@@ -159,16 +161,7 @@ class Model
                 $dbConfig['dsn'] = $dbConfig['dbType'] . ":host=" . $dbConfig['dbHost'] . ";port=" . $dbConfig['dbPort'] . ";dbname=" . $dbConfig['dbName'];
             }
 
-            switch ($dbConfig['dbDriver']) {
-                case 'mysqli' :
-                    break;
-                case 'access' :
-                    break;
-                default :
-                    // self::$object = new pdo_driver($dbConfig);
-                    self::$object[$key] = Db\PdoDriver::getInstance($dbConfig);
-
-            }
+            self::$object[$key] = Db\PdoDriver::getInstance($dbConfig);
 
             if (self::$object[$key] instanceof Db\IDBDriver) {
                 $obj = self::$object[$key];
@@ -186,7 +179,9 @@ class Model
 
     public function escapeId($field = '')
     {
-        if (empty($field)) return '';
+        if (empty($field)) {
+            return '';
+        }
 
         if (is_array($field)) {
             return trim(array_reduce($field, function ($result, $item) {
@@ -265,27 +260,29 @@ class Model
             $args = array_filter(explode(',', trim($args[0])));
 
             foreach ($args as $v) {
-                if ($this->methods[$method] != "") $this->methods[$method] .= ',';
+                if ($this->methods[$method] != "") {
+                    $this->methods[$method] .= ',';
+                }
+
                 $order = preg_split("/[\s,]+/", trim($v));
-
                 $dot = explode('.', $order[0]);
-
                 $this->methods[$method] .= '`' . $dot[0] . '`';
 
-                if (isset($dot[1])) $this->methods[$method] .= ".`$dot[1]`";
+                if (isset($dot[1])) {
+                    $this->methods[$method] .= ".`$dot[1]`";
+                }
 
-                if (isset($order[1])) $this->methods[$method] .= ' ' . $order[1];
+                if (isset($order[1])) {
+                    $this->methods[$method] .= ' ' . $order[1];
+                }
 
             }
 
 
         } else if ($method == "where") {
-
             $this->condition($args[0], isset($args[1]) ? $args[1] : "and");
         } else if ($method == "having") {
-
             $this->condition($args[0], isset($args[1]) ? $args[1] : "and", 'having');
-
         } else if ($method == 'count') {
             $obj = $this;
             if (count($args)) {
@@ -369,14 +366,23 @@ class Model
                 } else {
                     $operator = strtoupper($operator);
                     if (strpos($operator, 'IN') !== false) {
-                        if (is_string($v)) $v = explode(',', $v);
+                        if (is_string($v)) {
+                            $v = explode(',', $v);
+                        }
+
                         $val = $this->escape($v);
                     } else if (strpos($operator, 'BETWEEN') !== false) {
-                        if (is_string($v)) $v = explode(',', $v);
+                        if (is_string($v)) {
+                            $v = explode(',', $v);
+                        }
+
                         $val = $this->escape($v[0]) . ' and  ' . $this->escape($v[1]);
                     } else {
                         if (strpos($type, 'on') !== false) {
-                            if (is_string($v)) $v = explode(',', $v);
+                            if (is_string($v)) {
+                                $v = explode(',', $v);
+                            }
+
                             $val = $this->escapeId($v);
                         } else {
                             $val = $this->escape($v);
@@ -460,10 +466,11 @@ class Model
             return $this->tempTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
         }
 
-        if ($auto && !empty($this->tablePrefix))
+        if ($auto && !empty($this->tablePrefix)) {
             $tableName = strpos($tableName, $this->tablePrefix) === false
                 ? $this->tablePrefix . $tableName
                 : $tableName;
+        }
 
         $tableName = preg_split('/\s+|as/', $tableName);
         if (isset($tableName[1])) {
@@ -477,9 +484,9 @@ class Model
 
     protected final function getTempTableName()
     {
-        if (is_null($this->tempTableName))
+        if (is_null($this->tempTableName)) {
             $this->setTempTableName($this->tableName);
-
+        }
         return $this->tempTableName;
     }
 
@@ -501,15 +508,15 @@ class Model
         $group = $this->methods["group"] != "" ? " GROUP BY {$this->methods["group"]}" : "";
         $having = $this->methods["having"] != "" ? "{$this->methods["having"]}" : "";
 
-        $this->sql = "SELECT $field FROM  {$this->tempTableName} ";
+        $this->statement = "SELECT $field FROM  {$this->tempTableName} ";
 
         foreach ((array)$this->methods['join'] as $v) {
-            $this->sql .= " " . $v . " ";
+            $this->statement .= " " . $v . " ";
         }
 
-        $this->sql .= "{$this->methods['where']}{$group}{$having}{$order}{$this->methods['limit']}";
+        $this->statement .= "{$this->methods['where']}{$group}{$having}{$order}{$this->methods['limit']}";
         $this->cleanLastSql();
-        return $this->sql;
+        return $this->statement;
     }
 
 
@@ -656,20 +663,24 @@ class Model
      */
     protected function getDataPreProcessFill($data, $assoc)
     {
-        $preProcessCache = $this->getDataPreProcessAttr();
+        $getPreProcessCache = $this->getDataPreProcessAttr();
 
-        if ($assoc == false) {
-            foreach ($preProcessCache as $fieldName => $method) {
+        if (!$assoc) {
+            foreach ($getPreProcessCache as $fieldName => $method) {
                 foreach ($data as $v) {
-                    if (!isset($v->{$fieldName})) break;
+                    if (!isset($v->{$fieldName})) {
+                        break;
+                    }
 
                     $v->{$fieldName} = $this->$method($v->{$fieldName});
                 }
             }
         } else {
-            foreach ($preProcessCache as $fieldName => $method) {
+            foreach ($getPreProcessCache as $fieldName => $method) {
                 foreach ($data as $v) {
-                    if (!isset($v[$fieldName])) break;
+                    if (!isset($v[$fieldName])) {
+                        break;
+                    }
 
                     $v[$fieldName] = $this->$method($v[$fieldName]);
                 }
@@ -687,15 +698,17 @@ class Model
      */
     protected function setDataPreProcessFill($filed, $data)
     {
-        $preProcessCache = $this->getDataPreProcessAttr('set');
+        $setPreProcessCache = $this->getDataPreProcessAttr('set');
 
-        if (empty($preProcessCache)) {
+        if (empty($setPreProcessCache)) {
             return false;
         } else {
-            foreach ($preProcessCache as $fieldName => $method) {
+            foreach ($setPreProcessCache as $fieldName => $method) {
 
 
-                if (($key = array_search($fieldName, $filed)) === false) break;
+                if (($key = array_search($fieldName, $filed)) === false) {
+                    break;
+                }
 
 
                 if (is_array($data[0])) {
@@ -722,11 +735,13 @@ class Model
     protected function getDataPreProcessAttr($type = 'get')
     {
         if (!isset(static::$preProcessCache[$this->tableName][$type])) {
-            $preProcessCache = $this->getMutatedAttributes();
+            $preProcessCaches = $this->getMutatedAttributes();
 
-            if (!isset($preProcessCache[$type])) return [];
+            if (!isset($preProcessCaches[$type])) {
+                return [];
+            }
 
-            $getCache = $preProcessCache[$type];
+            $getCache = $preProcessCaches[$type];
 
             $fields = $this->tableField();
 
@@ -736,7 +751,7 @@ class Model
                 if ($key = Arr::arrayISearch($v, $fields)) {
                     $getAttr[$fields[$key]] = $type . $v . 'Attribute';
                 } else if ($key = Arr::arrayISearch(parseNaming($v, 2), $fields)) {
-                    $getAttr[$fields[$key]] = $type . $v . 'Attribute';;
+                    $getAttr[$fields[$key]] = $type . $v . 'Attribute';
                 }
             }
             static::$preProcessCache[$this->tableName][$type] = $getAttr;
@@ -767,10 +782,11 @@ class Model
 
                 //   $match = parseNaming($match, 2);
 
-                if ($matches[1][$key] == 'get')
+                if ($matches[1][$key] == 'get') {
                     $mutatedAttributes['get'][] = $match;
-                else
+                } else {
                     $mutatedAttributes['set'][] = $match;
+                }
             }
         }
 
@@ -786,7 +802,7 @@ class Model
      */
     protected final function cache($assoc = false, $row = 'result')
     {
-        $dbCacheFile = $this->tableName . '_' . md5($this->sql) . '_' . $row . (int)$assoc . (int)$this->PreProcessStatus;
+        $dbCacheFile = $this->tableName . '_' . md5($this->statement) . '_' . $row . (int)$assoc . (int)$this->PreProcessStatus;
 
         $cache = Cache::getInstance();
 
@@ -794,15 +810,15 @@ class Model
 
         $this->openCache = C('openCache');
 
-        if ($openCacheBak && !$cache->isExpired($dbCacheFile))
+        if ($openCacheBak && !$cache->isExpired($dbCacheFile)) {
             return $cache->get($dbCacheFile)->data;
-
+        }
 
         $this->getConnectionInstance();
         $this->db = $this->slaveServer[array_rand($this->slaveServer, 1)];
 
-        $query = $this->db->query($this->sql);
-        $this->queries[] = $this->sql;
+        $query = $this->db->query($this->statement);
+        $this->queries[] = $this->statement;
 
         if ($row == 'result') {
             $data = $query->result($assoc);
@@ -810,14 +826,16 @@ class Model
             $data[] = $query->row($assoc);
         }
 
-        if ($this->PreProcessStatus == true) {
+        if ($this->PreProcessStatus) {
             $re = $this->getDataPreProcessFill($data, $assoc);
         } else {
             $this->PreProcessStatus = true;
         }
 
 
-        if ($openCacheBak) $cache->set($dbCacheFile, (object)['sql' => $this->sql, 'data' => $re]);
+        if ($openCacheBak) {
+            $cache->set($dbCacheFile, (object)['sql' => $this->statement, 'data' => $re]);
+        }
 
         return $re;
 
@@ -832,7 +850,11 @@ class Model
     {
         $re = $this->cache($assoc, 'row');
 
-        return isset($re[0]) ? $re[0] : false;
+        if (isset($re[0])) {
+            return $re[0];
+        }
+
+        return false;
     }
 
 
@@ -843,9 +865,8 @@ class Model
      */
     public final function result($assoc = false)
     {
-        $re = $this->cache($assoc, 'result');
+        return $this->cache($assoc, 'result');
 
-        return $re;
     }
 
 
@@ -857,16 +878,17 @@ class Model
     public final function delete($where = "")
     {
         $this->getTempTableName();
-        if (!empty($where)) $this->where($where);
+        if (!empty($where)) {
+            $this->where($where);
+        }
 
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
-        $this->sql = "DELETE FROM {$this->tempTableName} {$where} {$limit}";
+        $this->statement = "DELETE FROM {$this->tempTableName} {$where} {$limit}";
 
-        $re = $this->query($this->sql)->result();
+        return $this->query($this->statement)->result();
 
-        return $re;
     }
 
     /**
@@ -876,20 +898,24 @@ class Model
      */
     public function duplicateKey($data)
     {
-        if (empty($data)) $data = \request::post();
+        if (empty($data)) {
+            $data = \request::post();
+        }
 
-        if (!$data)
+        if (!$data) {
             return false;
-
+        }
         $data = $this->check($data);
 
-        if ($data === false) return false;
+        if ($data === false) {
+            return false;
+        }
 
         $this->getTempTableName();
 
         $fields = array_keys($data);
 
-        if ($this->PreProcessStatus == true) {
+        if ($this->PreProcessStatus) {
             $values = $this->setDataPreProcessFill($fields, $data);
             $data = $values === false ? $data : $values;
         } else {
@@ -899,9 +925,9 @@ class Model
 
         $escapeData = $this->escape($data);
 
-        $this->sql = 'INSERT  INTO ' . $this->tempTableName . ' set ' . $escapeData . ' on duplicate key update ' . $escapeData;
+        $this->statement = 'INSERT  INTO ' . $this->tempTableName . ' set ' . $escapeData . ' on duplicate key update ' . $escapeData;
 
-        $re = $this->query($this->sql, $data);
+        $re = $this->query($this->statement, $data);
 
         return $re->getLastId();
     }
@@ -916,14 +942,19 @@ class Model
      */
     public final function insert($data = [], $act = 'INSERT')
     {
-        if (empty($data)) $data = \request::post();
+        if (empty($data)) {
+            $data = \request::post();
+        }
 
-        if (!$data) return false;
+        if (!$data) {
+            return false;
+        }
 
         $data = $this->check($data);
 
-        if ($data === false) return false;
-
+        if ($data === false) {
+            return false;
+        }
 
         return $this->inserts($data, $act);
     }
@@ -937,7 +968,7 @@ class Model
      */
     function replace($data = [])
     {
-        return $this->insert($data, $act = 'REPLACE');
+        return $this->insert($data, 'REPLACE');
     }
 
 
@@ -956,7 +987,7 @@ class Model
             $fields = array_keys($data);
         }
 
-        if ($this->PreProcessStatus == true) {
+        if ($this->PreProcessStatus) {
             $values = $this->setDataPreProcessFill($fields, $data);
             $data = $values === false ? $data : $values;
         } else {
@@ -972,10 +1003,10 @@ class Model
             return $res .= ',:' . $item;
         }), ',');
 
-        $this->sql = "{$act}  INTO " . $this->tempTableName . "(" . $field . ")  VALUES(" . $value . ") ";
+        $this->statement = "{$act}  INTO " . $this->tempTableName . "(" . $field . ")  VALUES(" . $value . ") ";
 
 
-        $re = $this->query($this->sql, $data);
+        $re = $this->query($this->statement, $data);
 
         return $re->getLastId();
     }
@@ -988,7 +1019,7 @@ class Model
      */
     function replaces($data = [])
     {
-        return $this->inserts($data, $act = 'REPLACE');
+        return $this->inserts($data, 'REPLACE');
     }
 
 
@@ -1004,16 +1035,21 @@ class Model
         if ($this->_validate) {
             $tableField = $this->tableField();
 
-            if ($tableField === false) return false;
+            if ($tableField === false) {
+                return false;
+            }
 
             foreach ($array as $key => $value) {
                 //判断字段是否存在 不存在则舍弃
-                if (!Arr::inIArray($key, $tableField)) unset($array[$key]);
+                if (!Arr::inIArray($key, $tableField)) {
+                    unset($array[$key]);
+                }
             }
         }
 
-        if (!get_magic_quotes_gpc())
+        if (!get_magic_quotes_gpc()) {
             $array = array_map('addslashes', $array);//回调过滤数据($data);
+        }
 
         return $array;
     }
@@ -1027,25 +1063,22 @@ class Model
      */
     public final function tableField()
     {
-        if (isset(self::$tableFields[$this->tempTableName]))
+        if (isset(self::$tableFields[$this->tempTableName])) {
             return self::$tableFields[$this->tempTableName];
+        }
 
-        $tempTableName = $this->getTempTableName();
         $sql = 'desc ' . $this->getTempTableName();
-
         $result = $this->query($sql)->result();
 
-        $this->tempTableName = $tempTableName;
+        foreach ($result as $row) {
 
-        foreach ($result as $k => $row) {
-            // $row["Field"] = strtolower($row["Field"]);
             if ($row->Key == "PRI") {
                 $fields["pri"] = $row->Field;
+            } elseif ($row->Extra == "auto_increment") {
+                $fields["auto"] = $row["Field"];
             } else {
                 $fields[] = $row->Field;
             }
-
-            // if ($row->Extra == "auto_increment")    $fields["auto"] = $row["Field"];
 
         }
         //如果表中没有主键，则将第一列当作主键
@@ -1067,7 +1100,9 @@ class Model
      */
     public final function rowCount()
     {
-        if ($this->db === null) return 0;
+        if ($this->db === null) {
+            return 0;
+        }
         return $this->db->rowCount();
 
     }
@@ -1079,9 +1114,11 @@ class Model
      */
     public final function query($sql = "", $parameters = [])
     {
-        if (!empty($sql)) $this->sql = $sql;
-
-        $this->queries[] = $this->sql;
+        if (empty($sql)) {
+            throw new \Exception('SQL不能为空');
+        }
+        $this->statement = $sql;
+        $this->queries[] = $this->statement;
 
 
         $this->parameters = !is_array($parameters) ? [] : $parameters;
@@ -1093,11 +1130,7 @@ class Model
             $this->queries[] = $sql;
             $this->db = $this->masterServer;
 
-            $re = $this->db->query($this->sql, $parameters);
-
-            return $re;
-
-
+            return $this->db->query($this->statement, $parameters);
         } else {
             return $this;
         }
@@ -1122,15 +1155,18 @@ class Model
 
         $data = $this->check($data);
 
-        if (!$data) return false;
+        if (!$data) {
+            return false;
+        }
 
-        if (!empty($where))
+        if (!empty($where)) {
             $this->where($where);
+        }
 
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
-        if ($this->PreProcessStatus == true) {
+        if ($this->PreProcessStatus) {
             $fields = array_keys($data);
             $values = array_values($data);
             $values = $this->setDataPreProcessFill($fields, $values);
@@ -1141,13 +1177,9 @@ class Model
 
         $data = $this->escape($data);
 
-        $this->sql = "UPDATE " . $this->tempTableName . " SET " . $data . " " . $where . " " . $limit;
+        $this->statement = "UPDATE " . $this->tempTableName . " SET " . $data . " " . $where . " " . $limit;
 
-
-        $re = $this->query($this->sql)->result();
-
-
-        return $re;
+        return $this->query($this->statement)->result();
     }
 
 
@@ -1194,7 +1226,7 @@ class Model
      */
     public final function startTrans()
     {
-        if ($this->hasActiveTransaction == false) {
+        if (!$this->hasActiveTransaction) {
             $this->hasActiveTransaction = true;
             if (is_null($this->masterServer)) {
                 $this->getConnectionInstance();
@@ -1328,13 +1360,8 @@ class Model
     function checkTable($tableName = '', $auto = true)
     {
         $this->table($tableName, $auto);
-
         $sql = "desc $this->tempTableName";
-
-        $info = $this->query($sql)->result();
-
-
-        return $info;
+        return $this->query($sql)->result();
     }
 
 
@@ -1347,12 +1374,9 @@ class Model
      */
     function checkField($field = '', $tableName = '', $auto = true)
     {
-
         $this->table($tableName, $auto);
-
         $sql = "desc {$this->tempTableName} $field";
-        $info = $this->query($sql)->row();
-        return $info;
+        return $this->query($sql)->row();
     }
 
 
@@ -1368,9 +1392,11 @@ class Model
 
 
         $sql = "alter table {$this->tempTableName} add ";
-        if (!$field = $this->filterFieldInfo($info)) return false;
-        $sql .= $field;
+        if (!$field = $this->filterFieldInfo($info)) {
+            return false;
+        }
 
+        $sql .= $field;
         return $this->query($sql)->result;
     }
 
@@ -1390,10 +1416,11 @@ class Model
 
         $sql = "alter table {$this->tempTableName} modify ";
 
-        if (!$field = $this->filterFieldInfo($info)) return false;
+        if (!$field = $this->filterFieldInfo($info)) {
+            return false;
+        }
+
         $sql .= $field;
-
-
         return $this->query($sql)->result;
 
         $this->checkField($info['name']);
@@ -1410,7 +1437,9 @@ class Model
      */
     private function filterFieldInfo($info = [])
     {
-        if (!is_array($info)) return false;
+        if (!is_array($info)) {
+            return false;
+        }
 
         $newInfo = [];
         $newInfo['name'] = $info['name'];
@@ -1446,13 +1475,17 @@ class Model
                 break;
 
             case 'enum':
-                if (!is_array($info['value']) || empty($info['value'])) return false;
+                if (!is_array($info['value']) || empty($info['value'])) {
+                    return false;
+                }
 
                 $newInfo['length'] = implode(',', array_map(function ($item) {
                     return "'{$item}'";
                 }, $info['value']));
                 $newInfo['default'] = 'DEFAULT "' . (isset($info['default']) ? $info['default'] : reset($info['value'])) . '"';
                 break;
+            default:
+                return false;
         }
         $newInfo['isNull'] = !empty($info['isNull']) ? ' NULL ' : ' NOT NULL ';
         $newInfo['comment'] = isset($info['comment']) ? ' ' : ' COMMENT "' . $info['comment'] . '" ';
@@ -1462,8 +1495,8 @@ class Model
 
         $sql .= $newInfo['isNull'];
         $sql .= $newInfo['default'];
-        $sql .= $newInfo['comment'];
-        return $sql;
+
+        return $sql . $newInfo['comment'];
     }
 
 

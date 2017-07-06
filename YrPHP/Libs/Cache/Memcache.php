@@ -26,12 +26,11 @@ class Memcache implements ICache
             $config = C('memcache');
             if (is_string($config)) {
                 $conf = explode(':', $config);
-
                 self::$object->connect($conf[0], $conf[1]);
             } elseif (is_array($config)) {
-                foreach ($config as $k => $v) {
+                foreach ($config as $v) {
                     $conf = explode(':', $v);
-                    self::$object->addserver($conf[0], $conf[1]);
+                    self::$object->addServer($conf[0], $conf[1]);
                 }
             } else {
                 die('参数错误');
@@ -57,7 +56,9 @@ class Memcache implements ICache
 
     public function get($key = null)
     {
-        if (is_null($key)) return false;
+        if (is_null($key)) {
+            return false;
+        }
 
         return myUnSerialize(self::getInstance()->get($key));
     }
@@ -77,7 +78,9 @@ class Memcache implements ICache
 
     public function del($key = null)
     {
-        if(is_null($key)) return false;
+        if (is_null($key)) {
+            return false;
+        }
 
         return self::getInstance()->delete($key);
     }

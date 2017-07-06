@@ -33,7 +33,9 @@ class Cart
             $this->key = $params['key'];
         }
 
-        if ($this->saveMode == 'session' && !session_id()) session_start();
+        if ($this->saveMode == 'session' && !session_id()) {
+            session_start();
+        }
 
         if (isset($_SESSION[$this->key]) || isset($_COOKIE[$this->key])) {
             $this->contents();
@@ -50,9 +52,14 @@ class Cart
      */
     function getContents($mallMode = null, $seller = null)
     {
-        $mallMode = is_null($mallMode) ? $this->mallMode : ($this->mallMode ? $mallMode : false);
+        if (is_null($mallMode)) {
+            $mallMode = $this->mallMode;
+        }
+
         if ($mallMode) {
-            if ($seller) return array($seller => $this->multiCartContents[$seller]);
+            if ($seller) {
+                return array($seller => $this->multiCartContents[$seller]);
+            }
 
             return $this->multiCartContents;
 
@@ -115,7 +122,10 @@ class Cart
 
         }
 
-        if (!isset($rowId)) return false;
+        if (!isset($rowId)) {
+            return false;
+        }
+
         if (in_array(false, $rowId)) {
             return false;
         }
@@ -143,7 +153,7 @@ class Cart
     protected function _insert($item = array(), $accumulation = false)
     {
 
-        if (!is_array($item) OR count($item) === 0) {
+        if (!is_array($item) || count($item) === 0) {
             $this->error = '插入的数据必须是数组格式';
             return false;
         }
@@ -235,7 +245,9 @@ class Cart
 
         }
 
-        if ($status === false) return false;
+        if ($status === false) {
+            return false;
+        }
 
         if ($this->mallMode) {
             $this->saveCart($this->multiCartContents);
@@ -302,7 +314,9 @@ class Cart
     public function remove($rowId = null)
     {
 
-        if (!is_array($rowId)) $rowId = array($rowId);
+        if (!is_array($rowId)) {
+            $rowId = array($rowId);
+        }
 
         foreach ($rowId as $v) {
             if (!isset($this->singleCartContents[$v])) {
@@ -338,7 +352,9 @@ class Cart
      */
     public function getItem($rowId = null)
     {
-        if (!$rowId) return false;
+        if (!$rowId) {
+            return false;
+        }
 
         if (!isset($this->singleCartContents[$rowId])) {
             return false;
@@ -372,12 +388,17 @@ class Cart
         $qty = 0;
 
         if (empty($seller) || $this->saveMode = false) {
-            if (empty($this->singleCartContents)) return $qty;
+            if (empty($this->singleCartContents)) {
+                return $qty;
+            }
+
             foreach ($this->singleCartContents as $v) {
                 $qty += $v['qty'];
             }
         } else {
-            if (empty($this->multiCartContents[$seller])) return $qty;
+            if (empty($this->multiCartContents[$seller])) {
+                return $qty;
+            }
             foreach ($this->multiCartContents[$seller] as $v) {
                 $qty += $v['qty'];
             }
@@ -415,7 +436,9 @@ class Cart
      */
     public function searchSeller($rowId)
     {
-        if (!$this->saveMode) return false;
+        if (!$this->saveMode) {
+            return false;
+        }
 
         foreach ($this->cartContents as $k => $v) {
             if (isset($v[$rowId])) {

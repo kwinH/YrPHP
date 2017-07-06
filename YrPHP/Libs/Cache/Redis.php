@@ -23,10 +23,11 @@ class Redis implements ICache
         } else {
             self::$object = new \Redis;
             $config = C('redis');
-            if (is_string($config)) $config = array($config);
-
-            if (is_array($config)) {
-                foreach ($config as $k => $v) {
+            if (is_string($config)) {
+                $conf = explode(':', $config);
+                self::$object->connect($conf[0], $conf[1]);
+            } elseif (is_array($config)) {
+                foreach ($config as $v) {
                     $conf = explode(':', $v);
                     self::$object->connect($conf[0], $conf[1]);
                 }
@@ -67,7 +68,9 @@ class Redis implements ICache
      */
     public function get($key = null)
     {
-        if (is_null($key)) return false;
+        if (is_null($key)) {
+            return false;
+        }
 
         return myUnSerialize(self::getInstance()->get($key));
     }
@@ -87,7 +90,9 @@ class Redis implements ICache
      */
     public function del($key = null)
     {
-        if (is_null($key)) return false;
+        if (is_null($key)) {
+            return false;
+        }
 
         $keys = self::getInstance()->keys("*{$key}*");
         return self::getInstance()->delete($keys);

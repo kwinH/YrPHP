@@ -50,6 +50,8 @@ class Debug
                 case 2:
                     self::$queries[] = $msg;
                     break;
+                default:
+                    return false;
             }
         }
     }

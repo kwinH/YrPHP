@@ -72,11 +72,15 @@ class Config
      */
     public static function get($key = '', $default = null)
     {
-        if (empty($key)) return self::$config;
+        if (empty($key)) {
+            return self::$config;
+        }
 
         $config = self::$config;
         foreach (explode('.', $key) as $v) {
-            if (!isset($config[$v])) return $default;
+            if (!isset($config[$v])) {
+                return $default;
+            }
             $config = $config[$v];
         }
         return $config;
@@ -92,7 +96,9 @@ class Config
     {
         $config = requireCache(APP_PATH . 'Config/' . $fileName . '.php');
 
-        if (!$config) return false;
+        if (!$config) {
+            return false;
+        }
 
         if (is_null($key)) {
             self::set($config);

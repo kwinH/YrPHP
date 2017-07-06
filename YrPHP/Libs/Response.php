@@ -117,9 +117,13 @@ class Response
 
 
         if (\Request::isPost()) {
-            if (is_null($url)) $url = 'referer';
+            if (is_null($url)) {
+                $url = 'referer';
+            }
         } else {
-            if (is_null($url)) $url = \Request::currentUrl();
+            if (is_null($url)) {
+                $url = \Request::currentUrl();
+            }
         }
         $this->redirect($url);
     }
@@ -130,12 +134,14 @@ class Response
 
         if (\Request::isAjax()) {
             exit($this->json(['success' => $message]));
-        }
-
-        if (\Request::isPost()) {
-            if (is_null($url)) $url = 'referer';
+        } elseif (\Request::isPost()) {
+            if (is_null($url)) {
+                $url = 'referer';
+            }
         } else {
-            if (is_null($url)) $url = \Request::currentUrl();
+            if (is_null($url)) {
+                $url = \Request::currentUrl();
+            }
         }
         $this->redirect($url);
     }

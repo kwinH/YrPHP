@@ -31,7 +31,9 @@ class File implements ICache
     public function isExpired($key)
     {
         $file = $this->dbCachePath . $key . '.' . $this->dbCacheExt;
-        if (!file_exists($file)) return true;
+        if (!file_exists($file)) {
+            return true;
+        }
 
         $contents = myUnSerialize(file_get_contents($this->dbCachePath . $key . '.' . $this->dbCacheExt));
 
@@ -58,10 +60,14 @@ class File implements ICache
 
     public function get($key = null)
     {
-        if (is_null($key)) return false;
+        if (is_null($key)) {
+            return false;
+        }
 
         $file = $this->dbCachePath . $key . '.' . $this->dbCacheExt;
-        if (!file_exists($file)) return false;
+        if (!file_exists($file)){
+          return false;
+        }
 
         $contents = myUnSerialize(file_get_contents($this->dbCachePath . $key . '.' . $this->dbCacheExt));
 
@@ -84,11 +90,13 @@ class File implements ICache
      */
     public function del($key = null)
     {
-        if (is_null($key)) return false;
+        if (is_null($key)){
+         return false;
+        }
 
         $file = \Yrphp\File::search($this->dbCachePath, $key);
 
-        foreach ($file as $k => $v) {
+        foreach ($file as  $v) {
             \Yrphp\File::rm($v);
         }
     }

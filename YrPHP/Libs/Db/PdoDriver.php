@@ -42,7 +42,10 @@ class PdoDriver extends PDO implements IDBDriver
     public static function getInstance($dbConfig = null)
     {
         $key = md5(serialize($dbConfig));
-        if (!isset(self::$_instance[$key])) self::$_instance[$key] = null;
+        if (!isset(self::$_instance[$key])) {
+            self::$_instance[$key] = null;
+        }
+
         if (!(self::$_instance[$key] instanceof self)) {
             if (empty($dbConfig['dsn'])) {
                 $dsn = $dbConfig['dbType'] . ":host=" . $dbConfig['dbHost'] . ";port=" . $dbConfig['dbPort'] . ";dbname=" . $dbConfig['dbName'];
@@ -117,12 +120,10 @@ class PdoDriver extends PDO implements IDBDriver
     function row($assoc = false)
     {
         try {
-            if (!$this->PDOStatement instanceof PDOStatement)
+            if (!$this->PDOStatement instanceof PDOStatement) {
                 throw  new Exception('errors');
-
-            if ($assoc) {
+            } elseif ($assoc) {
                 return $this->PDOStatement->fetch(PDO::FETCH_ASSOC);
-
             } else {
                 return $this->PDOStatement->fetch(PDO::FETCH_OBJ);
             }
@@ -142,10 +143,9 @@ class PdoDriver extends PDO implements IDBDriver
     function result($assoc = false)
     {
         try {
-            if (!$this->PDOStatement instanceof PDOStatement)
+            if (!$this->PDOStatement instanceof PDOStatement) {
                 throw  new Exception('errors');
-
-            if ($assoc) {
+            } elseif ($assoc) {
                 return $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
             } else {
                 return $this->PDOStatement->fetchAll(PDO::FETCH_OBJ);

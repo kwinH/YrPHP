@@ -78,7 +78,9 @@ class Uri
 
         $uri = empty($uri) ? [] : explode('/', $uri);
 
-        if (is_int($n)) return isset($uri[$n]) ? $uri[$n] : $no_result;
+        if (is_int($n)) {
+            return isset($uri[$n]) ? $uri[$n] : $no_result;
+        }
 
         return $uri;
     }
@@ -117,7 +119,9 @@ class Uri
     {
         $uri = empty($this->path) ? [] : explode('/', $this->path);
 
-        if (is_int($n)) return isset($uri[$n]) ? $uri[$n] : $no_result;
+        if (is_int($n)) {
+            return isset($uri[$n]) ? $uri[$n] : $no_result;
+        }
 
         return $uri;
     }

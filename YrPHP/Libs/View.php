@@ -83,8 +83,9 @@ class View
      */
     function assign($tplVar, $value = null)
     {
-        if ($tplVar != '')
+        if ($tplVar != '') {
             $this->tplVars[$tplVar] = $value;
+        }
     }
 
     /**
@@ -117,23 +118,31 @@ class View
 
     function buildTplFile($fileName, $tplVars = '')
     {
-        if (!empty($tplVars)) $this->tplVars = array_merge($this->tplVars, $tplVars);
+        if (!empty($tplVars)) {
+            $this->tplVars = array_merge($this->tplVars, $tplVars);
+        }
 
         /* 到指定的目录中寻找模板文件 */
         $fileName = strpos($fileName, '.') !== false ? $fileName : ($fileName . '.' . C('templateExt'));
         $tplFile = $this->templateDir . $fileName;
 
         /* 如果需要处理的模板文件不存在,则退出并报告错误 */
-        if (!file_exists($tplFile)) die("模板文件{$tplFile}不存在！");
+        if (!file_exists($tplFile)) {
+            throw new \Exception("模板文件{$tplFile}不存在！");
+        }
 
         /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
         $comFileDir = $this->compileDir . C('ctlName') . (strpos($fileName, '/') === false ? '' : '/' . dirname($fileName));
 
-        if (!file_exists($comFileDir)) File::mkDir($comFileDir);
+        if (!file_exists($comFileDir)) {
+            File::mkDir($comFileDir);
+        }
 
         $comFileName = $comFileDir . '/' . basename($fileName) . '.php';
 
-        if (is_null($this->comFileName)) $this->comFileName = $comFileName;
+        if (is_null($this->comFileName)) {
+            $this->comFileName = $comFileName;
+        }
 
         if (!file_exists($comFileName) || filemtime($comFileName) < filemtime($tplFile) || filemtime($comFileName) < filemtime($this->ctlFile)) {
             $repContent = $this->tplReplace(file_get_contents($tplFile));
@@ -187,15 +196,11 @@ class View
         }
 
         //包含标签
-        $content = preg_replace_callback('/' . $this->leftDelimiter . '(include|require)\s+(.*)\s*' . $this->rightDelimiter . '/isU',
+        return preg_replace_callback('/' . $this->leftDelimiter . '(include|require)\s+(.*)\s*' . $this->rightDelimiter . '/isU',
             function ($matches) {
                 return $this->buildTplFile($matches[2], null);
             },
             $content);
-
-
-        return $content;
-
     }
 
     public function setBlock($data)
@@ -239,13 +244,17 @@ class View
     public function init($cacheId = '')
     {
         ob_start();
-        if (self::$callNumber) return;
+        if (self::$callNumber) {
+            return false;
+        }
 
         if ($this->caching) {
             //self::$cacheId[] = $cacheId;
             $cacheDir = rtrim($this->cacheDir, '/') . '/' . $this->cacheSubDir;
 
-            if (!file_exists($cacheDir)) mkdir($cacheDir, 0755);
+            if (!file_exists($cacheDir)) {
+                mkdir($cacheDir, 0755);
+            }
 
             $this->cacheFile = $cacheDir . '/' . $this->cacheFileName;
             $this->cacheFile .= empty($cacheId) ? '' : '_' . $cacheId;
@@ -268,16 +277,18 @@ class View
      */
     protected function setCache()
     {
-        if ($this->cacheStatus === false) return '';
+        if ($this->cacheStatus === false) {
+            return '';
+        }
 
         if (file_exists($this->comFileName) && $this->caching) {
-            if (!file_exists($this->cacheFile)) {
-                File::vi($this->cacheFile, $this->cacheContent);
-            } elseif ($this->cacheLifeTime != 0 && filemtime($this->cacheFile) + $this->cacheLifeTime < time()) {
+            if (
+                !file_exists($this->cacheFile) || ($this->cacheLifeTime != 0
+                    && filemtime($this->cacheFile) + $this->cacheLifeTime < time())
+            ) {
                 File::vi($this->cacheFile, $this->cacheContent);
             }
         }
-
 
     }
 
@@ -309,13 +320,15 @@ class View
                 while ($filename = readdir($dir_handle)) {        //循环遍历目录
                     if ($filename != "." && $filename != "..") {    //一定要排除两个特殊的目录
                         $subFile = $file . "/" . $filename;    //将目录下的文件和当前目录相连
-                        if (is_dir($subFile))                    //如果是目录条件则成立
+                        if (is_dir($subFile)) {                    //如果是目录条件则成立
                             $this->delDir($subFile);                //递归调用自己删除子目录
-                        if (is_file($subFile)) {                //如果是文件条件则成立
-                            if (empty($template)) {
+                        } else if (is_file($subFile)) {
+                            //如果是文件条件则成立
+                            if (
+                                empty($template)
+                                || (strpos($filename, $template) !== false)
+                            ) {
                                 unlink($subFile);                    //直接删除这个文件
-                            } elseif (strpos($filename, $template) !== false) {
-                                unlink($subFile);
                             }
                         }
                     }

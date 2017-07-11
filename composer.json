@@ -1,8 +1,8 @@
 {
-    "name": "kwinh/yrphp",
-    "type": "library",
+    "name": "kwin/yrphp",
+    "type": "project",
     "description": "The YrPHP Framework.",
-    "keywords": ["kwinWong","kwinH","YrPHP","Framework"],
+    "keywords": ["kwin","kwinH","kwinWong","YrPHP","Framework"],
     "homepage": "https://github.com/kwinH/YrPHP",
     "license": "MIT",
     "authors": [

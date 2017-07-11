@@ -44,6 +44,7 @@ class ComposerStaticInitbeb289f9886f00932c5bddf136893312
         'YrPHP\\Db\\IDBDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/IDBDriver.php',
         'YrPHP\\Db\\PdoDriver' => __DIR__ . '/../..' . '/YrPHP/Libs/Db/PdoDriver.php',
         'YrPHP\\Debug' => __DIR__ . '/../..' . '/YrPHP/Libs/Debug.php',
+        'YrPHP\\Exception' => __DIR__ . '/../..' . '/YrPHP/Libs/Exception.php',
         'YrPHP\\Facade' => __DIR__ . '/../..' . '/YrPHP/Libs/Facade.php',
         'YrPHP\\File' => __DIR__ . '/../..' . '/YrPHP/Libs/File.php',
         'YrPHP\\Form' => __DIR__ . '/../..' . '/YrPHP/Libs/Form.php',

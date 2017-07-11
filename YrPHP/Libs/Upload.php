@@ -49,7 +49,7 @@ class Upload
      * 上传文件
      * @param 文件信息数组 $field ，上传文件的表单名称  默认是 $_FILES数组
      */
-    public function upload($field = '')
+    public function uploadFile($field = '')
     {
         if ('' === $field) {
             $files = $_FILES;
@@ -101,7 +101,6 @@ class Upload
 
     public function uploadOne($file = array())
     {
-
         if ($file['error'] > 0) {
             $this->fileInfo[$file['inputName']]['errorCode'] = $file['error'];
             $this->result[] = false;
@@ -123,10 +122,10 @@ class Upload
 
         if (empty($this->fileName)) {
             if ($this->isRandName) {
-                $fileName = date('Ymdhis') . mt_rand(100, 999);
+                $this->fileName = date('Ymdhis') . mt_rand(100, 999);
             } else {
                 $file['name'] = str_replace('.' . $this->fileExt, '', $file['name']);
-                $fileName = str_replace('.', '_', $file['name']);
+                $this->fileName = str_replace('.', '_', $file['name']);
             }
         }
         //目标不存在 则创建
@@ -138,18 +137,14 @@ class Upload
             }
         }
 
-
-        if (file_exists($this->savePath . $fileName . '.' . $this->fileExt) && !$this->overwrite) {
-
-            $fileName .= mt_rand(100, 999);
+        if (file_exists($this->savePath . $this->fileName . '.' . $this->fileExt) && !$this->overwrite) {
+            $this->fileName .= mt_rand(100, 999);
         }
 
-
-        $fileName .= '.' . $this->fileExt;
-
+        $this->fileName .= '.' . $this->fileExt;
 
         $path = rtrim($this->savePath, '/') . '/';
-        $path .= $fileName;
+        $path .= $this->fileName;
 
 
         /* 检查是否合法上传 */
@@ -160,7 +155,7 @@ class Upload
         }
 
         if (move_uploaded_file($file['tmp_name'], $path)) {
-            $this->fileInfo[$file['inputName']] = array('fileName' => $fileName,
+            $this->fileInfo[$file['inputName']] = array('fileName' => $this->fileName,
                 'fileType' => $file['type'],
                 'filePath' => $path,
                 'origName' => $file['name'],
@@ -171,11 +166,12 @@ class Upload
                 'imgHeight' => $this->imgHeight,
 
             );
-
+            $this->fileName = '';
             return true;
         } else {
             $this->fileInfo[$file['inputName']]['errorCode'] = -3;
             $this->result[] = false;
+            $this->fileName = '';
             return false;
         }
 
@@ -193,12 +189,12 @@ class Upload
 
     /**
      * 返回文件拓展后缀
-     * @param $filename
+     * @param $path
      * @return string
      */
-    public function getExtension($filename)
+    public function getExtension($path)
     {
-        $x = explode('.', $filename);
+        $x = explode('.', $path);
 
         if (count($x) === 1) {
             return '';

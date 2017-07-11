@@ -40,7 +40,7 @@ class FormRequest
      * @param  array $array 要验证的字段数据
      * @param  string $tableName 数据表名
      * @param bool $auto
-     * @return array
+     * @return array|bool
      *
      * array('字段名' => array(array('验证规则', ['错误提示'],[ '值域','值域',...])));
      * 验证规则:

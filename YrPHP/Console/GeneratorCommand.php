@@ -26,17 +26,22 @@ class GeneratorCommand
             $content .= 'class ' . $key . '{' . PHP_EOL;
             $reflection = new \ReflectionClass($className);
             foreach ($reflection->getMethods() as $method) {
+                if (strpos($method->name, '__') === 0) {
+                    continue;
+                }
+                $args = [];
                 $pars = '';
-                foreach ($method->getParameters() as $reflectionParameter) {
-                    $pars .= '$' . $reflectionParameter->getName();
+                foreach ($method->getParameters() as $k => $reflectionParameter) {
+                    $args[$k] = '$' . $reflectionParameter->getName();
+                    $pars .= $args[$k];
                     if ($reflectionParameter->isDefaultValueAvailable()) {
                         $defaultValue = $reflectionParameter->getDefaultValue();
-                        $pars .= '=' . preg_replace('/\s*/','',var_export($defaultValue, true));
+                        $pars .= '=' . preg_replace('/\s*/', '', var_export($defaultValue, true));
                     }
                     $pars .= ',';
                 }
                 $content .= $method->getDocComment() . PHP_EOL;
-                $content .= 'static function ' . $method->name . '(' . trim($pars, ',') . '){}' . PHP_EOL;
+                $content .= 'static function ' . $method->name . '(' . trim($pars, ',') . '){return ' . $className . '::' . $method->name . '(' . implode(',', $args) . ');}' . PHP_EOL;
             }
             $content .= '}' . PHP_EOL;
 

@@ -14,18 +14,18 @@ use response;
 
 abstract class Controller
 {
-    private static $instance;
+    protected static $instance;
 
     /**
      *
      * 在控制器上注册的中间件
      * @var array
      */
-    protected $middleware = [];
+    protected $middlewares = [];
 
-    function __construct()
+    public function __construct()
     {
-        self::$instance =& $this;
+        static::$instance =& $this;
 
     }
 
@@ -40,7 +40,7 @@ abstract class Controller
      */
     public static function &getInstance()
     {
-        return self::$instance;
+        return static::$instance;
     }
 
 
@@ -53,13 +53,13 @@ abstract class Controller
      */
     public function middleware($middleware, array $options = [])
     {
-        $this->middleware[APP . '\Middleware\\' . $middleware] = $options;
+        $this->middlewares[APP . '\Middleware\\' . $middleware] = $options;
     }
 
     public function getMiddleware()
     {
         $middleware = [];
-        foreach ($this->middleware as $k => $v) {
+        foreach ($this->middlewares as $k => $v) {
             if (empty($v)) {
                 $middleware[] = $k;
                 continue;
@@ -105,6 +105,7 @@ abstract class Controller
         if (class_exists($name)) {
             return loadClass($name);
         }
+        return null;
     }
 
 

@@ -12,7 +12,7 @@ class Curl
     protected $options = array();
     protected $ch;
 
-    function __construct()
+    public function __construct()
     {
         $this->ch = curl_init();
     }
@@ -22,7 +22,7 @@ class Curl
      * [setUrl description]
      * @param string $url [description]
      */
-    function setUrl($url = '')
+    public function setUrl($url = '')
     {
         $this->ch = curl_init();
         $this->options = array();
@@ -35,7 +35,7 @@ class Curl
      * @param string $value
      * @return $this
      */
-    function setOptions($option = '', $value = '')
+    public function setOptions($option = '', $value = '')
     {
         $this->options[$option] = $value;
         return $this;
@@ -47,7 +47,7 @@ class Curl
      * @param string $path 验证证书时，证书路径
      * @return $this
      */
-    function sslVerify($verify = false, $path = '')
+    public function sslVerify($verify = false, $path = '')
     {
         if ($verify) {
             $this->options[CURLOPT_SSL_VERIFYPEER] = true;//开启后cURL将从服务端进行验证。
@@ -64,7 +64,7 @@ class Curl
      * 传递一个连接中需要的用户名和密码
      * @param array|string $userPassword 格式为：array('userName','password') 或则, "username:password"
      */
-    function setUserPassword($userPassword = '')
+    public function setUserPassword($userPassword = '')
     {
         if (is_array($userPassword)) {
             $userPassword = implode(':', $userPassword);
@@ -76,7 +76,7 @@ class Curl
     /**
      * @param array $header //请求头
      */
-    function setHeader($header = array())
+    public function setHeader($header = array())
     {
         $this->options[CURLOPT_HTTPHEADER] = $header; //一个用来设置HTTP头字段的数组
         $this->options[CURLOPT_HEADER] = 1;//启用时会将头文件的信息作为数据流输出。
@@ -89,7 +89,7 @@ class Curl
      * @param array|string $data
      * @param string $enctype App|multipart  默认为application，文件上传请用multipart
      */
-    function post($data = array(), $enctype = 'App')
+    public function post($data = array(), $enctype = 'App')
     {
         if ($enctype == 'App' && is_array($data)) {
             $data = http_build_query($data);
@@ -107,7 +107,7 @@ class Curl
      * @param array|string $data array('user'=>'admin','pass'=>'admin') | admin&admin
      * @return $this
      */
-    function get($data = array())
+    public function get($data = array())
     {
         if (is_array($data)) {
             $data = http_build_query($data);
@@ -127,7 +127,7 @@ class Curl
      * @param array $data
      * @return array
      */
-    function delete($data = array())
+    public function delete($data = array())
     {
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
@@ -139,7 +139,7 @@ class Curl
      * @param array $data
      * @return array
      */
-    function put($data)
+    public function put($data)
     {
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT");
         curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
@@ -150,7 +150,7 @@ class Curl
      * 获得cookies
      * @param string $path 定义Cookie存储路径 必须使用绝对路径
      */
-    function getCookie($path = '')
+    public function getCookie($path = '')
     {
         $this->options[CURLOPT_COOKIEJAR] = $path;//连接结束后保存cookie信息的文件
         return $this;
@@ -160,7 +160,7 @@ class Curl
      * 设定HTTP请求中"Cookie: "部分的内容。多个cookie用分号分隔，分号后带一个空格(例如， "fruit=apple; colour=red")。
      * @param string|array $cookies 定义Cookie的值
      */
-    function setCookie($cookies = array())
+    public function setCookie($cookies = array())
     {
         $cookieString = '';
         if (is_array($cookies)) {
@@ -183,7 +183,7 @@ class Curl
      * 取出cookie，一起提交给服务器
      * @param string $path 定义Cookie存储路径 必须使用绝对路径
      */
-    function setCookieFile($path = '')
+    public function setCookieFile($path = '')
     {
         $this->options[CURLOPT_COOKIEFILE] = $path;//包含cookie数据的文件名
         return $this;
@@ -195,7 +195,7 @@ class Curl
      * @param bool $debug 是否开启调试模式 如果为true将打印调试信息
      * @return mixed
      */
-    function exec($debug = false)
+    public function exec($debug = false)
     {
         $this->options[CURLOPT_RETURNTRANSFER] = true; //将 curl_exec() 获取的信息以文件流的形式返回，而不是直接输出。
         if ($debug) {
@@ -213,14 +213,14 @@ class Curl
         return $re;
     }
 
-    function getInfo()
+    public function getInfo()
     {
         return curl_getinfo($this->ch);
     }
 
-    function __destruct()
+
+    public function __destruct()
     {
         curl_close($this->ch);
-
     }
 }

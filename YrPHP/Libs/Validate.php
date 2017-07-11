@@ -22,7 +22,7 @@ class Validate
      * @param null $value
      * @return bool
      */
-    static function required($value = null)
+    public static function required($value = null)
     {
         if ($value) {
             return true;
@@ -36,7 +36,7 @@ class Validate
      * @param string $val
      * @return bool
      */
-    static function equal($value = null, $val = null)
+    public static function equal($value = null, $val = null)
     {
         if (is_null($value)) {
             return false;
@@ -55,7 +55,7 @@ class Validate
      * @param string $val
      * @return bool
      */
-    static function notEqual($value = null, $val = null)
+    public static function notEqual($value = null, $val = null)
     {
         if (is_null($value)) {
             return false;
@@ -74,7 +74,7 @@ class Validate
      * @param array|string $range
      * @return bool
      */
-    static function in($value = '', $range = '')
+    public static function in($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -96,7 +96,7 @@ class Validate
      * @param array|string $range
      * @return bool
      */
-    static function notIn($value = '', $range = '')
+    public static function notIn($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -117,7 +117,7 @@ class Validate
      * @param array|string $range
      * @return bool
      */
-    static function between($value = '', $range = '')
+    public static function between($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -141,7 +141,7 @@ class Validate
      * @param array|string $range
      * @return bool
      */
-    static function notBetween($value = '', $range = '')
+    public static function notBetween($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -165,7 +165,7 @@ class Validate
      * @param $field 字段名
      * @return bool
      */
-    static function unique($value, $tableName, $field)
+    public static function unique($value, $tableName, $field)
     {
         $db = M();
         return !($db->where(array($field => $value))->count($tableName));
@@ -179,7 +179,7 @@ class Validate
      * length('abc',$rage = 3); strlen('abc') ==3
      * length('abc',$rage = array(5,3))==length('abc',$rage = array(3,5)) => strlen('abc') >=3 && strlen('abc') <=5
      */
-    static function length($value = '', $range = '')
+    public static function length($value = '', $range = '')
     {
         if (is_string($range)) {
             $range = explode(',', $range);
@@ -205,7 +205,7 @@ class Validate
      * Email格式验证
      * @param    string $value 需要验证的值
      */
-    static function email($value)
+    public static function email($value)
     {
         return filter_var($value, FILTER_VALIDATE_EMAIL);
     }
@@ -214,7 +214,7 @@ class Validate
      * URL格式验证
      * @param    string $value 需要验证的值
      */
-    static function url($value)
+    public static function url($value)
     {
 
         $rules = '/^(http|https)\:\/\/([\w-]+\.)+[\w-]+(\/[\w-.\/?%&=]*)?$/';
@@ -228,7 +228,7 @@ class Validate
      * 数字格式验证
      * @param    string $value 需要验证的值
      */
-    static function number($value)
+    public static function number($value)
     {
         return is_numeric($value);
     }
@@ -239,7 +239,7 @@ class Validate
      * @param    string $value 需要验证的值
      * @param    string $rules 正则表达式
      */
-    static function regex($value, $rules)
+    public static function regex($value, $rules)
     {
         return preg_match($rules, $value);
     }
@@ -249,7 +249,7 @@ class Validate
      * 判断是否为手机号码
      * @param    string $value 手机号码
      */
-    static function phone($value = '')
+    public static function phone($value = '')
     {
         return preg_match('/^1\d{10}$/', $value);
     }
@@ -261,7 +261,7 @@ class Validate
      * @param string $code session中的key
      * @return bool
      */
-    static function verifyCode($value = '', $code = 'verify')
+    public static function verifyCode($value = '', $code = 'verify')
     {
 
         if (!session_id()) {
@@ -287,15 +287,15 @@ class Validate
      * });
      * var_dump(Validate::test(3, 2)); true
      */
-    static function extend($ruleName, Closure $callback)
+    public static function extend($ruleName, Closure $callback)
     {
         static::$rule[$ruleName] = $callback;
     }
 
 
-    static function __callStatic($name, $paramenters)
+    public static function __callStatic($name, $paramenters)
     {
-        if (isset(self::$rule[$name])) {
+        if (isset(static::$rule[$name])) {
             return call_user_func_array(static::$rule[$name], $paramenters);
         }
     }

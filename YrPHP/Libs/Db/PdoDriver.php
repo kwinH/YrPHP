@@ -8,11 +8,12 @@
  */
 namespace YrPHP\Db;
 
-use Exception;
+
 use PDO;
 use PDOException;
 use PDOStatement;
 use YrPHP\Debug;
+use YrPHP\Exception;
 
 class PdoDriver extends PDO implements IDBDriver
 {
@@ -42,11 +43,11 @@ class PdoDriver extends PDO implements IDBDriver
     public static function getInstance($dbConfig = null)
     {
         $key = md5(serialize($dbConfig));
-        if (!isset(self::$_instance[$key])) {
-            self::$_instance[$key] = null;
+        if (!isset(static::$_instance[$key])) {
+            static::$_instance[$key] = null;
         }
 
-        if (!(self::$_instance[$key] instanceof self)) {
+        if (!(static::$_instance[$key] instanceof self)) {
             if (empty($dbConfig['dsn'])) {
                 $dsn = $dbConfig['dbType'] . ":host=" . $dbConfig['dbHost'] . ";port=" . $dbConfig['dbPort'] . ";dbname=" . $dbConfig['dbName'];
             } else {
@@ -54,18 +55,20 @@ class PdoDriver extends PDO implements IDBDriver
             }
             try {
                 // throw new PDOException("error");//错误抛出异常
-                self::$_instance[$key] = new self($dsn, $dbConfig['dbUser'], $dbConfig['dbPwd']);
-                self::$_instance[$key]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);// 设置为异常模式)))
+                static::$_instance[$key] = new self($dsn, $dbConfig['dbUser'], $dbConfig['dbPwd']);
+                static::$_instance[$key]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);// 设置为异常模式)))
 
                 if ($dbConfig['dbType'] == 'mysql' || $dbConfig['dbType'] == 'pgsql') {
-                    self::$_instance[$key]->exec("SET NAMES '{$dbConfig['charset']}'");
+                    static::$_instance[$key]->exec("SET NAMES '{$dbConfig['charset']}'");
                 }
             } catch (PDOException $e) {
+                echo '<pre>';
+                var_export($e);
                 die ("连接数库失败：" . $e->getMessage());
             }
         }
 
-        return self::$_instance[$key];
+        return static::$_instance[$key];
 
     }
 
@@ -127,7 +130,7 @@ class PdoDriver extends PDO implements IDBDriver
             } else {
                 return $this->PDOStatement->fetch(PDO::FETCH_OBJ);
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->result;
         }
 
@@ -150,7 +153,7 @@ class PdoDriver extends PDO implements IDBDriver
             } else {
                 return $this->PDOStatement->fetchAll(PDO::FETCH_OBJ);
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->result;
         }
     }

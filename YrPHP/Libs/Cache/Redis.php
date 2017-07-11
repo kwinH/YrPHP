@@ -11,31 +11,31 @@ namespace YrPHP\Cache;
 
 class Redis implements ICache
 {
-    private static $object;
+    protected static $object;
 
     static function getInstance()
     {
         if (!extension_loaded('redis')) {
             die('没有安装redis扩展');
         }
-        if (is_object(self::$object)) {
-            return self::$object;
+        if (is_object(static::$object)) {
+            return static::$object;
         } else {
-            self::$object = new \Redis;
+            static::$object = new \Redis;
             $config = C('redis');
             if (is_string($config)) {
                 $conf = explode(':', $config);
-                self::$object->connect($conf[0], $conf[1]);
+                static::$object->connect($conf[0], $conf[1]);
             } elseif (is_array($config)) {
                 foreach ($config as $v) {
                     $conf = explode(':', $v);
-                    self::$object->connect($conf[0], $conf[1]);
+                    static::$object->connect($conf[0], $conf[1]);
                 }
             } else {
                 die('参数错误');
             }
-            self::$object->select(0);
-            return self::$object;
+            static::$object->select(0);
+            return static::$object;
         }
 
     }
@@ -45,7 +45,7 @@ class Redis implements ICache
      */
     public function isExpired($key)
     {
-        return !self::getInstance()->exists($key);
+        return !static::getInstance()->exists($key);
     }
 
 
@@ -58,7 +58,7 @@ class Redis implements ICache
     public function set($key = '', $val = '', $timeout = null)
     {
         $timeout = is_null($timeout) ? C('dbCacheTime') : $timeout;
-        return self::getInstance()->set($key, mySerialize($val), $timeout);
+        return static::getInstance()->set($key, mySerialize($val), $timeout);
     }
 
     /**
@@ -72,7 +72,7 @@ class Redis implements ICache
             return false;
         }
 
-        return myUnSerialize(self::getInstance()->get($key));
+        return myUnSerialize(static::getInstance()->get($key));
     }
 
     /**
@@ -81,7 +81,7 @@ class Redis implements ICache
      */
     public function clear()
     {
-        return self::getInstance()->Flushdb();
+        return static::getInstance()->Flushdb();
     }
 
     /**
@@ -94,8 +94,8 @@ class Redis implements ICache
             return false;
         }
 
-        $keys = self::getInstance()->keys("*{$key}*");
-        return self::getInstance()->delete($keys);
+        $keys = static::getInstance()->keys("*{$key}*");
+        return static::getInstance()->delete($keys);
     }
 
 }

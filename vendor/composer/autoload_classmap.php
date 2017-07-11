@@ -25,6 +25,7 @@ return array(
     'YrPHP\\Db\\IDBDriver' => $baseDir . '/YrPHP/Libs/Db/IDBDriver.php',
     'YrPHP\\Db\\PdoDriver' => $baseDir . '/YrPHP/Libs/Db/PdoDriver.php',
     'YrPHP\\Debug' => $baseDir . '/YrPHP/Libs/Debug.php',
+    'YrPHP\\Exception' => $baseDir . '/YrPHP/Libs/Exception.php',
     'YrPHP\\Facade' => $baseDir . '/YrPHP/Libs/Facade.php',
     'YrPHP\\File' => $baseDir . '/YrPHP/Libs/File.php',
     'YrPHP\\Form' => $baseDir . '/YrPHP/Libs/Form.php',

@@ -283,13 +283,9 @@ function requireCache($filename)
  * @param string $url 跳转URL
  * @param int $time 指定时间跳转
  */
-function error404($msg = '', $url = '', $time = 3)
+function error404()
 {
     sendHttpStatus(404);
-
-    $msg = empty($msg) ? '你访问的页面不存在或被删除！' : $msg;
-
-    $url = empty($url) ? getUrl() : $url;
 
     require BASE_PATH . 'resource/tpl/404.php';
     die;
@@ -409,8 +405,6 @@ function Ip2Area($ip = '')
         return false;//'未知地区'
     }
     return $area;
-    return $area['country'] . '  ' . $area['province'] . '  ' . $area['city'];
-
 }
 
 /**
@@ -553,15 +547,12 @@ function parseNaming($name = '', $type = 0)
             return preg_replace_callback('/_([a-zA-Z])/', function ($match) {
                 return strtoupper($match[1]);
             }, $name);
-            break;
         case 1:
             return ucfirst(preg_replace_callback('/_([a-zA-Z])/', function ($match) {
                 return strtoupper($match[1]);
             }, $name));
-            break;
         case 2:
             return strtolower(trim(preg_replace("/[A-Z]/", "_\\0", $name), "_"));
-            break;
         default:
             return $name;
     }

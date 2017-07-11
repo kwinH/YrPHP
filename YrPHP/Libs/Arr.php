@@ -138,10 +138,10 @@ class Arr
     /**
      * 返回数组中指定的数组项
      * @param array $arr 指定数组
-     * @param $onlyKey 可以为多个参数或则单个数组格式
+     * @param array $onlyKey 可以为多个参数或则单个数组格式
      * @return array
      */
-    public static function only(array &$arr = [], $onlyKey)
+    public static function only(array &$arr = [], $onlyKey = array())
     {
         if (func_num_args() > 2) {
             $onlyKey = func_get_args();
@@ -156,10 +156,10 @@ class Arr
     /**
      * 过滤数组中指定的数组项,并返回
      * @param array $arr 指定数组
-     * @param $exceptKey 可以为多个参数或则单个数组格式
+     * @param array $exceptKey 可以为多个参数或则单个数组格式
      * @return array
      */
-    public static function except(array &$arr = [], $exceptKey)
+    public static function except(array &$arr = [], $exceptKey = array())
     {
         if (func_num_args() > 2) {
             $exceptKey = func_get_args();

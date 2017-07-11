@@ -19,8 +19,8 @@ class Request
 
     public function __construct()
     {
-        self::$getData = array_map([$this, 'filter'], $_GET);//回调过滤数据;
-        self::$postData = array_map([$this, 'filter'], $_POST);
+        static::$getData = array_map([$this, 'filter'], $_GET);//回调过滤数据;
+        static::$postData = array_map([$this, 'filter'], $_POST);
     }
 
 
@@ -74,7 +74,7 @@ class Request
 
     public function get($key = null, $default = null)
     {
-        $data = self::$getData;
+        $data = static::$getData;
 
         if (is_null($key)) {
             return $this->all($data);
@@ -86,7 +86,7 @@ class Request
 
     public function post($key = null, $default = null)
     {
-        $data = self::$postData;
+        $data = static::$postData;
 
         if (is_null($key)) {
             return $this->all($data);
@@ -98,7 +98,7 @@ class Request
 
     public function all($data = null)
     {
-        $data = $data ?: array_merge(self::$getData, self::$postData);
+        $data = $data ?: array_merge(static::$getData, static::$postData);
         if ($this->onlyKey) {
             Arr::only($data, $this->onlyKey);
 
@@ -114,10 +114,10 @@ class Request
     {
         switch ($method) {
             case 'post':
-                self::$postData = $data;
+                static::$postData = $data;
                 break;
             case 'get':
-                self::$getData = $data;
+                static::$getData = $data;
                 break;
             default:
                 return false;
@@ -130,10 +130,10 @@ class Request
     {
         switch ($method) {
             case 'post':
-                self::$postData = array_merge(self::$postData, $data);
+                static::$postData = array_merge(static::$postData, $data);
                 break;
             case 'get':
-                self::$getData = array_merge(self::$getData, $data);
+                static::$getData = array_merge(static::$getData, $data);
                 break;
             default:
                 return false;
@@ -147,10 +147,10 @@ class Request
 
         switch ($method) {
             case 'post':
-                $data = self::$postData;
+                $data = static::$postData;
                 break;
             case 'get':
-                $data = self::$getData;
+                $data = static::$getData;
                 break;
             default:
                 return false;

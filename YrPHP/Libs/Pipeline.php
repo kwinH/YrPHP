@@ -83,7 +83,7 @@ class Pipeline
                         return call_user_func([$pipe, $this->method], $passable, $stack);
                     }
                 }
-
+                return null;
             };
         };
     }

@@ -10,26 +10,26 @@ namespace YrPHP;
 
 class Debug
 {
-    static $info = array();
-    static $queries = array();
-    static $startTime;                //保存脚本开始执行时的时间（以微秒的形式保存）
-    static $stopTime;                //保存脚本结束执行时的时间（以微秒的形式保存）
-
+    public static $info = array();
+    public static $queries = array();
+    public static $startTime;                //保存脚本开始执行时的时间（以微秒的形式保存）
+    public static $stopTime;                //保存脚本结束执行时的时间（以微秒的形式保存）
+    public static $includeFile;
 
     /**
      * 在脚本开始处调用获取脚本开始时间的微秒值
      */
-    static function start()
+    public static function start()
     {
-        self::$startTime = microtime(true);   //将获取的时间赋给成员属性$startTime
+        static::$startTime = microtime(true);   //将获取的时间赋给成员属性$startTime
     }
 
     /**
      *在脚本结束处调用获取脚本结束时间的微秒值
      */
-    static function stop()
+    public static function stop()
     {
-        self::$stopTime = microtime(true);   //将获取的时间赋给成员属性$stopTime
+        static::$stopTime = microtime(true);   //将获取的时间赋给成员属性$stopTime
     }
 
     /**
@@ -37,18 +37,18 @@ class Debug
      * @param    string $msg 调试消息字符串
      * @param    int $type 消息的类型
      */
-    static function addMsg($msg, $type = 0)
+    public static function addMsg($msg, $type = 0)
     {
         if (defined("DEBUG") && DEBUG == 1) {
             switch ($type) {
                 case 0:
-                    self::$info[] = $msg;
+                    static::$info[] = $msg;
                     break;
                 case 1:
-                    self::$includeFile[] = $msg;
+                    static::$includeFile[] = $msg;
                     break;
                 case 2:
-                    self::$queries[] = $msg;
+                    static::$queries[] = $msg;
                     break;
                 default:
                     return false;
@@ -60,7 +60,7 @@ class Debug
      * 已经实例化的自定义类集合
      * @return array
      */
-    static function newClasses()
+    public static function newClasses()
     {
         $declaredClasses = [];
         foreach (get_declared_classes() as $class) {
@@ -81,7 +81,7 @@ class Debug
      *  返回被 include 和 require 文件名的 array
      * @return array
      */
-    static function getIncludedFiles()
+    public static function getIncludedFiles()
     {
         return get_included_files();
     }
@@ -91,7 +91,7 @@ class Debug
      * @param $str
      * @return mixed
      */
-    static function highlightCode($str)
+    public static function highlightCode($str)
     {
         /* The highlight string function encodes and highlights
          * brackets so we need them to start raw.
@@ -137,22 +137,22 @@ class Debug
     /**
      * 输出调试消息
      */
-    static function message()
+    public static function message()
     {
         $mess = "";
         $mess .= '<div style="clear:both;font-size:12px;background:#ddd;border:1px solid #009900;z-index:100;position: fixed;right: 0;bottom: 0;width: auto" id="_yrcms_debug">';
-        $mess .= '<div style="float:left;width:100%;" ><span><b>运行信息</b>( <font color="red">' . self::spent(STARTTIME, microtime(true)) . ' </font>秒)：</span><span onclick="_debug_details=document.getElementById(\'_debug_details\');_yrcms_debug=document.getElementById(\'_yrcms_debug\');if(_debug_details.style.display==\'none\'){_debug_details.style.display=\'inline\';_yrcms_debug.style.width=\'100%\';this.innerHTML=\'隐藏X\';}else{_debug_details.style.display=\'none\';_yrcms_debug.style.width=\'auto\';this.innerHTML=\'详情√\';}" style="cursor:pointer;float:right;width:35px;background:#500;border:1px solid #555;color:white">详情√</span></div><br/><div id="_debug_details" style="display:none">';
+        $mess .= '<div style="float:left;width:100%;" ><span><b>运行信息</b>( <font color="red">' . static::spent(STARTTIME, microtime(true)) . ' </font>秒)：</span><span onclick="_debug_details=document.getElementById(\'_debug_details\');_yrcms_debug=document.getElementById(\'_yrcms_debug\');if(_debug_details.style.display==\'none\'){_debug_details.style.display=\'inline\';_yrcms_debug.style.width=\'100%\';this.innerHTML=\'隐藏X\';}else{_debug_details.style.display=\'none\';_yrcms_debug.style.width=\'auto\';this.innerHTML=\'详情√\';}" style="cursor:pointer;float:right;width:35px;background:#500;border:1px solid #555;color:white">详情√</span></div><br/><div id="_debug_details" style="display:none">';
         $mess .= '<ul style="margin:0px;padding:0 10px 0 10px;list-style:none">';
 
 
-        self::$info[] = '内存使用：<strong style="color:red">' . round(memory_get_usage() / 1024, 2) . ' KB</strong>';
-        self::$info[] = 'URI字符串：' . implode('/', \uri::segment());
-        self::$info[] = 'URI路由地址：' . implode('/', \uri::rsegment());
-        self::$info[] = '控制器地址：' . C('classPath');
-        self::$info[] = '调用方法：' . C('nowAction');
-        if (count(self::$info) > 0) {
+        static::$info[] = '内存使用：<strong style="color:red">' . round(memory_get_usage() / 1024, 2) . ' KB</strong>';
+        static::$info[] = 'URI字符串：' . implode('/', \uri::segment());
+        static::$info[] = 'URI路由地址：' . implode('/', \uri::rsegment());
+        static::$info[] = '控制器地址：' . C('classPath');
+        static::$info[] = '调用方法：' . C('nowAction');
+        if (count(static::$info) > 0) {
             $mess .= '<br>［系统信息］';
-            foreach (self::$info as $info) {
+            foreach (static::$info as $info) {
                 $mess .= '<li>&nbsp;&nbsp;&nbsp;&nbsp;' . $info . '</li>';
             }
         }
@@ -160,8 +160,8 @@ class Debug
         $highlight = array('SELECT', 'DISTINCT', 'FROM', 'WHERE', 'AND', 'LEFT&nbsp;JOIN', 'ORDER&nbsp;BY', 'GROUP&nbsp;BY', 'LIMIT', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'OR&nbsp;', 'HAVING', 'OFFSET', 'NOT&nbsp;IN', 'IN', 'LIKE', 'NOT&nbsp;LIKE', 'COUNT', 'MAX', 'MIN', 'ON', 'AS', 'AVG', 'SUM', '(', ')');
 
         $mess .= '<br>［SQL语句］';
-        foreach (self::$queries as $val) {
-            $sql = self::highlightCode($val['sql']);
+        foreach (static::$queries as $val) {
+            $sql = static::highlightCode($val['sql']);
             foreach ($highlight as $bold) {
                 $sql = str_replace($bold, '<strong>' . $bold . '</strong>', $sql);
             }
@@ -172,19 +172,17 @@ class Debug
         }
 
         $mess .= '</ul>';
-        $mess .= '</div></div>';
-
-        return $mess;
+        return $mess . '</div></div>';
     }
 
     /**
      *返回同一脚本中两次获取时间的差值
      */
-    static function spent($startTime = null, $stopTime = null)
+    public static function spent($startTime = null, $stopTime = null)
     {
-        $startTime = empty($startTime) ? self::$startTime : $startTime;
-        $stopTime = empty($stopTime) ? self::$stopTime : $stopTime;
-        // return round((self::$stopTime - self::$startTime), 4);  //计算后以4舍5入保留4位返回
+        $startTime = empty($startTime) ? static::$startTime : $startTime;
+        $stopTime = empty($stopTime) ? static::$stopTime : $stopTime;
+        // return round((static::$stopTime - static::$startTime), 4);  //计算后以4舍5入保留4位返回
         return sprintf("%1\$.4f", ($stopTime - $startTime));  //计算后保留4位返回
     }
 
@@ -193,7 +191,7 @@ class Debug
      * @param $fileName 文件名
      * @param $content  内容
      */
-    static function log($content, $fileName = null)
+    public static function log($content, $fileName = null)
     {
         $fileName = is_null($fileName) ? 'log-' . date('Y-m-d') : $fileName;
         $fileName = C('logDir') . $fileName . '.log';

@@ -9,7 +9,7 @@
 namespace YrPHP;
 class View
 {
-    private static $callNumber = 0;    //防止重复调用
+    protected static $callNumber = 0;    //防止重复调用
     protected $templateDir;  //定义通过模板引擎组合后文件存放目录
     protected $comFileName;  //编译好的模版文件名
     protected $compileDir; //定义编译文件存放目录
@@ -81,7 +81,7 @@ class View
      * @param    string $tpl_var 需要一个字符串参数作为关联数组下标，要和模板中的变量名对应
      * @param    mixed $value 需要一个标量类型的值，用来分配给模板中变量的值
      */
-    function assign($tplVar, $value = null)
+    public function assign($tplVar, $value = null)
     {
         if ($tplVar != '') {
             $this->tplVars[$tplVar] = $value;
@@ -94,7 +94,7 @@ class View
      * @param    array $tpl_var 需要一个字符串参数作为关联数组下标，要和模板中的变量名对应
      * @param    string 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
      */
-    function display($fileName, $tplVars = '', $cacheId = '')
+    public function display($fileName, $tplVars = '', $cacheId = '')
     {
         //缓存静态文件
         $this->init($cacheId);
@@ -116,7 +116,7 @@ class View
     }
 
 
-    function buildTplFile($fileName, $tplVars = '')
+    public function buildTplFile($fileName, $tplVars = '')
     {
         if (!empty($tplVars)) {
             $this->tplVars = array_merge($this->tplVars, $tplVars);
@@ -128,7 +128,7 @@ class View
 
         /* 如果需要处理的模板文件不存在,则退出并报告错误 */
         if (!file_exists($tplFile)) {
-            throw new \Exception("模板文件{$tplFile}不存在！");
+            throw new Exception("模板文件{$tplFile}不存在！");
         }
 
         /* 获取组合的模板文件，该文件中的内容都是被替换过的 */
@@ -138,28 +138,28 @@ class View
             File::mkDir($comFileDir);
         }
 
-        $comFileName = $comFileDir . '/' . basename($fileName) . '.php';
+        $tempComFileName = $comFileDir . '/' . basename($fileName) . '.php';
 
         if (is_null($this->comFileName)) {
-            $this->comFileName = $comFileName;
+            $this->comFileName = $tempComFileName;
         }
 
-        if (!file_exists($comFileName) || filemtime($comFileName) < filemtime($tplFile) || filemtime($comFileName) < filemtime($this->ctlFile)) {
+        if (!file_exists($tempComFileName) || filemtime($tempComFileName) < filemtime($tplFile) || filemtime($tempComFileName) < filemtime($this->ctlFile)) {
             $repContent = $this->tplReplace(file_get_contents($tplFile));
 
             $this->setBlock($repContent);
 
             /* 保存由系统组合后的脚本文件 */
-            file_put_contents($comFileName, $repContent);
+            file_put_contents($tempComFileName, $repContent);
             return $repContent;
         }
 
-        return file_get_contents($comFileName);
+        return file_get_contents($tempComFileName);
 
     }
 
 
-    function getComFileName($fileName)
+    public function getComFileName($fileName)
     {
         /* 到指定的目录中寻找模板文件 */
         $fileName = strpos($fileName, '.') !== false ? $fileName : ($fileName . '.' . C('templateExt'));
@@ -244,12 +244,12 @@ class View
     public function init($cacheId = '')
     {
         ob_start();
-        if (self::$callNumber) {
+        if (static::$callNumber) {
             return false;
         }
 
         if ($this->caching) {
-            //self::$cacheId[] = $cacheId;
+            //static::$cacheId[] = $cacheId;
             $cacheDir = rtrim($this->cacheDir, '/') . '/' . $this->cacheSubDir;
 
             if (!file_exists($cacheDir)) {
@@ -266,7 +266,7 @@ class View
                     requireCache($this->cacheFile);
                     exit;
                 }
-                self::$callNumber++;
+                static::$callNumber++;
             }
         }
 

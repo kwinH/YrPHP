@@ -2282,7 +2282,7 @@ YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
 
 ####init($config)参数初始化
 
-####upload($field)文件上传
+####uploadFile($field)文件上传
 >@param 表单名称 $field，上传文件的表单名称  如果为空则上传 $_FILES数组中所有文件
 
 ####getFileInfo($inputName=null);获得上传文件相关属性
@@ -2307,12 +2307,12 @@ YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
  'allowedTypes'=>array('jpg','png')
  );
  //参数配置可以在实例化时就传入
-        $up = loadClass('YrPHP\\Upload',$config);
-        $re = $up->upload('file123');
+        $up = loadClass('YrPHP\\upload',$config);
+        $re = $up->uploadFile('file123');
 
  //参数配置也可以在init方法中传入
-        $up = loadClass('YrPHP\\Upload');
-        $re = $up->init($config)->upload('file123');
+        $up = loadClass('YrPHP\\upload');
+        $re = $up->init($config)->uploadFile('file123');
 
 ```
 

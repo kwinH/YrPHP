@@ -31,7 +31,7 @@ class App
         require ROOT_PATH . 'vendor/autoload.php';
 
         //注册自动加载函数
-        spl_autoload_register('self::autoLoadClass');
+        spl_autoload_register('static::autoLoadClass');
 
         if (!file_exists(APP)) {
             Structure::run();
@@ -56,11 +56,9 @@ class App
 
         requireCache($file);
 
-        if (!class_exists($className)) {
-            if ($name = Arr::arrayIGet(Config::get('classAlias'), $className)) {
-                file_put_contents($file, PHP_EOL . 'class ' . ucfirst(strtolower($className)) . ' extends Facade{public static $className=\'' . $name . '\';}', FILE_APPEND);
-                header('location: ' . $_SERVER['HTTP_REFERER']);
-            }
+        if (!class_exists($className) && $name = Arr::arrayIGet(Config::get('classAlias'), $className)) {
+            file_put_contents($file, PHP_EOL . 'class ' . ucfirst(strtolower($className)) . ' extends Facade{public static $className=\'' . $name . '\';}', FILE_APPEND);
+            header('location: ' . $_SERVER['HTTP_REFERER']);
         }
     }
 
@@ -167,10 +165,10 @@ class App
 
     static function run()
     {
-        self::init();
+        static::init();
         Config::load('class_alias', 'classAlias');
         Config::load('interface', 'interface');
-        self::loadConf();
+        static::loadConf();
         header("Content-Type:" . Config::get('contentType') . ";charset=" . Config::get('charset')); //设置系统的输出字符为utf-8
 
         $url = uri::rsegment();
@@ -243,23 +241,21 @@ class App
 
         if (method_exists($classObj, $action)) {
 
-            self::pipeline()
-                ->send(self::request())
+            static::pipeline()
+                ->send(static::request())
                 ->through(Config::get('middleware.before'))
                 ->then(function ($request) use ($classObj, $action, $url) {
-
-                    $ctlObj = self::loadClass($classObj);
-
+                    $ctlObj = static::loadClass($classObj);
                     $middleware = array_merge(Config::get('middleware.middle'), $ctlObj->getMiddleware());
 
-                    self::pipeline()
+                    static::pipeline()
                         ->send($request)
                         ->through($middleware)
                         ->then(function ($request) use ($classObj, $action, $url) {
                             array_unshift($url, $classObj, $action);
-                            $request->view = call_user_func_array('self::runMethod', $url);
+                            $request->view = call_user_func_array('static::runMethod', $url);
 
-                            self::pipeline()
+                            static::pipeline()
                                 ->send($request)
                                 ->through(Config::get('middleware.after'))
                                 ->then(function ($request) {
@@ -283,33 +279,31 @@ class App
     /**
      * @param array $argv
      */
-    static function cli($argv = array())
+    static function cli($argv)
     {
-        if (count($argv) < 3) {
-            exit('Parameter error');
-        }
+            if (count($argv) < 3) {
+                exit('Parameter error');
+            }
 
-        self::init();
-        Config::load('class_alias', 'classAlias');
-        Config::load('interface', 'interface');
-        Config::load('commands', 'commands');
-        self::loadConf();
+            static::init();
+            Config::load('class_alias', 'classAlias');
+            Config::load('interface', 'interface');
+            Config::load('commands', 'commands');
+            static::loadConf();
 
-        $class = Config::get('commands.' . $argv[1]);
-        if (is_null($class)) {
-            $class = APP . '\\' . Config::get('ctrBaseNamespace') . '\\' . ucfirst(strtolower($argv[1]));
-        }
+            $class = Config::get('commands.' . $argv[1]);
+            if (is_null($class)) {
+                $class = APP . '\\' . Config::get('ctrBaseNamespace') . '\\' . ucfirst(strtolower($argv[1]));
+            }
 
-        $method = $argv[2];
+            $method = $argv[2];
 
-        if (class_exists($class)) {
-            unset($argv[0], $argv[1], $argv[2]);
-            $class = static::loadClass($class);
-            call_user_func_array([$class, $method], $argv);
-        }
-
+            if (class_exists($class)) {
+                unset($argv[0], $argv[1], $argv[2]);
+                $class = static::loadClass($class);
+                call_user_func_array([$class, $method], $argv);
+            }
     }
-
 
     /**
      * loadClass($className [, mixed $parameter [, mixed $... ]])
@@ -325,7 +319,7 @@ class App
         //弹出第一个参数，这是类名，剩下的都是要传给实例化类的构造函数的参数了
         $className = array_shift($arguments);
 
-        if (!isset(self::$instanceList[$key])) {
+        if (!isset(static::$instanceList[$key])) {
             $reflection = new ReflectionClass($className);
             if ($reflection->isInterface()) {
                 $reflection = new ReflectionClass(Config::get('interface.' . $className));
@@ -334,24 +328,25 @@ class App
             $constructor = $reflection->getConstructor();
 
             if (is_null($constructor)) {
-                self::$instanceList[$key] = $reflection->newInstanceArgs();
+                static::$instanceList[$key] = $reflection->newInstanceArgs();
             } else {
                 if (!$arguments) {
-                    $arguments = self::getDependencies($constructor);
+                    $arguments = static::getDependencies($constructor);
                 }
 
-                self::$instanceList[$key] = $reflection->newInstanceArgs($arguments);
+                static::$instanceList[$key] = $reflection->newInstanceArgs($arguments);
             }
 
         }
-        return self::$instanceList[$key];
+        return static::$instanceList[$key];
     }
+
 
     /**
      * 递归解析参数
      * @param ReflectionMethod $rfMethod
+     * @param array $params
      * @return array
-     * @throws \Exception
      */
     static function getDependencies(ReflectionMethod $rfMethod, $params = [])
     {
@@ -363,7 +358,7 @@ class App
 
         foreach ($rfMethod->getParameters() as $param) {
             if ($dependency = $param->getClass()) {   //该参数不是对象
-                $instanceParams[] = self::loadClass($dependency->name);
+                $instanceParams[] = static::loadClass($dependency->name);
             } else {
                 if ($argument = array_shift($params)) {
                     $instanceParams[] = $argument;
@@ -389,9 +384,9 @@ class App
         $MethodName = array_shift($arguments);
         $reflectionMethod = new ReflectionMethod($className, $MethodName);
 
-        $args = self::getDependencies($reflectionMethod, $arguments);//返回类方法的参数
+        $args = static::getDependencies($reflectionMethod, $arguments);//返回类方法的参数
 
-        return $reflectionMethod->invokeArgs(self::loadClass($className), $args);
+        return $reflectionMethod->invokeArgs(static::loadClass($className), $args);
     }
 
     public static function __callStatic($name, $paramenters)

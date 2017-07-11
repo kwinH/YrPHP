@@ -11,7 +11,7 @@ namespace YrPHP\Cache;
 
 class Memcache implements ICache
 {
-    private static $object;
+    protected static $object;
 
     static function getInstance()
     {
@@ -19,23 +19,23 @@ class Memcache implements ICache
             die('没有安装memcache扩展');
         }
 
-        if (is_object(self::$object)) {
-            return self::$object;
+        if (is_object(static::$object)) {
+            return static::$object;
         } else {
-            self::$object = new \Memcache;
+            static::$object = new \Memcache;
             $config = C('memcache');
             if (is_string($config)) {
                 $conf = explode(':', $config);
-                self::$object->connect($conf[0], $conf[1]);
+                static::$object->connect($conf[0], $conf[1]);
             } elseif (is_array($config)) {
                 foreach ($config as $v) {
                     $conf = explode(':', $v);
-                    self::$object->addServer($conf[0], $conf[1]);
+                    static::$object->addServer($conf[0], $conf[1]);
                 }
             } else {
                 die('参数错误');
             }
-            return self::$object;
+            return static::$object;
         }
 
     }
@@ -60,7 +60,7 @@ class Memcache implements ICache
             return false;
         }
 
-        return myUnSerialize(self::getInstance()->get($key));
+        return myUnSerialize(static::getInstance()->get($key));
     }
 
 
@@ -73,7 +73,7 @@ class Memcache implements ICache
     public function set($key, $val, $timeout = null)
     {
         $timeout = is_null($timeout) ? C('dbCacheTime') : $timeout;
-        return self::getInstance()->set($key, mySerialize($val), 0, $timeout);
+        return static::getInstance()->set($key, mySerialize($val), 0, $timeout);
     }
 
     public function del($key = null)
@@ -82,11 +82,11 @@ class Memcache implements ICache
             return false;
         }
 
-        return self::getInstance()->delete($key);
+        return static::getInstance()->delete($key);
     }
 
     public function clear()
     {
-        return self::getInstance()->flush();
+        return static::getInstance()->flush();
     }
 }

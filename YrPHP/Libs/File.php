@@ -20,15 +20,15 @@ class File
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-    static public function createFile($aimUrl, $overWrite = false)
+    public static function createFile($aimUrl, $overWrite = false)
     {
         if (file_exists($aimUrl) && !$overWrite) {
             return false;
         } elseif (file_exists($aimUrl) && $overWrite) {
-            self::unlinkFile($aimUrl);
+            static::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
-        self::mkDir($aimDir);
+        static::mkDir($aimDir);
         touch($aimUrl);
         return true;
     }
@@ -39,11 +39,11 @@ class File
      * @param  string $aimDir
      * @return  boolean
      */
-    static public function rm($aimDir)
+    public static function rm($aimDir)
     {
         $aimDir = str_replace('', '/', $aimDir);
         if (is_file($aimDir)) {
-            return self::unlinkFile($aimDir);
+            return static::unlinkFile($aimDir);
         }
 
         $aimDir = substr($aimDir, -1) == '/' ? $aimDir : $aimDir . '/';
@@ -58,9 +58,9 @@ class File
                 continue;
             }
             if (!is_dir($aimDir . $file)) {
-                self::unlinkFile($aimDir . $file);
+                static::unlinkFile($aimDir . $file);
             } else {
-                self::rm($aimDir . $file);
+                static::rm($aimDir . $file);
             }
         }
         closedir($dirHandle);
@@ -73,7 +73,7 @@ class File
      * @param  string $aimUrl
      * @return  boolean
      */
-    static public function unlinkFile($aimUrl)
+    public static function unlinkFile($aimUrl)
     {
         if (file_exists($aimUrl)) {
             return unlink($aimUrl);
@@ -85,9 +85,9 @@ class File
      * 建立文件夹
      *
      * @param  string $aimUrl
-     * @return  viod
+     * @return  bool
      */
-    static public function mkDir($aimUrl, $mode = 0777)
+    public static function mkDir($aimUrl, $mode = 0777)
     {
         $aimUrl = str_replace('', '/', $aimUrl);
         $aimDir = '';
@@ -110,7 +110,7 @@ class File
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-    static public function moveFile($fileUrl, $aimUrl, $overWrite = false)
+    public static function moveFile($fileUrl, $aimUrl, $overWrite = false)
     {
         if (!file_exists($fileUrl)) {
             return false;
@@ -118,10 +118,10 @@ class File
         if (file_exists($aimUrl) && $overWrite = false) {
             return false;
         } elseif (file_exists($aimUrl) && $overWrite = true) {
-            self::unlinkFile($aimUrl);
+            static::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
-        self::mkDir($aimDir);
+        static::mkDir($aimDir);
         rename($fileUrl, $aimUrl);
         return true;
     }
@@ -134,10 +134,10 @@ class File
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-    static public function mv($oldDir, $aimDir, $overWrite = false)
+    public static function mv($oldDir, $aimDir, $overWrite = false)
     {
         if (is_file($oldDir)) {
-            return self::moveFile($oldDir, $aimDir, $overWrite);
+            return static::moveFile($oldDir, $aimDir, $overWrite);
         }
 
         $aimDir = str_replace('', '/', $aimDir);
@@ -148,7 +148,7 @@ class File
             return false;
         }
         if (!file_exists($aimDir)) {
-            self::mkDir($aimDir);
+            static::mkDir($aimDir);
         }
         @$dirHandle = opendir($oldDir);
         if (!$dirHandle) {
@@ -159,9 +159,9 @@ class File
                 continue;
             }
             if (!is_dir($oldDir . $file)) {
-                self::moveFile($oldDir . $file, $aimDir . $file, $overWrite);
+                static::moveFile($oldDir . $file, $aimDir . $file, $overWrite);
             } else {
-                self::mv($oldDir . $file, $aimDir . $file, $overWrite);
+                static::mv($oldDir . $file, $aimDir . $file, $overWrite);
             }
         }
         closedir($dirHandle);
@@ -177,7 +177,7 @@ class File
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-    static public function copyFile($fileUrl, $aimUrl, $overWrite = false)
+    public static function copyFile($fileUrl, $aimUrl, $overWrite = false)
     {
         if (!file_exists($fileUrl)) {
             return false;
@@ -185,10 +185,10 @@ class File
         if (file_exists($aimUrl) && !$overWrite) {
             return false;
         } elseif (file_exists($aimUrl) && $overWrite) {
-            self::unlinkFile($aimUrl);
+            static::unlinkFile($aimUrl);
         }
         $aimDir = dirname($aimUrl);
-        self::mkDir($aimDir);
+        static::mkDir($aimDir);
         copy($fileUrl, $aimUrl);
         return true;
     }
@@ -202,11 +202,11 @@ class File
      * @param  boolean $overWrite 该参数控制是否覆盖原文件
      * @return  boolean
      */
-    static public function cp($oldDir, $aimDir, $overWrite = false)
+    public static function cp($oldDir, $aimDir, $overWrite = false)
     {
         $aimDir = str_replace('', '/', $aimDir);
         if (is_file($oldDir)) {
-            return self::copyFile($oldDir, $aimDir, $overWrite);
+            return static::copyFile($oldDir, $aimDir, $overWrite);
         }
 
         $aimDir = substr($aimDir, -1) == '/' ? $aimDir : $aimDir . '/';
@@ -216,7 +216,7 @@ class File
             return false;
         }
         if (!file_exists($aimDir)) {
-            self::mkDir($aimDir);
+            static::mkDir($aimDir);
         }
         $dirHandle = opendir($oldDir);
         while (false !== ($file = readdir($dirHandle))) {
@@ -224,9 +224,9 @@ class File
                 continue;
             }
             if (!is_dir($oldDir . $file)) {
-                self::copyFile($oldDir . $file, $aimDir . $file, $overWrite);
+                static::copyFile($oldDir . $file, $aimDir . $file, $overWrite);
             } else {
-                self::cp($oldDir . $file, $aimDir . $file, $overWrite);
+                static::cp($oldDir . $file, $aimDir . $file, $overWrite);
             }
         }
         closedir($dirHandle);
@@ -240,7 +240,7 @@ class File
      *$name 修改后的文件路径及文件名
      * @return    bool
      */
-    static public function rename($path, $name)
+    public static function rename($path, $name)
     {
         if (file_exists($path)) {
             if (rename($path, $name)) {
@@ -257,12 +257,12 @@ class File
      * @param  string $filename 文件名
      * @param  boolean $str 待写入的字符数据
      */
-    static public function vi($filename, $str)
+    public static function vi($filename, $str)
     {
         $path = pathinfo($filename, PATHINFO_DIRNAME);
 
         if (!is_dir($path)) {
-            self::mkDir($path);
+            static::mkDir($path);
         }
 
         if (function_exists('file_put_contents')) {
@@ -281,7 +281,7 @@ class File
      * @return string
      */
 
-    static public function readsFile($filename)
+    public static function readsFile($filename)
     {
         if (function_exists('file_get_contents')) {
             return file_get_contents($filename);
@@ -299,7 +299,7 @@ class File
      * @param  string $filename 文件名
      * @return array
      */
-    static public function readFile2array($filename)
+    public static function readFile2array($filename)
     {
         $file = file($filename);
         $arr = array();
@@ -318,13 +318,13 @@ class File
      * @param    string $fileexts 转换的文件格式
      * @return    string    如果原字符集和目标字符集相同则返回false，否则为true
      */
-    static public function dirIconv($in_charset, $out_charset, $dir, $fileexts = 'php|html|htm|shtml|shtm|js|txt|xml')
+    public static function dirIconv($in_charset, $out_charset, $dir, $fileexts = 'php|html|htm|shtml|shtm|js|txt|xml')
     {
         if ($in_charset == $out_charset) {
             return false;
         }
 
-        $list = self::dirList($dir);
+        $list = static::dirList($dir);
         foreach ($list as $v) {
             if (preg_match("/\.($fileexts)/i", $v) && is_file($v)) {
                 file_put_contents($v, iconv($in_charset, $out_charset, file_get_contents($v)));
@@ -341,9 +341,9 @@ class File
      * @param    array $list 增加的文件列表
      * @return    array    所有满足条件的文件
      */
-    static public function dirList($path, $key = '', $list = array())
+    public static function dirList($path, $key = '', $list = array())
     {
-        $path = self::dirPath($path);
+        $path = static::dirPath($path);
         $files = glob($path . '\*');
         //$dir = substr($path,strrpos($path,'\\')+1);
         foreach ($files as $v) {
@@ -362,7 +362,7 @@ class File
             }
 
             if (is_dir($v)) {
-                $list = self::dirList($v, $key, $list);
+                $list = static::dirList($v, $key, $list);
             }
 
 
@@ -379,9 +379,9 @@ class File
      * @param    array $list 增加的文件列表
      * @return    array    所有满足条件的文件
      */
-    static public function search($path, $key = '', $list = array())
+    public static function search($path, $key = '', $list = array())
     {
-        $path = self::dirPath($path);
+        $path = static::dirPath($path);
 
         $files = glob($path . '*');
 
@@ -402,7 +402,7 @@ class File
             }
 
             if (is_dir($v)) {
-                $list = self::search($v, $key, $list);
+                $list = static::search($v, $key, $list);
             }
 
 
@@ -416,7 +416,7 @@ class File
      * @param    string $path 路径
      * @return    string    路径
      */
-    static public function dirPath($path)
+    public static function dirPath($path)
     {
         $path = str_replace('\\', '/', realpath($path));
         if (substr($path, -1) != '/') {
@@ -431,7 +431,7 @@ class File
      * @param    string $filename
      * @return    string
      */
-    static public function fileExt($filename)
+    public static function fileExt($filename)
     {
         if (file_exists($filename)) {
             return pathinfo($filename, PATHINFO_EXTENSION);
@@ -450,7 +450,7 @@ class File
      * 的块大小)、blocks(所占据块的数目)。
      *
      */
-    static public function getFileInfo($filename)
+    public static function getFileInfo($filename)
     {
         if (file_exists($filename)) {
             return array_merge(pathinfo($filename), stat($filename));
@@ -464,20 +464,20 @@ class File
      * @param    string $path 路径
      * @param    int $mtime 修改时间
      * @param    int $atime 访问时间
-     * @return    array    不是目录时返回false，否则返回 true
+     * @return    array|bool    不是目录时返回false，否则返回 true
      */
-    static public function dirTouch($path, $mtime = TIME, $atime = TIME)
+    public static function dirTouch($path, $mtime, $atime)
     {
         if (!is_dir($path)) {
             return false;
         }
-        $path = self::dirPath($path);
+        $path = static::dirPath($path);
         if (!is_dir($path)) {
             touch($path, $mtime, $atime);
         }
         $files = glob($path . '*');
         foreach ($files as $v) {
-            is_dir($v) ? self::dirTouch($v, $mtime, $atime) : touch($v, $mtime, $atime);
+            is_dir($v) ? static::dirTouch($v, $mtime, $atime) : touch($v, $mtime, $atime);
         }
         return true;
     }
@@ -490,7 +490,7 @@ class File
      * @param    array $dirs 传入的目录
      * @return    array    返回目录及子目录列表
      */
-    static public function dirTree($dir, $parentid = 0, $dirs = array())
+    public static function dirTree($dir, $parentid = 0, $dirs = array())
     {
         global $id;
         if ($parentid == 0) {
@@ -501,7 +501,7 @@ class File
             if (is_dir($v)) {
                 $id++;
                 $dirs [$id] = array('id' => $id, 'parentid' => $parentid, 'name' => basename($v), 'dir' => $v . '/');
-                $dirs = self::dirTree($v . '/', $id, $dirs);
+                $dirs = static::dirTree($v . '/', $id, $dirs);
             }
         }
         return $dirs;
@@ -513,7 +513,7 @@ class File
      * @param    string $dir 路径
      * @return    array    返回目录列表
      */
-    static public function dirNodeTree($dir)
+    public static function dirNodeTree($dir)
     {
         $d = dir($dir);
         $dirs = array();
@@ -527,11 +527,10 @@ class File
 
     /**
      * 获取目录大小
-     *
-     * @param    string $dirname 目录
-     * @return    string      比特B
+     * @param string $dirname 目录
+     * @return bool|int 比特B
      */
-    static public function getDirSize($dirname)
+    public static function getDirSize($dirname = '')
     {
         if (!file_exists($dirname) || !is_dir($dirname)) {
             return false;
@@ -548,7 +547,7 @@ class File
             }
             $file = $dirname . "/" . $file;
             if (is_dir($file)) {
-                $size += self::getDirSize($file);
+                $size += static::getDirSize($file);
             } else {
                 $size += filesize($file);
             }
@@ -560,9 +559,9 @@ class File
 
     /**
      * 将字节转换成Kb或者Mb...
-     * @param $size为字节大小
+     * @param int $size为字节大小
      */
-    static public function bitSize($size)
+    public static function bitSize($size)
     {
         if (!preg_match("/^[0-9]+$/", $size)) {
             return 0;
@@ -580,7 +579,12 @@ class File
         return $size . $type [$j];
     }
 
-    static public function remoteFileExists($url_file)
+    /**
+     * 判断远程文件是否存在
+     * @param string $url_file
+     * @return bool
+     */
+    public static function remoteFileExists($url_file = '')
     {
         $url_file = trim($url_file);
         if (empty($url_file)) {

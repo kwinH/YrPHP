@@ -13,7 +13,7 @@ namespace YrPHP;
 class Structure
 {
 
-    static function run()
+    public static function run()
     {
 
         $fun = <<<st
@@ -113,7 +113,7 @@ st;
         }
         File::cp(BASE_PATH . 'Config', APP_PATH . 'Config');
         File::mkDir(ROOT_PATH . 'public');
-        header("Location: /" );
+        header("Location: /");
 
     }
 }

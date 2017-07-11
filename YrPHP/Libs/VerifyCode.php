@@ -26,7 +26,7 @@ class VerifyCode
     private $pixelNum = 666; //干扰点个数
     private $lineNum = 10; //干扰线条数
 
-    function __construct($config = array())
+    public function __construct($config = array())
     {
         if (!session_id()) {
             session_start();
@@ -35,7 +35,7 @@ class VerifyCode
         $this->init($config);
     }
 
-    function init($config = array())
+    public function init($config = array())
     {
         foreach ($config as $k => $v) {
             $this->$k = $v;
@@ -138,13 +138,11 @@ class VerifyCode
                 $str = $str1 . $str2 . $str3;
                 break;
         }
-        $randStr = '';
+        $this->randStr = '';
         for ($i = 0; $i < $this->len; $i++) {
             $start = mt_rand(1, strlen($str) - 1);
-            $randStr .= substr($str, $start, 1);
+            $this->randStr .= substr($str, $start, 1);
         }
-        $this->randStr = $randStr;
-
     }
 
     /**

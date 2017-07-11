@@ -11,7 +11,7 @@ namespace YrPHP;
 class Model
 {
     // 当前数据库操作对象
-    private static $object;
+    protected static $object;
     /**
      * 主服务器
      * @var \YrPHP\Db\PdoDriver
@@ -86,7 +86,7 @@ class Model
 
     private $PreProcessStatus = true;
 
-    private static $tableFields = [];
+    protected static $tableFields = [];
 
     public function __construct($tableName = null, $connection = null)
     {
@@ -101,7 +101,7 @@ class Model
         }
         if (!is_null($connection)) {
             $this->connection = $connection;
-        } else if (is_null($this->connection)) {
+        } elseif (is_null($this->connection)) {
             $this->connection = $this->dbConfig['defaultConnection'];
         }
 
@@ -129,7 +129,7 @@ class Model
     {
         $this->slaveServer = [];
         $dbConf = $this->dbConfig[$this->connection];
-        $this->masterServer = self::getInstance($dbConf['masterServer']);
+        $this->masterServer = static::getInstance($dbConf['masterServer']);
 
         if (empty($dbConf['slaveServer'])) {
             $this->slaveServer[] = $this->masterServer;
@@ -139,7 +139,7 @@ class Model
             }
 
             foreach ($dbConf['slaveServer'] as $v) {
-                $this->slaveServer[] = self::getInstance($v);
+                $this->slaveServer[] = static::getInstance($v);
             }
         }
 
@@ -154,17 +154,18 @@ class Model
     {
         $startTime = microtime(true);
         $key = md5(json_encode($dbConfig));
-        if (is_object(self::$object[$key])) {
-            $obj = self::$object[$key];
+
+        if (is_object(static::$object[$key])) {
+            $obj = static::$object[$key];
         } else {
             if (empty($dbConfig['dsn'])) {
                 $dbConfig['dsn'] = $dbConfig['dbType'] . ":host=" . $dbConfig['dbHost'] . ";port=" . $dbConfig['dbPort'] . ";dbname=" . $dbConfig['dbName'];
             }
 
-            self::$object[$key] = Db\PdoDriver::getInstance($dbConfig);
+            static::$object[$key] = Db\PdoDriver::getInstance($dbConfig);
 
-            if (self::$object[$key] instanceof Db\IDBDriver) {
-                $obj = self::$object[$key];
+            if (static::$object[$key] instanceof Db\IDBDriver) {
+                $obj = static::$object[$key];
             } else {
                 die('错误：必须实现db\Driver接口');
             }
@@ -188,15 +189,20 @@ class Model
                 return $result . ',' . $this->escapeId($item);
             }), ',');
         } else {
-            $field = explode('.', $field);
+            //$matches[1]为别名
+            $matches = preg_split('/\s(as|\s+)\s*/', trim($field));
+            $field = explode('.', $matches[0]);
 
             if (isset($field[1])) {
-                return "`{$this->tablePrefix}{$field[0]}`.`{$field[1]}`";
+                $field = "`{$this->tablePrefix}{$field[0]}`." . (strpos($field[1], '*') === false ? "`{$field[1]}`" : $field[1]);
             } else {
-                return "`{$field[0]}`";
+                $field = strpos($field[0], '*') === false ? "`{$field[0]}`" : $field[0];
             }
 
-
+            if (isset($matches[1])) {
+                return $field . ' as `' . $matches[1] . '`';
+            }
+            return $field;
         }
     }
 
@@ -215,9 +221,9 @@ class Model
                 }) . ')';
             }
 
-        } else if (is_string($value)) {
+        } elseif (is_string($value)) {
             return '"' . trim($value) . '"';
-        } else if (is_numeric($value)) {
+        } elseif (is_numeric($value)) {
             return $value;
         }
 
@@ -255,43 +261,15 @@ class Model
     public function __call($method, $args)
     {
         $method = strtolower($method);
-        if (in_array($method, array("order", "group"), true)) {
-            // 连贯操作的实现
-            $args = array_filter(explode(',', trim($args[0])));
-
-            foreach ($args as $v) {
-                if ($this->methods[$method] != "") {
-                    $this->methods[$method] .= ',';
-                }
-
-                $order = preg_split("/[\s,]+/", trim($v));
-                $dot = explode('.', $order[0]);
-                $this->methods[$method] .= '`' . $dot[0] . '`';
-
-                if (isset($dot[1])) {
-                    $this->methods[$method] .= ".`$dot[1]`";
-                }
-
-                if (isset($order[1])) {
-                    $this->methods[$method] .= ' ' . $order[1];
-                }
-
-            }
-
-
-        } else if ($method == "where") {
-            $this->condition($args[0], isset($args[1]) ? $args[1] : "and");
-        } else if ($method == "having") {
-            $this->condition($args[0], isset($args[1]) ? $args[1] : "and", 'having');
-        } else if ($method == 'count') {
+        if ($method == 'count') {
             $obj = $this;
             if (count($args)) {
-                $auto = end($args) === false ? false : true;
+                $auto = end($args) !== false;
                 $obj = $obj->table($args[0], $auto);
             }
             return $obj->select($method . '(*) as c')->get()->row()->c;
 
-        } else if (in_array($method, array('sum', 'min', 'max', 'avg'))) {
+        } elseif (in_array($method, array('sum', 'min', 'max', 'avg'))) {
             $obj = $this;
             switch (count($args)) {
                 case 1:
@@ -306,7 +284,7 @@ class Model
                     $obj = $obj->table($args[1], (boolean)$args[2]);
                     break;
                 default:
-                    throw  new \Exception('参数错误');
+                    throw  new Exception('参数错误');
             }
 
             return $obj->select($method . '(' . $field . ') as c')->get()->row()->c;
@@ -315,6 +293,25 @@ class Model
         return $this;
     }
 
+    /**
+     * @param string $where
+     * @param string $logical
+     * @return $this
+     */
+    public function where($where = '', $logical = "and")
+    {
+        return $this->condition($where, $logical);
+    }
+
+    /**
+     * @param string $where
+     * @param string $logical
+     * @return $this
+     */
+    public function having($where = '', $logical = "and")
+    {
+        return $this->condition($where, $logical, 'having');
+    }
 
     /**
      * @param string $where id=1 || ['id'=>1,'or id'=>2,'age >'=>15,'or id in'=>[1,2,3,4,5]]
@@ -338,57 +335,42 @@ class Model
                 $filed = preg_split('/\s+/', $k);
 
                 if (count($filed) == 3) {
-                    $logical = filed[0];
-                    $operator = filed[1];
-                    $filed = $this->escapeId(filed[2]);
+                    $logical = $filed[0];
+                    $operator = $filed[1];
+                    $filed = $this->escapeId($filed[2]);
+                } elseif (preg_match('/(and|or)\s+/i', $k, $matches)) {
+                    $logical = $matches[0];
+                    $operator = '=';
+                    $filed = $this->escapeId($filed[1]);
                 } else {
-                    if (preg_match('/and|or/i', $filed[0]) !== 0) {
-                        $logical = $filed[0];
-                        $operator = isset($filed[2]) ? $filed[2] : '=';
-                        $filed = $this->escapeId($filed[1]);
-                    } else {
-                        $operator = isset($filed[1]) ? $filed[1] : '=';
-                        $filed = $this->escapeId($filed[0]);
-                    }
+                    $operator = isset($filed[1]) ? $filed[1] : '=';
+                    $filed = $this->escapeId($filed[0]);
                 }
 
-
                 if ($count != 0) {
-                    $this->methods[$type] .= ' ' . $logical . ' ';
+                    $this->methods[$type] .= " {$logical} ";
                 }
 
                 if ($v instanceof \Closure) {
                     $this->methods[$type] .= $filed . ' ' . $operator . ' (' . call_user_func($v, new Model($this->tableName)) . ')';
-                } else if (is_null($v)) {
+                } elseif (is_null($v) || strripos($v, 'null') !== false) {
                     $this->methods[$type] .= $filed . ' is null';
-                } elseif (strripos($v, 'null') !== false) {
-                    $this->methods[$type] .= $filed . "  is {$v}";
                 } else {
                     $operator = strtoupper($operator);
-                    if (strpos($operator, 'IN') !== false) {
-                        if (is_string($v)) {
-                            $v = explode(',', $v);
-                        }
-
-                        $val = $this->escape($v);
-                    } else if (strpos($operator, 'BETWEEN') !== false) {
-                        if (is_string($v)) {
-                            $v = explode(',', $v);
-                        }
-
-                        $val = $this->escape($v[0]) . ' and  ' . $this->escape($v[1]);
-                    } else {
-                        if (strpos($type, 'on') !== false) {
-                            if (is_string($v)) {
-                                $v = explode(',', $v);
-                            }
-
-                            $val = $this->escapeId($v);
-                        } else {
-                            $val = $this->escape($v);
-                        }
-
+                    if (is_string($v)) {
+                        $v = explode(',', $v);
                     }
+
+                    if (strpos($operator, 'IN') !== false) {
+                        $val = $this->escape($v);
+                    } elseif (strpos($operator, 'BETWEEN') !== false) {
+                        $val = $this->escape($v[0]) . ' and  ' . $this->escape($v[1]);
+                    } elseif (strpos($type, 'on') !== false) {
+                        $val = $this->escapeId($v);
+                    } else {
+                        $val = $this->escape($v);
+                    }
+
                     $this->methods[$type] .= $filed . ' ' . $operator . ' ' . $val;
                 }
                 $count++;
@@ -398,6 +380,55 @@ class Model
         $this->methods[$type] .= ')';
         return $this;
 
+    }
+
+
+    /**
+     * @param string $sql
+     * @param string $method
+     * @return $this
+     */
+    protected function orderOrGroup($sql = '', $method = 'order')
+    {
+        $args = array_filter(explode(',', trim($sql)));
+
+        foreach ($args as $v) {
+            if ($this->methods[$method] != "") {
+                $this->methods[$method] .= ',';
+            }
+
+            $order = preg_split("/[\s,]+/", trim($v));
+            $dot = explode('.', $order[0]);
+            $this->methods[$method] .= '`' . $dot[0] . '`';
+
+            if (isset($dot[1])) {
+                $this->methods[$method] .= ".`$dot[1]`";
+            }
+
+            if (isset($order[1])) {
+                $this->methods[$method] .= ' ' . $order[1];
+            }
+
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $sql “id desc,createTime desc”=>“order by id desc,createTime desc”
+     * @return Model
+     */
+    public function order($sql = '')
+    {
+        return $this->orderOrGroup($sql, 'order');
+    }
+
+    /**
+     * @param string $sql “name,price”=>“group by name,price”
+     * @return Model
+     */
+    public function group($sql = '')
+    {
+        return $this->orderOrGroup($sql, 'group');
     }
 
 
@@ -418,9 +449,7 @@ class Model
         }
 
         $field = $this->escapeId($fieldArr);
-        //count(*) as c
-        $field = preg_replace('/`(.*)\s*\((.*)\)\s*(as|\s+)\s*(\S*)`/isU', '$1(`$2`) $3 `$4`', $field);
-        $field = preg_replace('/`\*`/', "*", $field);
+
         $this->methods['field'] .= ',' . $field;
         $this->methods['field'] = trim($this->methods['field'], ',');
 
@@ -462,7 +491,7 @@ class Model
     {
         if (empty($tableName)) {
             $tableName = $this->tableName;
-        } else if ($tableName instanceof \Closure) {
+        } elseif ($tableName instanceof \Closure) {
             return $this->tempTableName = ' (' . call_user_func($tableName, new Model($this->tableName)) . ') as tmp' . uniqid();
         }
 
@@ -484,7 +513,7 @@ class Model
 
     protected final function getTempTableName()
     {
-        if (is_null($this->tempTableName)) {
+        if (empty($this->tempTableName)) {
             $this->setTempTableName($this->tableName);
         }
         return $this->tempTableName;
@@ -501,14 +530,12 @@ class Model
 
     public function buildSql()
     {
-        $this->getTempTableName();
-
         $field = $this->methods['field'] ? $this->methods['field'] : '*';
         $order = $this->methods["order"] != "" ? " ORDER BY {$this->methods["order"]} " : "";
         $group = $this->methods["group"] != "" ? " GROUP BY {$this->methods["group"]}" : "";
         $having = $this->methods["having"] != "" ? "{$this->methods["having"]}" : "";
 
-        $this->statement = "SELECT $field FROM  {$this->tempTableName} ";
+        $this->statement = "SELECT $field FROM  {$this->getTempTableName()} ";
 
         foreach ((array)$this->methods['join'] as $v) {
             $this->statement .= " " . $v . " ";
@@ -747,10 +774,10 @@ class Model
 
             $getAttr = [];
             foreach ($getCache as $v) {
-
-                if ($key = Arr::arrayISearch($v, $fields)) {
-                    $getAttr[$fields[$key]] = $type . $v . 'Attribute';
-                } else if ($key = Arr::arrayISearch(parseNaming($v, 2), $fields)) {
+                if (
+                    ($key = Arr::arrayISearch($v, $fields))
+                    || ($key = Arr::arrayISearch(parseNaming($v, 2), $fields))
+                ) {
                     $getAttr[$fields[$key]] = $type . $v . 'Attribute';
                 }
             }
@@ -877,7 +904,6 @@ class Model
      */
     public final function delete($where = "")
     {
-        $this->getTempTableName();
         if (!empty($where)) {
             $this->where($where);
         }
@@ -885,7 +911,7 @@ class Model
         $where = $this->methods['where'];
         $limit = $this->methods['limit'];
 
-        $this->statement = "DELETE FROM {$this->tempTableName} {$where} {$limit}";
+        $this->statement = "DELETE FROM {$this->getTempTableName()} {$where} {$limit}";
 
         return $this->query($this->statement)->result();
 
@@ -911,8 +937,6 @@ class Model
             return false;
         }
 
-        $this->getTempTableName();
-
         $fields = array_keys($data);
 
         if ($this->PreProcessStatus) {
@@ -925,7 +949,7 @@ class Model
 
         $escapeData = $this->escape($data);
 
-        $this->statement = 'INSERT  INTO ' . $this->tempTableName . ' set ' . $escapeData . ' on duplicate key update ' . $escapeData;
+        $this->statement = 'INSERT  INTO ' . $this->getTempTableName() . ' set ' . $escapeData . ' on duplicate key update ' . $escapeData;
 
         $re = $this->query($this->statement, $data);
 
@@ -980,7 +1004,6 @@ class Model
      */
     function inserts($data = [], $act = 'INSERT')
     {
-        $this->getTempTableName();
         if (is_array($data[0])) {
             $fields = array_keys($data[0]);
         } else {
@@ -1000,10 +1023,10 @@ class Model
         //$value = trim(str_repeat('?,', count($fields)), ',');
 
         $value = trim(array_reduce($fields, function ($res, $item) {
-            return $res .= ',:' . $item;
+            return $res . ',:' . $item;
         }), ',');
 
-        $this->statement = "{$act}  INTO " . $this->tempTableName . "(" . $field . ")  VALUES(" . $value . ") ";
+        $this->statement = "{$act}  INTO " . $this->getTempTableName() . "(" . $field . ")  VALUES(" . $value . ") ";
 
 
         $re = $this->query($this->statement, $data);
@@ -1063,8 +1086,8 @@ class Model
      */
     public final function tableField()
     {
-        if (isset(self::$tableFields[$this->tempTableName])) {
-            return self::$tableFields[$this->tempTableName];
+        if (isset(static::$tableFields[$this->tempTableName])) {
+            return static::$tableFields[$this->tempTableName];
         }
 
         $sql = 'desc ' . $this->getTempTableName();
@@ -1086,9 +1109,9 @@ class Model
             if (!array_key_exists("pri", $fields)) {
                 $fields["pri"] = array_shift($fields);
             }
-            self::$tableFields[$this->tableName] = $fields;
+            static::$tableFields[$this->tableName] = $fields;
 
-            return self::$tableFields[$this->tableName];
+            return static::$tableFields[$this->tableName];
         }
 
         return false;
@@ -1115,7 +1138,7 @@ class Model
     public final function query($sql = "", $parameters = [])
     {
         if (empty($sql)) {
-            throw new \Exception('SQL不能为空');
+            throw new Exception('SQL不能为空');
         }
         $this->statement = $sql;
         $this->queries[] = $this->statement;
@@ -1147,11 +1170,9 @@ class Model
      */
     public final function update($data = [], $where = "")
     {
-        $this->getTempTableName();
-
-        if (empty($data))
-            $data = \request::post();
-
+        if (empty($data)) {
+            $data = \Request::post();
+        }
 
         $data = $this->check($data);
 
@@ -1177,7 +1198,7 @@ class Model
 
         $data = $this->escape($data);
 
-        $this->statement = "UPDATE " . $this->tempTableName . " SET " . $data . " " . $where . " " . $limit;
+        $this->statement = "UPDATE " . $this->getTempTableName() . " SET " . $data . " " . $where . " " . $limit;
 
         return $this->query($this->statement)->result();
     }
@@ -1403,7 +1424,7 @@ class Model
 
     /**
      * 修改字段
-     * 不能修改字段名称，只能修改
+     * 不能修改字段名称，只能修改字段类型、默认值、注释
      * @param array $info
      * @param string $tableName
      * @param bool $auto 是否自动添加表前缀
@@ -1422,8 +1443,6 @@ class Model
 
         $sql .= $field;
         return $this->query($sql)->result;
-
-        $this->checkField($info['name']);
     }
 
     /*

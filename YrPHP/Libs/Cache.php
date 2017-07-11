@@ -24,25 +24,25 @@ class Cache
      * @param null $dbCacheType
      * @return null|Cache\File|Cache\Memcache|Cache\Memcached|Cache\Redis
      */
-    static function getInstance($dbCacheType = null)
+    public static function getInstance($dbCacheType = null)
     {
-        if (!(self::$_instance instanceof self)) {
+        if (!(static::$_instance instanceof self)) {
             $dbCacheType = is_null($dbCacheType) ? C('dbCacheType') : $dbCacheType;
             $dbCacheType = strtolower($dbCacheType);
 
             switch ($dbCacheType) {
                 case "file":
-                    self::$_instance = new Cache\File;
+                    static::$_instance = new Cache\File;
                     break;
                 case "memcache":
-                    self::$_instance = new Cache\Memcache;
+                    static::$_instance = new Cache\Memcache;
                     break;
                 case "memcached":
-                    self::$_instance = new Cache\Memcached;
+                    static::$_instance = new Cache\Memcached;
 
                     break;
                 case "redis":
-                    self::$_instance = new Cache\Redis;
+                    static::$_instance = new Cache\Redis;
 
                     break;
                 default:
@@ -50,12 +50,12 @@ class Cache
                     break;
             }
 
-            if (!(self::$_instance instanceof Cache\ICache)) {
+            if (!(static::$_instance instanceof Cache\ICache)) {
                 die('错误：必须实现Cache\ICache接口');
             }
         }
 
-        return self::$_instance;
+        return static::$_instance;
     }
 
     private function __clone()

@@ -65,8 +65,8 @@ class File implements ICache
         }
 
         $file = $this->dbCachePath . $key . '.' . $this->dbCacheExt;
-        if (!file_exists($file)){
-          return false;
+        if (!file_exists($file)) {
+            return false;
         }
 
         $contents = myUnSerialize(file_get_contents($this->dbCachePath . $key . '.' . $this->dbCacheExt));
@@ -81,7 +81,26 @@ class File implements ICache
 
     public function clear()
     {
-        \Yrphp\File::rm();
+        $aimDir = str_replace('', '/', $this->dbCachePath);
+
+        $aimDir = substr($aimDir, -1) == '/' ? $aimDir : $aimDir . '/';
+
+        if (!is_dir($aimDir)) {
+            return false;
+        }
+
+        $dirHandle = opendir($aimDir);
+        while (false !== ($file = readdir($dirHandle))) {
+            if ($file == '.' || $file == '..') {
+                continue;
+            }
+            if (!is_dir($aimDir . $file)) {
+                \Yrphp\File::unlinkFile($aimDir . $file);
+            } else {
+                \Yrphp\File::rm($aimDir . $file);
+            }
+        }
+        closedir($dirHandle);
     }
 
     /**
@@ -90,13 +109,13 @@ class File implements ICache
      */
     public function del($key = null)
     {
-        if (is_null($key)){
-         return false;
+        if (is_null($key)) {
+            return false;
         }
 
         $file = \Yrphp\File::search($this->dbCachePath, $key);
 
-        foreach ($file as  $v) {
+        foreach ($file as $v) {
             \Yrphp\File::rm($v);
         }
     }

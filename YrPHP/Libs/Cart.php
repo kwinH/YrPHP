@@ -50,7 +50,7 @@ class Cart
      * @param null $seller 返回指定商家下的所以产品，默认为null，返回所以商家，单商家下无效
      * @return array
      */
-    function getContents($mallMode = null, $seller = null)
+    public function getContents($mallMode = null, $seller = null)
     {
         if (is_null($mallMode)) {
             $mallMode = $this->mallMode;

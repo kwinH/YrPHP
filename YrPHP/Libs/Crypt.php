@@ -11,24 +11,23 @@ namespace YrPHP;
 
 class Crypt
 {
-    function __construct()
+    public function __construct()
     {
         $mode = C('cryptMode');
-        switch ($mode){
-            case 'des3':
+        if ($mode == 'des3') {
             $this->class = loadClass('YrPHP\Crypt\DES3');
-                break;
-            default:
-            die('类型错误');
-                break;
+        } else {
+            throw new Exception('类型错误');
         }
-
-
     }
-    function encrypt($input){
-    return $this->class->encrypt($input);
+
+    public function encrypt($input)
+    {
+        return $this->class->encrypt($input);
     }
-    function decrypt($encrypted){
-     return   $this->class->decrypt($encrypted);
+
+    public function decrypt($encrypted)
+    {
+        return $this->class->decrypt($encrypted);
     }
 }

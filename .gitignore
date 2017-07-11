@@ -1,6 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-### CodeIgniter template
-/App/*
 /.idea/*
-/public/*
-/_class_alias.php
+/App/Runtime/*/*
+!/App/Runtime/*/index.html

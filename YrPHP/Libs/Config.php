@@ -26,10 +26,10 @@ class Config
     {
         if ($value === '' && is_array($key)) {
             foreach ($key as $k => $v) {
-                self::set($k, $v);
+                static::set($k, $v);
             }
         } else {
-            $array = &self::$config;
+            $array = &static::$config;
             $keys = explode('.', $key);
             while (count($keys) > 1) {
                 $key = array_shift($keys);
@@ -52,10 +52,10 @@ class Config
     {
         if (is_array($key)) {
             foreach ($key as $k => $v) {
-                self::delete($k);
+                static::delete($k);
             }
         } else {
-            $array = &self::$config;
+            $array = &static::$config;
             $keys = explode('.', $key);
             while (count($keys) > 1) {
                 $key = array_shift($keys);
@@ -73,10 +73,10 @@ class Config
     public static function get($key = '', $default = null)
     {
         if (empty($key)) {
-            return self::$config;
+            return static::$config;
         }
 
-        $config = self::$config;
+        $config = static::$config;
         foreach (explode('.', $key) as $v) {
             if (!isset($config[$v])) {
                 return $default;
@@ -89,7 +89,7 @@ class Config
 
     public static function all()
     {
-        return self::$config;
+        return static::$config;
     }
 
     public static function load($fileName = '', $key = null)
@@ -101,12 +101,12 @@ class Config
         }
 
         if (is_null($key)) {
-            self::set($config);
+            static::set($config);
         } else {
-            self::set($key, $config);
+            static::set($key, $config);
         }
 
-        return self::$config;
+        return static::$config;
     }
 
 

@@ -45,17 +45,17 @@ class Uri
         $uri = parse_url($_SERVER['REQUEST_URI']);
 
         $this->query = isset($uri['query']) ? $uri['query'] : '';
-        $path = isset($uri['path']) ? $uri['path'] : '';
-        $this->path = str_replace(C('urlSuffix'), '', $path);
+        $this->path = isset($uri['path']) ? $uri['path'] : '';
+        $this->path = str_replace(C('urlSuffix'), '', $this->path);
 
 
         //判断URL是否包含入口文件index.php及路径 如果有则去除，没有则只去除路径
         //$_SERVER['SCRIPT_NAME'] 包含当前脚本的路径
-        if (strpos($path, $_SERVER['SCRIPT_NAME']) === 0) {
+        if (strpos($this->path, $_SERVER['SCRIPT_NAME']) === 0) {
             //$this->path = (string)substr($this->path, strlen($_SERVER['SCRIPT_NAME']));
             $this->path = (string)str_replace($_SERVER['SCRIPT_NAME'], '', $this->path);
 
-        } elseif (strpos($path, dirname($_SERVER['SCRIPT_NAME'])) === 0) {
+        } elseif (strpos($this->path, dirname($_SERVER['SCRIPT_NAME'])) === 0) {
             $this->path = (string)substr($this->path, strlen(dirname($_SERVER['SCRIPT_NAME'])));
         }
 

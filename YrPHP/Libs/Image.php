@@ -32,7 +32,7 @@ class Image
         $this->imgPath = $imgPath;
         //检测图像文件
         if (!is_file($imgPath)) {
-            throw  new \Exception('不存在的图像文件');
+            throw  new Exception('不存在的图像文件');
         }
 
         //获取图像信息
@@ -40,7 +40,7 @@ class Image
 
         //检测图像合法性
         if (false === $this->info || (IMAGETYPE_GIF === $this->info[2] && empty($this->info['bits']))) {
-            throw new \Exception('非法图像文件');
+            throw new Exception('非法图像文件');
         }
 
         $pathInfo = pathinfo($imgPath);//array(dirname,basename,extension,filename)
@@ -74,7 +74,6 @@ class Image
                 break;
             default:
                 return false;
-                break;
         }
         return $imgResource;
     }
@@ -178,7 +177,7 @@ class Image
                 if (is_array($position)) {
                     list($x, $y) = $position;
                 } else {
-                    throw  new \Exception('不支持的文字位置类型');
+                    throw  new Exception('不支持的文字位置类型');
                 }
                 break;
         }
@@ -210,7 +209,6 @@ class Image
      */
     public function text($water = array(), $position = 0)
     {
-
         $font = isset($water['font']) ? $water['font'] : BASE_PATH . 'resource/font/1.ttf';
         $size = isset($water['size']) ? $water['size'] : 20;
         $color = isset($water['color']) ? $water['color'] : '#000000';
@@ -222,15 +220,8 @@ class Image
             if (empty($color[3]) || $color[3] > 127) {
                 $color[3] = 0;
             }
-        } elseif (!is_array($color)) {
-            throw  new \Exception('错误的颜色值');
-        }
-        if (!isset($color[0])) {
-            $color[0] = 0;
-        }
-
-        if (!isset($color[1])) {
-            $color[1] = $color[2] = $color[0];
+        } else {
+            throw  new Exception('错误的颜色值');
         }
 
         $color = imagecolorallocatealpha($this->img, $color[0], $color[1], $color[2], $color[3]);//为图像分配颜色
@@ -292,7 +283,7 @@ class Image
                     $x += $posx;
                     $y += $posy;
                 } else {
-                    die('不支持的文字位置类型');
+                    throw new Exception('不支持的文字位置类型');
                 }
                 break;
         }
@@ -320,16 +311,16 @@ class Image
     {
         //资源检测
         if (empty($this->img)) {
-            throw new \Exception('没有可以被添加水印的图像资源');
+            throw new Exception('没有可以被添加水印的图像资源');
         }
         if (!is_file($water)) {
-            throw new \Exception('水印图像不存在');
+            throw new Exception('水印图像不存在');
         }
 
         //获取水印图像信息
         $waterInfo = getimagesize($water);
         if (false === $waterInfo || (IMAGETYPE_GIF === $waterInfo[2] && empty($waterInfo['bits']))) {
-            die('非法水印文件');
+            throw new Exception('非法水印文件');
         }
         $x = $y = 0;
 
@@ -401,7 +392,7 @@ class Image
                 if (is_array($position)) {
                     list($x, $y) = $position;
                 } else {
-                    die('不支持的文字位置类型');
+                    throw new Exception('不支持的文字位置类型');
                 }
                 break;
         }

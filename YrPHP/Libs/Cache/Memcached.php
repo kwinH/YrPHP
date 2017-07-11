@@ -11,7 +11,7 @@ namespace YrPHP\Cache;
 
 class Memcached implements ICache
 {
-    private static $object;
+    protected static $object;
 
 
     static function getInstance()
@@ -20,24 +20,24 @@ class Memcached implements ICache
             die('没有安装memcached扩展');
         }
 
-        if (is_object(self::$object)) {
-            return self::$object;
+        if (is_object(static::$object)) {
+            return static::$object;
         } else {
-            self::$object = new \Memcached;
+            static::$object = new \Memcached;
             $config = C('memcache');
             if (is_string($config)) {
                 $conf = explode(':', $config);
-                self::$object->addserver($conf[0], $conf[1]);
+                static::$object->addserver($conf[0], $conf[1]);
             } elseif (is_array($config)) {
                 foreach ($config as $v) {
                     $conf = explode(':', $v);
-                    self::$object->addServer($conf[0], $conf[1]);
+                    static::$object->addServer($conf[0], $conf[1]);
                 }
             } else {
                 die('参数错误');
             }
 
-            return self::$object;
+            return static::$object;
         }
 
     }
@@ -63,14 +63,14 @@ class Memcached implements ICache
             return false;
         }
 
-        return myUnSerialize(self::getInstance()->get($key));
+        return myUnSerialize(static::getInstance()->get($key));
     }
 
 
     public function set($key = '', $val = '', $timeout = null)
     {
         $timeout = is_null($timeout) ? C('dbCacheTime') : $timeout;
-        return self::getInstance()->set($key, mySerialize($val), $timeout);
+        return static::getInstance()->set($key, mySerialize($val), $timeout);
     }
 
     public function del($key = null)
@@ -79,11 +79,11 @@ class Memcached implements ICache
             return false;
         }
 
-        return self::getInstance()->delete($key);
+        return static::getInstance()->delete($key);
     }
 
     public function clear()
     {
-        return self::getInstance()->flush();
+        return static::getInstance()->flush();
     }
 }

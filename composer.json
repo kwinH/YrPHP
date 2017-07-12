@@ -1,9 +1,22 @@
 {
+    "name": "kwin/yrphp",
+    "type": "project",
+    "description": "The YrPHP Framework.",
+    "keywords": ["kwin","kwinH","kwinWong","YrPHP","Framework"],
+    "homepage": "https://github.com/kwinH/YrPHP",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "KwinWong",
+            "email": "KwinWong@hotmail.com",
+            "homepage": "https://github.com/kwinH",
+            "role": "Developer"
+        }
+    ],
     "require": {
-
+        "php": ">=5.5.0"
     },
-
-  "autoload": {
+      "autoload": {
     "classmap": [
       "YrPHP"
     ],

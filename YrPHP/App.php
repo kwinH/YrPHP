@@ -49,11 +49,7 @@ class App
   */
     static function autoLoadClass($className)
     {
-        $file = '_class_alias.php';
-        if (!file_exists($file)) {
-            file_put_contents($file, '<?php' . PHP_EOL . 'use YrPHP\Facade;');
-        }
-
+        $file = BASE_PATH.'_class_alias.php';
         requireCache($file);
 
         if (!class_exists($className) && $name = Arr::arrayIGet(Config::get('classAlias'), $className)) {

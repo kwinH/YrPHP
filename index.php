@@ -8,3 +8,4 @@
 define('DEBUG',1);
 define("APP", 'App');
 include 'YrPHP/App.php';
+App::run();

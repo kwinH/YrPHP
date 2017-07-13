@@ -14,7 +14,12 @@
         }
     ],
     "require": {
-        "php": ">=5.5.0"
+        "php": ">=5.5.0",
+        "kwin/yrphp-core": "dev-master"
+    },
+    "minimum-stability": "dev",
+     "extra": {
+        "yrphp-path": "YrPHP"
     },
       "autoload": {
     "classmap": [

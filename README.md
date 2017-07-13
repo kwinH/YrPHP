@@ -1,8 +1,59 @@
 [TOC]
+
+
 #简介
+
 yrPHP运用大量的单例及工厂模式，确保用最少的资源做最多的事，采用了composer自动加载，无需手动加载类库文件，还集成了缓存技术及页面静态化技术，确保运行速度及响应速度
 
+# 安装YrPHP
+
+#### 通过 Composer Create-Project
+
+```
+composer create-project kwin/yrphp yrphp
+```
+
+#### Git安装
+
+> YrPHP拆分为多个仓库，主要包括：
+>
+> 之所以设计为应用和核心仓库分离，是为了支持`Composer`单独更新核心框架。
+
+应用项目：https://github.com/kwinH/YrPHP
+核心框架：https://github.com/kwinH/YrPHP-Core
+
+首先克隆下载应用项目仓库
+
+```
+git clone https://github.com/kwinH/YrPHP blog
+```
+
+然后切换到`blog`目录下面，再克隆核心框架仓库：
+
+```
+git clone https://github.com/kwinH/YrPHP-Core YrPHP
+```
+
+
+
+#### 测试
+
+```
+php -S localhost:8000 -t blog
+```
+
+在浏览器中输入地址：
+
+```
+http://localhost:8000
+```
+
+会自动生成以下目录结构
+
+至此，YrPHP已经安装成功。
+
 #目录结构
+
 www  WEB部署目录（或者子目录）
 
 ```
@@ -209,14 +260,101 @@ $route['news/(\d*)'] = 'article/news/:1';
 ## 实现代码提示、跟踪和自动补全
 
 ```shell
-$ php index.php ide-help generate
+$ php artisan ide-help generate
 ```
 
-> 参数必须是3个及以上，index.php是入口文件，ide-help是config/commands.php中类的key值（也可以说是类别名），generate是方法名，其他参数都做为调用的方法的参数
+> 参数必须是3个及以上，artisan是入口文件，ide-help是config/commands.php中类的key值（也可以说是类别名），也可以是控制器名（多目录用`/`分开）。generate是方法名，其他参数都做为调用的方法的参数
 
 # 中间件
 
-略。。。
+HTTP 中间件提供了一个方便的机制来过滤进入应用程序的 HTTP 请求，在一个请求真正处理前，我们可能会对请求做各种各样的判断，然后才可以让它继续传递到更深层次中。
+
+## 创建一个中间件
+
+> 中间件一般放在App/Middleware目录下，如下就要一个名为App/Middleware/Auth.php的中间件，该中间件实现了如果用户还没登录，则跳转到登录页面，否则调用`$next($request)`继续执行（相当于允许通过中间件）
+
+```php
+<?php
+/**
+ * Project: YrPHP.
+ * Author: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
+namespace App\Middleware;
+
+use Closure;
+use Response;
+use YrPHP\IMiddleware;
+use YrPHP\Request;
+
+class Auth implements IMiddleware
+{
+    public function handler(Request $request, Closure $next)
+    {
+        if (!session('admin')) {
+            Response::errorBackTo('您还没有登录，请先登录', '/admin/manager/login');
+        }
+
+        $next($request);
+    }
+}
+```
+
+## 调用
+
+1、你可以在App/Config/config.php文件中配置
+
+```php
+<?php 
+//.....
+    /*--------------------以下是全局中间件配置---------------------------------------*/
+    'middleware' => [
+        //在实例化控制器之前
+        'before' => [
+            YrPHP\Middleware\VerifyCsrfToken::class,
+        ],
+        //在实例化控制器实例化之后，未调用方法之前
+        'middle' => [
+
+        ],
+        //调用方法之后
+        'after' => [
+
+        ],
+    ],
+
+//....
+```
+
+2、也可以在控制器中单独调用
+
+```php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: TOYOTA
+ * Date: 2017/3/16 0016
+ * Time: 14:05
+ */
+
+namespace App\Controllers\Admin;
+
+use YrPHP\Controller;
+class User extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->middleware('Auth',['except'=>['login']]);
+    }
+  
+  	//....
+  
+    }
+```
+
+> middleware(\$middleware, array \$options = []) \$middleware参数为中间件名，\$options 为过滤条件，['except'=>['login']]代表调用login方法不调用该中间件，其他都要调用该中间件，['only'=>['content']]代表仅调用content方法时调用该中间件，其他都不要调用该中间件。
 
 #控制器
 

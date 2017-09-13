@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "kwin/yrphp-core": "dev-master"
+        "kwin/yrphp-core": "~3.0"
     },
     "minimum-stability": "dev",
      "extra": {

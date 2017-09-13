@@ -122,19 +122,454 @@ www  WEB部署目录（或者子目录）
 
 #核心
 
-## URI及路由
+## 路由
 
-##### URI 段
+### 基本路由
 
-URL支持普通模式和PATHINFO模式，默认采用PATHINFO模式
+你可以在 `Config/routes.php` 文件中定义应用程序的大多数路由，最基本的YrPHP 路由仅接受 URI 和一个`闭包`：
 
-根据模型-视图-控制器模式，在此 URL 段一般以如下形式表示：
-example.com/file/.../file(n)/class/function/ID
+```PHP
+Route::get('/', function () {
+    return 'Hello World';
+});
 
-1. 第一段表示调用控制器文件目录(可多级引导/file/..../file2/... 可省略 为控制器根目录 **所有目录名均为小写**)。
-2. 第二段表示调用控制器**类**。
-3. 第三段表示调用类中的**函数**或方法。
-4. 第四及更多的段表示的是传递给控制器的**参数**，如 ID 或其他各种变量。
+Route::post('foo/bar', function () {
+    return 'Hello World';
+});
+
+Route::put('foo/bar', function () {
+    //
+});
+
+Route::delete('foo/bar', function () {
+    //
+});
+```
+
+
+
+#### 为多重动作注册路由
+
+有时候你可能需要注册一个可响应多个 HTTP 动作的路由。这时可通过 `Route` 的 `match` 方法来实现：
+
+```php
+Route::match(['get', 'post'], '/', function () {
+    return 'Hello World';
+});
+```
+
+或者，你甚至可以通过 `any` 方法来使用注册路由并响应所有的 HTTP 动作：
+
+```php
+Route::any('foo', function () {
+    return 'Hello World';
+});
+```
+
+### 基础路由参数
+
+有时候你可能需要从 URI 中获取一些参数。例如，从 URL 获取用户的 ID。这时可通过自定义路由参数来获取：
+
+```PHP
+Route::get('user/{id}', function ($id) {
+    return 'User '.$id;
+});
+```
+
+你可以依照路由需要，定义任意数量的路由参数：
+
+```PHP
+Route::get('posts/{post}/comments/{comment}', function ($postId, $commentId) {
+    //
+});
+```
+
+路由的参数都会被放在「大括号」内。当运行路由时，参数会通过路由`闭包`来传递。
+
+### 可选的路由参数
+
+有时候你需要指定路由参数的默认值，可以在参数名称后面加上 `='value'` 来实现：
+
+```PHP
+//return "kwin"
+Route::get('user/{name=kwin}', function ($name) {
+    return $name;
+});
+
+```
+
+### 正则表达式限制参数
+
+你可以使用 `pattern` 参数来限制路由参数格式。`pattern`  参数为一个数组，以名称为key，以定义参数应该如何被限制的正则表达式为value：
+
+```php
+Route::get('user/{name}', [
+  	'pattern'=>['name'=>'[A-Za-z]+']
+    'uses'=>function ($name) {
+    //
+}
+]);
+
+Route::get('user/{id}', [
+  	'pattern'=>['id'=>'[0-9]+']
+    'uses'=>function ($id) {
+    //
+}
+]);
+
+Route::get('user/{id}/{name}', [
+  	'pattern'=>['id'=>'[0-9]+', 'name' => '[a-z]+']]
+    'uses'=>function ($id, $name) {
+    //
+}
+]);
+
+```
+
+
+
+#### 全局限制
+
+如果你希望路由参数可以总是遵循正则表达式，则可以使用 `pattern` 方法。
+
+模式一旦被定义，便会自动应用到所有后续使用该参数名称的路由上：
+
+```php
+Route::pattern('id', '[0-9]+');
+Route::get('user/{id}', function ($id) {
+    // Only called if {id} is numeric.
+});
+```
+
+
+
+## 命名路由
+
+命名路由让你可以更方便的为特定路由生成 URL 或进行重定向。你可以使用 `as` 数组键指定名称到路由上：
+
+```PHP
+Route::get('user/profile', [
+  'as' => 'profile', 
+  'uses' => function () {
+    //
+}
+]);
+```
+
+还可以指定路由名称到控制器动作：
+
+```PHP
+Route::get('user/profile', [
+    'as' => 'profile',
+    'uses' => 'UserController@showProfile'
+]);
+```
+
+
+
+#### 路由群组和命名路由
+
+如果你使用了 [路由群组]，那么你可以在路由群组的属性数组中指定一个 `as` 关键字，这将允许你为路由群组中的所有路由设置相同的前缀名称：
+
+```PHP
+Route::group(['as' => 'admin::'], function () {
+    Route::get('dashboard', [
+    'as' => 'dashboard', 
+    'uses' => function () {
+        // 路由名称为「admin::dashboard」
+    }]);
+});
+```
+
+#### 对命名路由生成 URLs
+
+一旦你在指定的路由中分配了名称，则可通过 `route` 函数来使用路由名称生成 URLs 或重定位：
+
+```php
+$url = Route::url('profile');
+```
+
+如果路由定义了参数，那么你可以把参数作为第二个参数传递给 `route` 方法。指定的参数将自动加入到 URL 中：
+
+```php
+Route::get('user/{id}/profile', [
+  'as' => 'profile', 
+  'uses' =>function ($id) {
+    //
+}
+]);
+
+$url = Route::rul('profile', ['id' => 1]);
+```
+
+
+
+## 路由群组
+
+路由群组允许你共用路由属性，例如：中间件、命名空间，你可以利用路由群组统一为多个路由设置共同属性，而不需在每个路由上都设置一次。共用属性被指定为数组格式，当作 `Route::group` 方法的第一个参数。
+
+为了了解更多路由群组的相关内容，我们可通过几个常用样例来熟悉这些特性。
+
+### 中间件
+
+指定中间件到所有群组内的路由中，则可以在群组属性数组里使用 `middleware` 参数。中间件将会依照列表内指定的顺序运行：
+
+```php
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/', function ()    {
+        // 使用 Auth 中间件
+    });
+
+    Route::get('user/profile', function () {
+        // 使用 Auth 中间件
+    });
+});
+```
+
+
+
+### 命名空间
+
+另一个常见的例子是，指定相同的 PHP 命名空间给控制器群组。可以使用 `namespace` 参数来指定群组内所有控制器的命名空间：
+
+```PHP
+Route::group(['namespace' => 'Admin'], function()
+{
+    // 控制器在「App\Controllers\Admin」命名空间
+
+    Route::group(['namespace' => 'User'], function()
+    {
+        // 控制器在「App\Controllers\Admin\User」命名空间
+    });
+});
+```
+
+请记住，默认你不用指定完整的`App\Controllers` 命名空间前缀就能注册控制器路由。所以，我们只需要指定在基底 `App\Controllers`根命名空间之后的部分命名空间。
+
+### 路由前缀
+
+通过路由群组数组属性中的 `prefix`，在路由群组内为每个路由指定的 URI 加上前缀。例如，你可能想要在路由群组中将所有的路由 URIs 加上前缀 `admin`：
+
+```php
+Route::group(['prefix' => 'admin'], function () {
+    Route::get('users', function ()    {
+        // 符合「/admin/users」URL
+    });
+});
+```
+
+你也可以使用 `prefix` 参数去指定路由群组中共用的参数：
+
+```php
+Route::group(['prefix' => 'accounts/{account_id}'], function () {
+    Route::get('detail', function ($account_id)    {
+        // 符合 accounts/{account_id}/detail URL
+    });
+});
+```
+
+
+
+## RESTful 资源控制器
+
+```php
+Route::resource('photos', 'PhotosController');
+```
+
+这一条路由声明会创建多个路由，用来处理各式各样和相片资源相关的的 RESTful 行为。同样地，生成的控制器有着各种和这些行为绑定的方法，包含要处理的 URI 及方法对应的注释。
+
+#### 由资源控制器处理的行为
+
+| 动词        | 路径                     | 行为（方法） | 路由名称          |
+| --------- | ---------------------- | ------ | ------------- |
+| GET       | `/photos`              | index  | photos.index  |
+| GET       | `/photos/create`       | create | photos.create |
+| POST      | `/photos`              | save   | photos.save   |
+| GET       | `/photos/{photo}`      | show   | photos.show   |
+| GET       | `/photos/{photo}/edit` | edit   | photos.edit   |
+| PUT/PATCH | `/photos/{photo}`      | update | photos.update |
+| DELETE    | `/photos/{photo}`      | delete | photos.delete |
+
+#### 部分资源路由
+
+声明资源路由时，你可以指定让此路由仅处理一部分的行为：
+
+```php
+Route::resource('photos', 'PhotosController',
+                ['only' => ['index', 'show']]);
+
+Route::resource('photos', 'PhotosController',
+                ['except' => ['create', 'store', 'update', 'destroy']]);
+```
+
+#### 命名资源路由
+
+所有的资源控制器行为默认都有路由名称；不过你可以在选项中传递一个 `names` 数组来重写这些名称：
+
+```PHP
+Route::resource('photos', 'PhotosController',
+                ['names' => ['create' => 'photo.build']]);
+```
+
+#### 嵌套资源
+
+有时你可能会需要定义「嵌套」资源路由。例如，相片资源可能会附带多个「评论」。要「嵌套」此资源控制器，可在路由声明中使用「点」记号：
+
+```PHP
+Route::resource('photos.comments', 'PhotoCommentController');
+```
+
+此路由会注册一个「嵌套」资源，可通过类似的 URL 来访问它：`photos/{photos}/comments/{comments}`。
+
+```php
+<?php
+
+namespace App\Controllers;
+
+use YrPHP\Controller;
+
+class PhotoCommentController extends Controller
+{
+    /**
+     * 显示指定相片的评论。
+     *
+     * @param  int  $photoId
+     * @param  int  $commentId
+     * @return Response
+     */
+    public function show($photoId, $commentId)
+    {
+        //
+    }
+}
+```
+
+#### 附加资源控制器
+
+如果想在资源控制器中默认的资源路由之外加入其它额外路由，则应该在调用 `Route::resource` **之前** 定义这些路由。否则，由 `resource` 方法定义的路由可能会不小心覆盖你附加的路由：
+
+```php
+Route::get('photos/popular', 'PhotosController@method');
+
+Route::resource('photos', 'PhotosController');
+```
+
+## 隐式控制器
+
+YrPHP让你能够轻易地通过定义单个路由来处理控制器类中的各种行为。首先，使用 `Route::controller` 方法来定义路由。`controller` 方法接受两个参数。第一个参数是控制器所处理的基本 URI，第二个是控制器的类名称：
+
+```PHP
+Route::controller('users', 'UserController');
+```
+
+接下来，只要在控制器中加入方法。方法的名称应由它们所响应的 HTTP 动词作为开头，紧跟着首字母大写的 URI 所组成：
+
+```PHP
+<?php
+
+namespace App\Controllers;
+
+use YrPHP\Controller;
+
+class UserController extends Controller
+{
+    /**
+     * 响应对 GET /users 的请求
+     * 响应对 GET /users/index 的请求（PS:当有参数时必须带上`/index`）
+     */
+    public function getIndex()
+    {
+        //
+    }
+
+  
+    /**
+     * 响应对 GET /users/info/1 的请求
+     * 		 GET /users/info 默认$id为1
+     */
+    public function getInfo($id=1)
+    {
+        //
+    }
+
+    /**
+     * 响应对 POST /users/info 的请求
+     */
+    public function postInfo()
+    {
+        //
+    }
+  
+     /**
+     * 响应对 put /users/info/1 的请求
+     */
+    public function putInfo($id)
+    {
+        //
+    }
+
+     /**
+     * 响应对 patch /users/info/1 的请求
+     */
+    public function patchInfo($id)
+    {
+        //
+    }
+  
+     /**
+     * 响应对 DETELE /users/info/1 的请求
+     */
+    public function deleteInfo($id)
+    {
+        //
+    }
+  
+     /**
+     * 响应对 GET /users/info 的请求
+     * 响应对 GET /users/info/1 的请求
+     * 响应对 POST /users/info/1 的请求
+     * 响应对 put /users/info/1 的请求
+     * 响应对 patch /users/info/1 的请求
+     * 响应对 delete /users/info/1 的请求
+     */
+    public function anyInfo($id=null)
+    {
+        //
+    }
+}
+```
+
+正如你在上述例子中所看到的，`index` 方法会响应控制器所处理的根 URI，在这个例子中是 `users`。
+
+> YrPHP的Route会从上至下解析，直到找到方法就不会继续解析其他方法，所以要注意方法的顺序。
+
+#### 分派路由名称
+
+如果你想要 `命名` 控制器中的某些路由，你可以在 `controller` 方法中传入一个名称数组作为第三个参数：
+
+```PHP
+Route::controller('users', 'UserController', [
+    'getShow' => 'user.show',
+]);
+```
+
+## 路由缓存
+
+若你的应用程序完全通过控制器使用路由，你可以利用 YrPHP的路由缓存。使用路由缓存可以大幅降低注册全部路由所需的时间。在某些情况下，你的路由注册甚至可以快上一百倍！要生成路由缓存，只要运行 `route cache` 此 Artisan 命令：
+
+```
+php artisan route cache
+```
+
+这就可以了！现在你的缓存路由文件将被用来代替 `Config/routes.php` 这一文件。请记得，若你添加了任何新的路由，就必须生成新的路由缓存。因此你可能希望只在你的项目部署时才运行 `route cache` 这一命令。
+
+要移除缓存路由文件而不生成新的缓存，请使用 `route clear` 命令：
+
+```
+php artisan route clear
+```
+
+## URI
 
 ####获得URL
 >getUrl($url,$indexPage);//如果参数为空 则返回现在所在所在的根目录如`http://example.com/index.php/news/index/id`
@@ -146,64 +581,7 @@ example.com/file/.../file(n)/class/function/ID
 >`* @return string`
 >`*/`
 
-##解析URL (YrPHP\Uri类)
-**分析`http://example.com/index.php/news/index/id`**
 
-
-####rsegment($n = null, $no_result = null)
->返回路由替换过后的uri 数组(也就是实际所访问的地址) 分割一个详细的URI分段。n 为你想要得到的段数
-1. news
-2. index
-3. id
->
->下标n从1开始 如果为空 则默认返回 $no_result
-
-####rpart($n = null, $no_result = null)
->同rsegment($n = null, $no_result = null)
-
-####segment($n = null, $no_result = null)
->返回没有经过路由替换的uri 数组(也就是现在所访问的地址) 分割一个详细的URI分段。n 为你想要得到的段数
-1. news
-2. index
-3. id
->
->下标n从1开始 如果为空 则默认返回 $no_result
-
-####part($n = null, $no_result = null)
->同segment($n = null, $no_result = null)
-
-
-####getPath()
->返回没有经过路由替换的uri 字符串(也就是现在所访问的地址)
->/news/index/id
-
-####getRPath()
->返回经过路由替换过后的uri 字符串(也就是实际所访问的地址)
->/news/index/id
-
-##URL模式
-这种URL模式就是系统默认的PATHINFO模式，不同的URL模式获取模块和操作的方法不同，yrphp支持的URL模式有三种：普通模式、PATHINFO模式、REWRITE重写模式 可以通过设置 config/config.php 文件，配置$config[‘urlType’] 参数改变URL模式。
-
-| URL模式 | urlType设置   |
-| ----- | ----------- |
-| 0     | 普通模式        |
-| 1     | PATHINFO模式  |
-| 2     | REWRITE重写模式 |
-
-
-1. 普通模式：example.com?c=class&m=function
-   普通模式通过GET获得测试
-
-   ```php
-   $config['ctlTrigger'] = 'c'; //控制器名
-
-   $config['actTrigger'] = 'm'; //方法名
-
-   ```
-
-
-   2.PATHINFO模式：如上
-   3.REWRITE重写模式：
    默认情况下，index.php 文件将被包含在你的 URL 中：
    example.com/index.php/news/article/my_article
 
@@ -215,12 +593,11 @@ RewriteEngine on
  RewriteCond %{REQUEST_FILENAME} !-f
 
 RewriteRule .* index.php
-
 ```
 
 在上面的例子中，可以实现任何非 index.php、images 和 robots.txt 的 HTTP 请求都被指向 index.php。
 
-
+
 ## 添加 URL 后缀
 
 通过设置 config/config.php 文件，你可以为 yrphp 生成的 URL 添加一个指定的文件后缀。举例来说，如果 URL 是这样的：
@@ -236,24 +613,6 @@ example.com/index.php/products/view/shoes.html
 ```php
 $config['urlSuffix'] = '.html';
 ```
-
-## 路由定义：
-
-路由规则定义在/config/routes.php 文件中. 在此文件中，你可以看到一个名为 $route的数组，它可以让你定义你自己的路由规则。 定义可以用 正则表达式(Regular Expressions)
-
-####例子
-
-下面是一些简单的例子:
-
-```php
-$route['news/(\d*)'] = 'article/news/:1';
-```
-
-以上配置 访问 news/1 则实际访问的是article/news/1
-
-> 注意:  如果你使用逆向引用请将双反斜线语法替换为:语法（\\\1 替换为 :1).
-
-
 
 #  cli命令行模式
 
@@ -457,6 +816,8 @@ return [
 无论何种配置文件，定义了配置文件之后，都统一使用系统提供的C方法（可以借助Config单词来帮助记忆）来读取已有的配置。
 
 获取已经设置的参数值：**C('参数名称')**
+
+> 除config.php文件外，其他文件可以用C('fileName.param')获取
 
 ```php
 $charset = C('charset');//获得配置中的编码格式 =>YrPHP\Config::get('charset');两者等同
@@ -1279,7 +1640,7 @@ $db->find(1);
 >生产最后的SQL一句
 >
 >string $tableName 表名
->$auto 是否自动添加表前缀**
+>$auto 是否自动添加表前缀
 
 ------------
 ```php
@@ -1332,11 +1693,12 @@ $this->limit(1)->all();
 ```
 
 **WHERE**
->**where($where = '', $logical = "and")
+>where($where = '', $logical = "and")
+>
 > @param $logical 与前一个条件的连接符
 > @param $where string|array
 >string "id>'100'"   `->`     where id>'100'**
->**
+>
 >array($field=>$value)
 >
 >例：
@@ -1346,7 +1708,7 @@ $this->limit(1)->all();
 >field可以用空格分开，与连接符、字段名、运算符组成
 >运算符 =|!=|<>|>|<|like|is|between|not between|in|not in
 >连接符 or|and 与前一个条件的连接符 默认调用`$logical`
->**
+>
 
 ```php
 
@@ -2057,7 +2419,6 @@ function csrfField(){}
  * @return mixed|string
  */
 function parseNaming($name = '', $type = 0){}
-
 ```
 
 ------------

@@ -10,7 +10,7 @@ yrPHP运用大量的单例及工厂模式，确保用最少的资源做最多的
 #### 通过 Composer Create-Project
 
 ```
-composer create-project kwin/yrphp yrphp
+composer create-project kwin/yrphp yrphp "5.*"
 ```
 
 #### Git安装
@@ -48,8 +48,6 @@ php -S localhost:8000 -t blog
 http://localhost:8000
 ```
 
-会自动生成以下目录结构
-
 至此，YrPHP已经安装成功。
 
 #目录结构
@@ -59,14 +57,26 @@ www  WEB部署目录（或者子目录）
 ```
 ├─index.php       入口文件
 ├─README.md       README文件
-├─App     应用目录
-├─public          资源文件目录
-└─YrPHP           框架目录
-│  ├─Common      核心公共函数目录
-│  ├─Config      核心配置目录
-│  ├─Lang        核心语言包目录
-│  ├─Libs        框架类库目录
-│  ├─resource    核心资源文件目录
+├─App       应用目录
+│  ├─Boots       引导启动类
+│  ├─Config      自定义配置目录
+│  ├─Controls    默认控制器目录
+│  ├─Helpers     常用方法存放目录
+│  ├─Lang        自定义语言包目录
+│  ├─Libs        自定义类库目录
+│  ├─Listeners   事件类库目录
+│  ├─Middleware  中间件类库目录
+│  ├─Models      默认模型目录
+│  ├─Routes      所有路由定义文件
+│  ├─Runtime     缓存目录
+│  ├─Views       默认视图目录
+├─public     资源文件目录
+└─YrPHP      框架目录
+│  ├─Console      核心命令类目录
+│  ├─Helpers      常用方法存放目录
+│  ├─Libs         框架类库目录
+│  ├─Middleware   中间件类库目录
+│  ├─resource     核心资源文件目录
 
 ```
 
@@ -79,31 +89,10 @@ index.php
     //定义项目目录
     define("APP", 'App');
     //框架入口文件
-    include 'App.php';
-```
+	include 'YrPHP/App.php';
+	//执行核心代码
+	App::run();
 
-> 注意：APP的定义必须是当前目录下的文件名,不需要标明路径
-> 系统会在第一次调用时 自动生成项目目录结构
-
-#应用目录
-
-www  WEB部署目录（或者子目录）
-
-```
-├─index.php       入口文件
-
-├─App     应用目录
-│  ├─Controls    默认控制器目录
-│  ├─Models      默认模型目录
-│  ├─views      默认视图目录
-│  ├─Common      自定义公共函数目录
-│  ├─Config      自定义配置目录
-│  ├─Lang        自定义语言包目录
-│  ├─Libs        自定义类库目录
-│  ├─Runtime    缓存目录
-.
-.
-.
 ```
 
 
@@ -122,7 +111,41 @@ www  WEB部署目录（或者子目录）
 
 #核心
 
+## 引导启动项
+
+系统在完成基本配置会先运行在`Config/config.php`文件中的`boots`项中的所有类下面的`init`方法。
+
+你可以在此做一些配置及预处理。
+
 ## 路由
+
+在引导启动项中载入路由配置文件
+
+```php
+<?php
+/**
+ * Project: YrPHP.
+ * Author: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
+
+namespace App\Boots;
+
+
+use YrPHP\Routing\Router;
+
+class AddRoutesBoot
+{
+
+    function init()
+    {
+        Router::loadRoutesFrom(APP_PATH . 'Routes/web.php');
+    }
+}
+```
+
+
 
 ### 基本路由
 
@@ -223,7 +246,6 @@ Route::get('user/{id}/{name}', [
     //
 }
 ]);
-
 ```
 
 
@@ -261,7 +283,7 @@ Route::get('user/profile', [
 ```PHP
 Route::get('user/profile', [
     'as' => 'profile',
-    'uses' => 'UserController@showProfile'
+    'uses' => 'App\\Controllers\\UserController@showProfile'
 ]);
 ```
 
@@ -333,18 +355,18 @@ Route::group(['middleware' => 'auth'], function () {
 另一个常见的例子是，指定相同的 PHP 命名空间给控制器群组。可以使用 `namespace` 参数来指定群组内所有控制器的命名空间：
 
 ```PHP
-Route::group(['namespace' => 'Admin'], function()
+Route::group(['namespace' => 'App\\Controllers'], function()
 {
-    // 控制器在「App\Controllers\Admin」命名空间
+    // 控制器在「App\Controllers」命名空间
 
-    Route::group(['namespace' => 'User'], function()
+    Route::group(['namespace' => 'Admin'], function()
     {
-        // 控制器在「App\Controllers\Admin\User」命名空间
+        // 控制器在「App\Controllers\Admin」命名空间
     });
 });
 ```
 
-请记住，默认你不用指定完整的`App\Controllers` 命名空间前缀就能注册控制器路由。所以，我们只需要指定在基底 `App\Controllers`根命名空间之后的部分命名空间。
+
 
 ### 路由前缀
 
@@ -660,31 +682,118 @@ class Auth implements IMiddleware
 }
 ```
 
+### 前置 & 后置中间件
+
+中间件是在请求之前或之后运行取决于中间件本身。例如，以下的中间件会在应用处理请求 **之前** 执行一些任务：
+
+```PHP
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+
+class BeforeMiddleware
+{
+    public function handler($request, Closure $next)
+    {
+        // 执行动作
+
+        return $next($request);
+    }
+}
+```
+
+而下面（这种写法的）中间件会在应用处理请求 **之后** 执行其任务：
+
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+
+class AfterMiddleware
+{
+    public function handler ($request, Closure $next)
+    {
+        $response = $next($request);
+
+        // 执行动作
+
+        return $response;
+    }
+}
+```
+
+
+
 ## 调用
 
-1、你可以在App/Config/config.php文件中配置
+1、你可以在App/Boots/AddMiddleware.php文件中配置
 
 ```php
 <?php 
-//.....
-    /*--------------------以下是全局中间件配置---------------------------------------*/
-    'middleware' => [
-        //在实例化控制器之前
-        'before' => [
-            YrPHP\Middleware\VerifyCsrfToken::class,
-        ],
-        //在实例化控制器实例化之后，未调用方法之前
-        'middle' => [
+/**
+ * Project: swoole.
+ * Author: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
 
-        ],
-        //调用方法之后
-        'after' => [
+namespace App\Boots;
 
-        ],
-    ],
+use YrPHP\Boots\AddMiddleware as BootsAddMiddleware;
 
-//....
+class AddMiddleware extends BootsAddMiddleware
+{
+    /**
+     * 全局中间件
+     *
+     * @var array
+     */
+    protected $middleware = [
+        \YrPHP\Middleware\DebugListen::class,
+        \YrPHP\Middleware\VerifyCsrfToken::class,
+    ];
+
+    /**
+     * 所有的中间件别名
+     *
+     * @var array
+     */
+    protected $routeMiddleware = [
+        'auth'=>\App\Middleware\Auth::class
+    ];
+
+    /**
+     * 所有的中间件组
+     * @var array
+     */
+    protected $middlewareGroups = [
+        'admin'=>[
+            'auth'
+        ]
+    ];
+
+}
 ```
+
+> 可以使用与单个中间件相同的语法将中间件组分配给路由和控制器操作。重申一遍，中间件组只是更方便地实现了一次为路由分配多个中间件。 
+
+```php
+Route::get('/', function () {
+    //
+})->middleware('admin');
+
+Route::group(['middleware' => ['admin']], function () {
+    //
+});
+```
+
+
+
+
 
 2、也可以在控制器中单独调用
 
@@ -705,7 +814,7 @@ class User extends Controller
     function __construct()
     {
         parent::__construct();
-        $this->middleware('Auth',['except'=>['login']]);
+        $this->middleware('auth',['except'=>['login']]);
     }
   
   	//....
@@ -713,60 +822,41 @@ class User extends Controller
     }
 ```
 
-> middleware(\$middleware, array \$options = []) \$middleware参数为中间件名，\$options 为过滤条件，['except'=>['login']]代表调用login方法不调用该中间件，其他都要调用该中间件，['only'=>['content']]代表仅调用content方法时调用该中间件，其他都不要调用该中间件。
+> middleware(\$middleware, array \$options = []) \$middleware参数为中间件别名，\$options 为过滤条件，['except'=>['login']]代表调用login方法不调用该中间件，其他都要调用该中间件，['only'=>['content']]代表仅调用content方法时调用该中间件，其他都不要调用该中间件。
 
 #控制器
 
 例子：创造一个控制器
-在APP目录下的controls目录下创建一个名为:
-Test.class.php的文件
+在APP目录下的Controller目录下创建一个名为:
+UserController.php的文件
 
 ```php
 <?php
 use YrPHP\Controller;
 
-class Test extends Controller
+class UserController extends Controller
 {
     function __construct()
     {
         parent::__construct();
     }
 
-    function  index()
+    function  show($id)
     {
-      echo "Hello World";
+      echo "Hello World ".$id;
     }
 ```
 
+你可以这样定义一个指向该控制器行为的路由：
 
-接着我们用浏览器打开 example.com/index.php/test
-就可以看到 Hello World
-
-##命名空间
-```php
-use YrPHP\Controller;
+```PHP
+Route::get('user/{id}', 'UserController@show');
 ```
 
-表示引入 YrPHP\Controller 命名空间便于直接使用。所以，
+现在，当一个请求与此指定路由的 URI 匹配时， `UserController` 类的 `show` 方法就会被执行。当然，路由参数也会被传递至该方法。
 
-```php
-use YrPHP\Controller;
-
-class Test extends Controller
-```
-
-等同于使用：
-
-```php
-class Test extends YrPHP\Controller
-```
-
-
-
-##规则
-1. 文件名必须是：***类名***.class.php
-2. ***类名首字母必须大写***
-3. 必须继承Controller类，可以重写Controller类（这在扩展中再说）
+接着我们用浏览器打开 example.com/index.php/user/1
+就可以看到 Hello World 1
 
 # 依赖注入
 ```php
@@ -815,12 +905,12 @@ return [
 
 无论何种配置文件，定义了配置文件之后，都统一使用系统提供的C方法（可以借助Config单词来帮助记忆）来读取已有的配置。
 
-获取已经设置的参数值：**C('参数名称')**
+获取已经设置的参数值：**config('参数名称')**
 
-> 除config.php文件外，其他文件可以用C('fileName.param')获取
+> 除config.php文件外，其他文件可以用config('fileName.param')获取
 
 ```php
-$charset = C('charset');//获得配置中的编码格式 =>YrPHP\Config::get('charset');两者等同
+$charset = config('charset');//获得配置中的编码格式 =>YrPHP\Config::get('charset');两者等同
 ```
 
 如果`charset`尚未存在设置，则返回NULL。
@@ -828,13 +918,13 @@ $charset = C('charset');//获得配置中的编码格式 =>YrPHP\Config::get('ch
 > 支持设置默认值例如：
 
 ```php
-C('my_config','default_config');
+config('my_config','default_config');
 ```
 
 >如果不传参数 则返回所有配置信息
 
 ```php
-$config = C();//return array;
+$config = config();//return array;
 ```
 
 ##动态配置
@@ -1115,7 +1205,7 @@ class Index extends Controller
 
 ####将函数赋值
 ```php
-{assign $config = C()}
+{assign $config = config()}
 ```
 
 
@@ -1150,7 +1240,7 @@ class Index extends Controller
 ##循环
 ####foreach
 ```php
-{assign $config = C()}
+{assign $config = config()}
 
 {foreach (config as k=>$v)}
 
@@ -1390,7 +1480,114 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 {=form::button('name',['class'=>'button'])}
 ```
 
-#模型
+
+
+# 事件系统
+
+Laravel 应用中的`App\Boots\EventBoot` 提供了一个很方便的地方来注册所有的事件监听器。它的 `listen` 属性是一个数组，包含所有的事件（键）以及事件对应的监听器（值）。你也可以根据应用需求来增加事件到这个数组中。例如，增加一个 `ViewLog` 事件：
+
+```php
+/**
+ * 应用程序的事件监听器映射。
+ *
+ * @var array
+ */
+protected $listen = [
+    'App\Boots\ViewLog' => [
+        'App\Boots\ViewLogListen',
+    ],
+];
+```
+
+## 手动注册事件
+
+```php
+ \Event::listen('event.name', function ($param1, $param2) {
+        //
+    });
+```
+
+## 启动监听器
+
+```php
+<?php 
+ \Event::fire('App\Boots\ViewLog');
+```
+
+> 启动监听器，如果是个类则会访问该类下的`handle`方法，如果是个匿名函数，
+> 则会调用这个匿名函数 ，第二个参数是个数组是可以传入给匿名的参数
+
+##事件订阅者
+
+> 事件订阅者是一个在自身内部可以订阅多个事件的类，允许你在单个类中定义多个事件处理器。订阅者应该定义一个 `subscribe` 方法，这个方法接受一个事件分发器的实例。你可以调用事件分发器的 `listen` 方法来注册事件监听器：
+
+```php
+<?php
+
+namespace App\Boots;
+
+class UserEventSubscriber
+{
+    /**
+     * 处理用户登录事件。
+     */
+    public function onUserLogin($event) {}
+
+    /**
+     * 处理用户注销事件。
+     */
+    public function onUserLogout($event) {}
+
+    /**
+     * 为订阅者注册监听器。
+     *
+     * @param  YrPHP\Event  $events
+     */
+    public function subscribe($events)
+    {
+        $events->listen(
+            'App\Boots\UserEventSubscriber\Login',
+            'App\Boots\UserEventSubscriber@onUserLogin'
+        );
+
+        $events->listen(
+            'App\Boots\UserEventSubscriber\Logout',
+            'App\Boots\UserEventSubscriber@onUserLogout'
+        );
+    }
+
+}
+```
+
+
+
+## 注册事件订阅者
+
+一旦订阅者被定义，它就可以被注册到事件分发器中。你可以在 `App\Boots\EventBoot` 类的 `$subscribe` 属性注册订阅者。例如，添加 `UserEventSubscriber` 到列表中：
+
+```php
+<?php
+namespace App\Boots;
+
+use YrPHP\Event;
+
+class EventBoot
+{
+    /**
+     * The event listener mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+	//
+    ];
+
+    protected $subscribe = [
+	'App\Boots\UserEventSubscriber'
+    ];
+```
+
+#数据库
 
 ##数据库配置
 
@@ -1405,200 +1602,72 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 - Email:kwinwong@hotmail.com
     */
 
-//数据库配置例子 请将该文件复制到你的项目下的config文件夹下 不允许直接在该文件下配置
-
 return [
-'defaultConnection' => 'default',
-  'default' => [
-    //主服务器
-    'masterServer' => [
-        'dsn' => 'mysql:host=localhost;dbname=huobucuo',
-        'dbDriver' => 'pdo', // 数据库类型
-        'dbType' => 'mysql', // 数据库类型
-        'dbHost' => 'localhost', // 服务器地址
-        'dbName' => 'test', // 数据库名
-        'dbUser' => 'root', // 用户名
-        'dbPwd' => 'root', // 密码
-        'dbPort' => '3306', // 端口
-        'tablePrefix' => 'drp_', // 数据库表前缀
+
+    'defaultConnection' => 'default',
+
+    'default' => [
+
+//        'master' => [],//主服务器
+//        'slave' => [],//从服务器
+        'driver' => 'pdo', // 数据库类型
+        'type' => 'mysql', // 数据库类型
+        'host' => 'localhost', // 服务器地址
+        'dbname' => 'test', // 数据库名
+        'user' => 'root', // 用户名
+        'password' => 'root', // 密码
+        'port' => '3306', // 端口
+        'prefix' => '', // 数据库表前缀
         'charset' => 'utf8',
-    ],
-    //从服务器可以配置多个,也可以不配置，不做读写分离
-    /*
-    'slaveServer'  => [
-        [
-            'dsn'         => '',
-            'dbDriver'    => 'pdo', // 数据库类型
-            'dbType'      => 'mysql', // 数据库类型
-            'dbHost'      => '', // 服务器地址
-            'dbName'      => '', // 数据库名
-            'dbUser'      => '', // 用户名
-            'dbPwd'       => '', // 密码
-            'dbPort'      => '3306', // 端口
-            'charset'     => 'utf8',
-        ],
-        [
-            'dsn'         => '',
-            'dbDriver'    => 'pdo', // 数据库类型
-            'dbType'      => 'mysql', // 数据库类型
-            'dbHost'      => '', // 服务器地址
-            'dbName'      => '', // 数据库名
-            'dbUser'      => '', // 用户名
-            'dbPwd'       => '', // 密码
-            'dbPort'      => '3306', // 端口
-            'charset'     => 'utf8',
-        ],
-    ],
-    */
-]
-  ];
+    ]
+];
 ```
 
 >数据库配置模版文件在BASE_PATH/config/database.php
 >如需修改相关配置
 >
->如果设置了***APP_MODE***
->则在APP_PATH/database**__APP_MODE**.php中修改相关配置
->否则
 >在APP_PATH/database.php中修改相关配置
 
-##模型定义
-
-> 模型类并非必须定义，只有当存在独立的业务逻辑或者属性的时候才需要定义。
-> 文件名为**模型名.class.php**  UserModel的文件名为**UserModel.class.php**
-
-模型类通常需要继承系统的YrPHP\Model类或其子类，下面是一个Model\UserModel类的定义：
-
-```php
-<?php
-namespace App\Model;
-use YrPHP\Model;
-
-class UserModel extends Model
-{
-
-    public function __construct()
-    {
-        parent::__construct('users');
-  }
-
-}
-```
 
 
-##模型实例化
-
-##### M(['模型名']);
->模型名是为选填 如果为空则实例化父类。
-
-
-```php
-M('UserModel');//实例化UserModel模型
-```
-
->实例化请确保参数确定 区分大小写
->如果模型UserModel不存在，则实例化父类 表为user_model
-
-## CURL
-### Active Record 模式
+## 数据库请求构建器
 
 ####添加数据INSERT
-> **$this->insert([添加的数据]);**
+> **insert(array $data);**
 
 ```php
-namespace App\Model;
-use YrPHP\Model;
-class UserModel extends Model
-{
-    public function __construct()
-    {
-        parent::__construct('users');//操作users表
-  }
+//return int 受影响行数
+DB::::table('user')->insert(['name'=>'kwin','age'=>'18']);
+       
 
-    public function userInsert()
-    {
-      return $this->insert(['name'=>'kwin','age'=>'18']);
-       //return int 受影响行数
-  }
-  
-  
-      public function userInserts()
-    {
-      return $this->inserts([
-        ['name'=>'kwin','age'=>'18'],
-        ['name'=>'nathan','age'=>'26']
-      ]);
-       //return int 受影响行数
-  }
-}
+//inserts支付批量添加
+//return int 受影响行数
+ DB::::table('user')->inserts([
+  ['name'=>'kwin','age'=>'18'],
+  ['name'=>'nathan','age'=>'26']
+]);
 ```
->添加的数据如果为空,则获取$_POST数据，默认开启验证，如果字段数据库不存在 则过滤
->如果有临时关闭则 $this->setOptions(array('_validate'=>false));
->
->inserts支付批量添加
 
 ------------
 
 
 ####删除数据DELETE
 
-> **$this->delete(条件);**
+> **delete($where = []);**
 
-**在自定义模型在调用**
 ```php
 <?php
-namespace App\Model;
-use YrPHP\Model;
-class UserModel extends Model
-{
-
-    public function __construct()
-    {
-        parent::__construct('users');
-  }
-
-    public function userDelete()
-    {
-     return $this->delete(['id <'=>3]);
-     //return int 受影响行数
-  }
-}
+  //return int 受影响行数
+  DB::::table('user')->delete(['id <'=>3]);
 ```
 >条件为array|string 推荐array
 
-------------
-
-
-***在控制器在调用***
-```php
-    <?php
-    use core\Controller;
-    
-    class Users extends Controller
-    {
-        function __construct()
-        {
-            parent::__construct();
-        }
-    
-       //直接调用父类model，操作users表
-        function  model()
-        {
-         $db = M('users');
-         $db->delete([是否自动添加前缀bool]);
-    
-        }
-       //实例化刚才创建的模型，操作其方法
-        function  userModel()
-        {
-         $db = M('UserModel');
-         $db->userDelete();
-        }
-```
-
 ####修改数据
+
+> **update($data=[],$where=[])**
+
 ```php
-$this->update(array 数据，array 条件);
+DB::::table('user')->update(['name'=>'kwin']],['id'=>1]]);
 //return int 受影响行数
 ```
 >条件为array|string 推荐array
@@ -1607,49 +1676,18 @@ $this->update(array 数据，array 条件);
 
 ####查询数据
 
-**FIND**
->**find($id = 0, $assoc = false)
->string|int $id 查询的条件主键值
->bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object
->以主键为条件 查询
-
-------------
-```php
-$db = M('users');
-$db->find(1);
-//生成的SQL语句
-//select * from `users` where id=1;
-```
-
-**ALL**
->**all($assoc = false, $tableName = "", $auto = true)
->bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object
->以主键为条件 查询
-
-------------
-```php
-$db = M('users');
-$db->find(1);
-//生成的SQL语句
-//select * from `users` where id=1;
-```
-
 **GET**
->**get(\$tableName = "", $auto = true)**
+>**get($field = '*')**
 >
->生产最后的SQL一句
->
->string $tableName 表名
->$auto 是否自动添加表前缀
+>return YrPHP\Database\Collection
 
-------------
 ```php
-$this->get([表名]，[是否自动添加前缀bool]);
+DB::::table('user')->get('id','name');
 //生成的SQL语句
-//select * from `tableName`;
+//select `id`,`name` from `user`;
 ```
 
-**SELECT|FIELD**
+**SELECT**
 
 >**select($field =[],[...])**
 >
@@ -1666,13 +1704,13 @@ $this->get([表名]，[是否自动添加前缀bool]);
 ------------
 
 ```php
-$this->select('field1,field2,field3')->all();
+DB::::table('user')->select('field1,field2,field3')->get();
 //生成的SQL语句
-//select `field1`,`field2`,`field3` from `tableName`;
+//select `field1`,`field2`,`field3` from `user`;
 
-$this->select(['field1','field2','field3'])->all();
+DB::::table('user')->get(['field1','field2','field3']);
 //生成的SQL语句
-//select `field1`,`field2`,`field3` from `tableName`;
+//select `field1`,`field2`,`field3` from `user`;
 
 
 ```
@@ -1687,9 +1725,9 @@ $this->select(['field1','field2','field3'])->all();
 
 ```php
 //查询一条数据
-$this->limit(1)->all();
+DB::::table('user')->limit(1)->get();
 //生成的SQL语句
-//select * from `tableName` limit 1;
+//select * from `user` limit 1;
 ```
 
 **WHERE**
@@ -1704,198 +1742,149 @@ $this->limit(1)->all();
 >例：
 >['id'=>1,'or id'=>2,'age >'=>15,'or id in'=>[1,2,3,4,5]]
 >
->$value 值 array|string|int|null|‘not null’
+>$value 值 array|Closure|string|int|null
 >field可以用空格分开，与连接符、字段名、运算符组成
 >运算符 =|!=|<>|>|<|like|is|between|not between|in|not in
 >连接符 or|and 与前一个条件的连接符 默认调用`$logical`
->
 
 ```php
 
-$this->where("id='100'")->all();
+DB::::table('user')->where("id='100'")->get();
 //生成的SQL语句
-//select * from `tableName` where （id = '100'）;
+//select * from `user` where (id = '100');
 
-$this->->where("id='1659'")->where(array('id !='=>'1113','name like'=>'%nathan%'))->get('users');//前缀在config/database.php 设置 tablePrefix
+DB::::table('user')->where("id='1659'")->where(array('id !='=>'1113','name like'=>'%kwin%'))->get();//前缀在config/database.php 设置 tablePrefix
 //生成的SQL语句
-//SELECT  *  FROM  `yrp_users` where (id='1659') or ( `id` != '1113'  or  `name` like '%nathan%' )
+//SELECT  *  FROM  `prefix_user` where (id='1659') or ( `id` != '1113'  or  `name` like '%kwin%' )
 
 
-$this->where("id='1596'")->where(array('id !='=>'1113','or fullname like'=>'%nathan%',
-'and update_time between'=>array(10000 , 100000000)))->get('users');
+DB::::table('user')->where("id='1596'")->where(array('id !='=>'1113','or fullname like'=>'%kwin%',
+'and update_time between'=>array(10000 , 100000000)))->get();
 //前缀在config/database.php 设置 tablePrefix
 //生成的SQL语句
-//SELECT  *  FROM  `yrp_users` where (id='1596') and ( `id` != '1113'  or  `fullname` like '%nathan%'  and  `update_time` between '10000' and '100000000' )
+//SELECT  *  FROM  `prefix_user` where (id='1596') and ( `id` != '1113'  or  `fullname` like '%kwin%'  and  `update_time` between '10000' and '100000000' )
 
-$this->where(array('id in'=>array(1,2,3,4,5,6,7,8,9,10)))->get('users');
+DB::::table('user')->where(array('id in'=>array(1,2,3,4,5,6,7,8,9,10)))->get();
 //生成的SQL语句
-//SELECT  *  FROM  `yrp_users` where ( `id` in(1,2,3,4,5,6,7,8,9,10))
+//SELECT  *  FROM  `prefix_user` where ( `id` in(1,2,3,4,5,6,7,8,9,10))
+
+
+DB::::table('user')->where(['id in'=>function($model){
+  return $model->table('test')->select('id')
+    ->where(['name !='=>''])
+    ->toSql();
+}])->get();
+//生成的SQL语句
+//SELECT  *  FROM  `prefix_user` where (id in (select `id` FROM `prefix_test` where (`name`!='')))
 ```
->where 可以用连贯查询 一组where会用()包含
+>where 可以用连贯查询 一组where会用`()`包含
 
 **ORDER**
 ```php
-$this->order('id desc')->all();
+DB::::table('user')->order('id desc')->get();
 //生成的SQL语句
- SELECT  *  FROM  `yrp_users` ORDER BY `id` desc
+ SELECT  *  FROM  `prefix_user` ORDER BY `id` desc
 ```
 
 **GROUP**
 ```php
-$this->order('ip')->all();
+DB::::table('user')->order('ip')->get();
 //生成的SQL语句
-//SELECT  *  FROM  `yrp_users` `GROUP BY `ip`
+//SELECT  *  FROM  `prefix_user` `GROUP BY `ip`
 ```
 
 **HAVING**
 >同WHERE
 
 ```php
-$this->group('id')->having(array('id >'=>'2000'))->get('users');
+DB::::table('user')->group('id')->having(array('id >'=>'2000'))->get('users');
 //生成的SQL语句
-//SELECT  *  FROM  `yrp_users` GROUP BY `id` having ( `id` > '2000' )
+//SELECT  *  FROM  `prefix_user` GROUP BY `id` having ( `id` > '2000' )
 ```
 
 **JOIN**
->**join($table, $cond, $type = '', $auto = true)
-> @param $table 表名
-> @param $cond  连接条件 同where
-> @param string $type 连接方式
-> @param bool $auto 是否自动添加表前缀**
+>**join($table, $cond, $type = '', $auto = true)**
+> **@param $table 表名**
+> **@param $cond  连接条件 同where**
+>**@param string $type 连接方式**
 
 
 ```php
-$this->join('users as b', ['a.id'=>'b.id'], 'left')->get('users as a');
+DB::::table('orders as a')->join('user as b', ['a.id'=>'b.id'], 'left')->get();
 //生成的SQL语句
-//SELECT  *  FROM  `yrp_users` as `a` LEFT JOIN `yrp_users` as `b` ON `a`.`id`=`b`.`id`
+//SELECT  *  FROM  `prefix_orders` as `a` LEFT JOIN `prefix_user` as `b` ON `a`.`id`=`b`.`id`
 ```
 
-##计算
+### 聚合查询
 
-**统计COUNT**
->**count($tableName,$auto = true)
->$tableName 表名
->$auto 是否自动添加前缀 bool 默认true**
+#### 统计COUNT
+
+>**count()**
 
 ```php
-$this->count('users');
+DB::table('user')->count();
 //同
-$this->select('count(*) as count')->get('users')->row()->count;
+DB::table('user')->select('count(*) as count')->get()->row()->count;
 //生成的SQL语句
-//SELECT COUNT(*) as `count` FROM  `yrp_users`
+//SELECT COUNT(*) as `count` FROM  `prefix_user`
 ```
 
-**最大值MAX**
->**max($tableName,$field,$auto = true)
->$tableName 表名
->$field 字段名 不能为空
->$auto 是否自动添加前缀 bool 默认true**
+#### 最大值MAX
+>**max()**
+>
 
 ```php
-$this->max('users','id');
+DB::::table('user')->max('id');
 //同
-$this->select('max(id) as max')->get('users')->row()->max;
+DB::::table('user')->select('max(id) as max')->get()->row()->max;
 //生成的SQL语句
-//SELECT MAX(id) as `max` FROM  `yrp_users`
+//SELECT MAX(`id`) as `max` FROM  `prefix_user`
 ```
 
-**最小值MIN**
->**min($tableName,$field,$auto = true)
->$tableName 表名
->$field 字段名 不能为空
->$auto 是否自动添加前缀 bool 默认true**
+#### 最小值MIN
+>**min()**
 
 ```php
-$this->min('users','id');
+DB::::table('user')->min('id');
 //同
-$this->select('min(id) as min')->get('users')->row()->min;
+DB::::table('user')->select('min(id) as min')->get('users')->row()->min;
 //生成的SQL语句
-//SELECT MIN(id) as `min` FROM  `yrp_users`
+//SELECT MIN(`id`) as `min` FROM  `prefix_user`
 ```
 
-**累计值SUM**
->**sum($tableName,$field,$auto = true)
->$tableName 表名
->$field 字段名 不能为空
->$auto 是否自动添加前缀 bool 默认true**
+#### 累计值SUM
+>**sum()**
 
 ```php
-$this->sum('users','id');
+DB::::table('user')->sum('id');
 //同
-$this->select('sum(id) as sum')->get('users');
+DB::::table('user')->select('sum(id) as sum')->get();
 //生成的SQL语句
-//SELECT SUM(id) as `sum` FROM  `yrp_users`
+//SELECT SUM(`id`) as `sum` FROM  `prefix_user`
 ```
 
-**平均值SUM**
->**sum($tableName,$field,$auto = true)
->$tableName 表名
->$field 字段名 不能为空
->$auto 是否自动添加前缀 bool 默认true**
+#### 平均值SUM
+>**sum()**
 
 ```php
-$this->avg('users','id');
+DB::::table('user')->avg('users','id');
 //同
-$this->select('avg(id) as avg')->get('users');
+DB::::table('user')->select('avg(id) as avg')->get();
 //生成的SQL语句
-//SELECT AVG(id) as `avg` FROM  `yrp_users`
-```
-##查询结果返回
-
-####row($assoc = false) 查询一条结果
->**@param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object  当查询价格为空时 返回false
->**
-
-```php
-//查询一条数据 返回对象格式
-$this->select('id')->where(array('id'=>1))->get('users')->row();
-//返还一条数据 当查询结果为空时 返回false
-//stdClass::__set_state(array( 'id' => '231', ))
-
-//查询一条数据 返回数组格式
-$this->select('id')->where(array('id'=>1))->get('users')->row(true);
-//返还一条数据 当查询结果为空时 返回false
-//array(1) { ["id"]=> string(3) "231" }
+//SELECT AVG(`id`) as `avg` FROM  `prefix_user`
 ```
 
-------------
 
-
-####result($assoc = false) 查询一条结果
->**@param bool|false $assoc 当该参数为 TRUE 时，将返回 array 而非 object  当查询价格为空时 返回一个空的数组array()
->**
-
+### query 操作SQL
 ```php
-//查询所有数据 返回对象格式
-$this->select('id')->get('users')->result();
-//返还一条数据 当查询结果为空时 返回一个空的数组array()
-//array ( 0 => stdClass::__set_state(array( 'id' => '1', )), 1 => stdClass::__set_state(array( 'id' => '2', )), 2 => stdClass::__set_state(array( 'id' => '3', )), .....)
+//返回一个包含结果集中所有行的数组,只获取列名
+$re = DB::::query("select * from prefix_users");
 
-//查询所有数据 返回数组格式
-$this->select('id')->get('users')->result(true);
-//返还所以数据 当查询结果为空时 返回一个空的数组array()
-//array ( 0 => array ( 'id' => '1', ), 1 => array ( 'id' => '2', ), 2 => array ( 'id' => '3', ),....)
-```
-
-####rowCount() — 返回受上一个 SQL 语句影响的行数
-
-```php
-$db = M();
-$re = $db->select('id')->get('users')->result();
-echo  $db->rowCount();//输出查询结果总条数
-```
-
-##query 操作SQL
-```php
-$db = M();
-$re = $db->query("select * from yrp_users")->result();
-//查询 同 $db->get('yrp_users')
-
-$re = $db->query("update yrp_users name='nathan' where id=500")->rowCount();
+$re = DB::::query("update prefix_users name='nathan' where id=500")->rowCount();
 //修改 返回受影响的行数
 ```
 
-##事务
+## 事务
 
 ####要使用事务来运行你的查询, 你可以使用如下方法:
 1. startTrans(); 开启事务
@@ -1903,26 +1892,16 @@ $re = $db->query("update yrp_users name='nathan' where id=500")->rowCount();
 3. commit(); 事务提交
 4. rollback(); 事务回滚
 
-####属性
-**public $transStatus;bool 事务是否发生错误**
-
 ```php
-$m = M('users');
-$t= $m->transaction(function () use($m) {
-  $m->insert(['name' => 'q1']);
 
+$t= DB::::transaction(function () use($m) {
+  $m->insert(['name' => 'q1']);
    $m->insert(['name' => 'q17567']);
    $m->insert(['name1' => 'q3', 'age' => 24]);
 
-})->transStatus;
-var_export($t);
-
-
-
-
-
-
-
+});
+//当恒等于true时，成功，其余情况为失败
+var_export($t===true);
 ```
 
 
@@ -1930,31 +1909,25 @@ var_export($t);
 
 ```php
 try{
-$this->startTrans();
-$this->query('一条SQL查询...');
+DB::::startTrans();
+DB::::query('一条SQL查询...');
 
-$this->query('另一条查询...');
+DB::::query('另一条查询...');
   
-re = this->query('还有一条查询...');
-$this->commit();
+re = DB::::query('还有一条查询...');
+DB::::commit();
 }catch (\Exception $e){
-$m->rollback();
+DB::::rollback();
 }
 ```
 
 
 
-##错误调试
-```php
-$db = M();
-$error = $db->error();//返回的是一个数组array
-var_export($error);
-```
-
 ##数据缓存
+
 ```php
 //获得缓存实例 $dbCacheType 缓存驱动，有file memcache、memcached、redis,默认为file
-$cache = core\cache::getInstance($dbCacheType = null);
+$cache = YrPHP\Cache::getInstance($dbCacheType = null);
 
 /**
 * 设置缓存
@@ -2017,20 +1990,107 @@ $this->setCache(false);
 
 ##lastQuery() 查询上一条SQL语句
 ```php
-$db = M();
-$re = $db->get('users')->result();
-echo $db->lastQuery();
-//select * from `yrp_users`
+$re = DB::::get('users');
+echo DB::::lastQuery();
+//等同于 DB::::lastSql()
+//select * from `prefix_users`
 ```
 
 
 
 ## 使用多数据库连接
 
-当你使用了多个连接时，则可以通过  `connection` 方法来访问每个连接。传递给 `connection` 方法的 `name` 必须对应至 `config/database.php` 配置文件中的连接列表的其中一个：
+当你使用了多个连接时，则可以通过  `setconnection` 方法来访问每个连接。传递给 `setconnection` 方法的 `name` 必须对应至 `config/database.php` 配置文件中的连接列表的其中一个：
 
 ```php
-$users = M()->connection('foo')->select(...);
+$users = DB::::setconnection('two')->query(...);
+```
+
+# 模型
+
+## 模型定义
+
+> 模型类并非必须定义，只有当存在独立的业务逻辑或者属性的时候才需要定义。
+> 文件名为**模型名.php**  `user表`对应的文件名为**User.php**，如果要修改默认对应的表名，则重写$table属性
+
+模型类通常需要继承系统的YrPHP\Database\Model类或其子类，下面是一个Model\User类的定义：
+
+```php
+<?php
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class User extends Model
+{
+  //链接用database配置里的`conn1`数组
+  protected $connection = 'conn1';
+  
+  //不写 默认操作user表
+  protected $table = 'users';
+
+  //默认主键为`id` 改写为`uid`
+  protected $primaryKey = 'uid';
+  
+}
+```
+
+
+
+## 取回单个模型
+
+```php
+// 通过主键取回一个模型...
+$user = User::find(1);
+
+// 取回符合查询限制的第一个模型 ...
+$data = User::where(['status'=>1])->first();
+echo $data->name;
+echo $data['age'];
+```
+
+
+
+## 取回集合
+
+> 返回的所有多结果集都是 `YrPHP\Database\Collection` 对象的实例。所有的集合都可以作为迭代器，可以就像简单的 PHP 数组一样来遍历它们：
+
+```PHP
+// 取回符合查询限制的所有模型 ...
+$users = User::where(['name like'=>'%李%'])->get();
+
+foreach ($users as $user) {
+    echo $user->name;
+  	echo $user['age'];
+}
+```
+
+
+
+## 新增
+
+```PHP
+$user           = new User;
+$user->name     = 'kwin';
+$user->email    = 'kwinwong@hotmail.com';
+$user->save();
+```
+
+## 更新
+
+```php
+$user = User::find(1);
+$user->name     = 'kwin';
+$user->email    = 'kwinwong@hotmail.com';
+$user->save();
+```
+
+## 删除
+
+```php
+User::destroy(1);
+User::destroy([1, 2, 3]);
+User::destroy(1, 2, 3);
 ```
 
 
@@ -2039,13 +2099,13 @@ $users = M()->connection('foo')->select(...);
 
 ### 定义一个访问器
 
-若要定义一个访问器，则必须在你的模型上创建一个 `getFooAttribute` 方法。要访问的 `Foo` 字段需使用「驼峰式」来命名。在这个例子中，我们将为 `first_name` 属性定义一个访问器。当 Eloquent 尝试获取 `first_name` 的值时，将会自动调用此访问器：
+若要定义一个访问器，则必须在你的模型上创建一个 `getFooAttribute` 方法。要访问的 `Foo` 字段需使用「驼峰式」来命名。在这个例子中，我们将为 `first_name` 属性定义一个访问器。当 Model 尝试获取 `first_name` 的值时，将会自动调用此访问器：
 
 ```php
 <?PHP
 namespace App\Models;
 
-use YrPHP\Model;
+use YrPHP\Database\Model;
 
 class User extends Model
 {
@@ -2071,12 +2131,12 @@ class User extends Model
 如你所见的，字段原始的值被传递到访问器中，让你可以操作并返回结果。如果要访问被修改的值，则可以像这样来访问 `first_name` 属性：
 
 ```php
-$user = M('User')->find(1);
+$user = User::find(1);
 
 $firstName = $user->first_name;
 
 //closePreProcess方法可以临时关闭访问器和修改器
-$user = M('User')->closePreProcess()->find(1);
+$user = User::closePreProcess()->find(1);
 ```
 
 
@@ -2090,7 +2150,7 @@ $user = M('User')->closePreProcess()->find(1);
 
 namespace App\Models;
 
-use YrPHP\Model;
+use YrPHP\Database\Model;
 
 class User extends Model
 {
@@ -2107,17 +2167,335 @@ class User extends Model
 }
 ```
 
-修改器会获取属性已经被设置的值，让你可以操作该值并将其设置到 Eloquent 模型内部的 `$attributes` 属性上。举个例子，如果我们尝试将 `first_name` 属性设置成 `Sally`：
+修改器会获取属性已经被设置的值，让你可以操作该值并将其设置到 模型内部的 `$attributes` 属性上。举个例子，如果我们尝试将 `first_name` 属性设置成 `Sally`：
 
 ```php
-$user = Model('User')->insert(['first_name'=>'Sally'])；
+$user = User::insert(['first_name'=>'Sally'])；
   
   //closePreProcess方法可以临时关闭访问器和修改器
-$user = M('User')->closePreProcess()->insert(['first_name'=>'Sally'])；
+$user = User::closePreProcess()->insert(['first_name'=>'Sally'])；
 ```
 
 在这个例子中，`setFirstNameAttribute` 函数将会使用 `Sally` 作为参数来调用。修改器会对该名字使用`strtolower` 函数并将其值返回。
 
+
+## 模型关联
+
+### 一对一
+一对一关联是最基本的关联关系。例如，一个 User 模型可能关联一个 Identity 模型。为了定义这个关联，我们要在 User 模型中写一个 identity 方法，在 identity 方法内部调用 hasOne 方法并返回其结果：
+
+#### 定义
+
+```php
+<?php
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class User extends Model
+{
+
+  //不写 默认操作user表
+  protected $table = 'users';
+
+  
+    function identity()
+    {
+       return $this->hasOne('\App\Models\Identity');
+    }
+}
+```
+
+#### 关联查找
+
+hasOne 方法的第一个参数是关联模型的类名。关联关系定义好后，我们就可以动态属性获得相关的记录。您可以像在访问模型中定义的属性一样，使用动态属性：
+
+```PHP
+$identity = User::find(1)->identity;
+```
+
+默认会基于模型名决定外键名称。在当前场景中，会假设 Identity 模型有一个 user_id 外键，如果外键名不是这个，可以通过给 hasOne 方法传递第二个参数覆盖默认使用的外键名：
+
+```php
+return $this->hasOne('\App\Models\Identity', 'foreign_key');
+```
+
+
+此外，Model会假定外键值是与父级 id（或自定义 $primaryKey）列的值相匹配的。 换句话说，会将在 Phone 记录的 user_id 列中查找与用户表的 id 列相匹配的值。 如果您希望该关联使用 id以外的自定义键名，则可以给 hasOne 方法传递第三个参数：
+
+```PHP
+return $this->hasOne('\App\Models\Identity', 'foreign_key', 'local_key');
+```
+
+
+
+####  关联新增
+
+```PHP
+User::find(1)->identity()->insert([
+  'id_card' => '330328198905084836'
+]);
+```
+
+系统会自动把当前模型的主键传入Identity模型表的外键中
+
+### 多态一对一
+
+多态一对一相比多态一对多关联的区别是动态的一对一关联，举个例子说有一个个人和团队表，而无论个人还是团队都有一个头像需要保存但都会对应同一个头像表
+```
+member
+	id - integer
+    name - string
+    
+team
+	id - integer
+    name - string
+    
+avatar
+	id - integer
+    avatar - string
+    imageable_id - integer
+    imageable_type - string   
+```
+
+#### 定义
+
+会员模型：
+
+```php
+<?php
+
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class Member extends Model
+{
+    /**
+     * 获取用户的头像
+     */
+    public function avatar()
+    {
+        return $this->morphOne('App\Models\Avatar', 'imageable');
+    }
+}
+```
+团队模型：
+
+```php
+<?php
+
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class Team extends Model
+{
+    /**
+     * 获取团队的头像
+     */
+    public function avatar()
+    {
+        return $this->morphOne('App\Models\Avatar', 'imageable');
+    }
+}
+```
+
+morphOne方法的参数如下：
+**morphOne('关联模型名','多态字段信息','多态类型','多态外键','多态外键对应关联键名');**
+**关联模型名（必须）：**关联的模型名称。
+**多态字段信息（可选）：**多态字段使用 多态前缀\_type和多态前缀\_id，默认为当前的关联方法名作为字段前缀。
+**多态类型字段（可选）：** 默认`type`,与多态字段组合成多态类型字段，多态字段信息\_多态类型
+**多态外键字段（可选）：** 默认`id`,与多态字段组合成多态外键字段，多态字段信息\_多态外键
+**多态外键对应关联键名：** 与多态外键字段关联的主键字段名
+
+#### 关联查找
+
+```PHP
+//返回一个Avatar模型
+$avatar = Member::find(1)->avatar;
+```
+
+#### 关联新增
+
+```php
+Member::find(1)->avatar()->insert([
+  'img' => 'upload/image/1499757432849533.jpg'
+]);
+```
+
+> 系统会把当前模型的`表名`填充到Avatar模型的`多态类型字段`上，把当前模型的`主键`填充到Avatar模型的`多态外键字段`上
+
+
+
+
+### 一对多
+
+「一对多」关联用于定义单个模型拥有任意数量的其它关联模型。例如，一个人可能会有多张银行卡帐号。
+
+#### 定义
+
+```php
+<?php
+
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class User extends Model
+{
+    /**
+     * 获得该用户下绑定的所有银行卡。
+     */
+    public function bankCard()
+    {
+        return $this->hasMany('\App\Models\BankCard');
+    }
+}
+```
+
+记住，Model 会自动确定 `BankCard` 模型上正确的外键字段。按照约定，Model 使用父级表名、加上 `_id` 后缀名作为外键字段。对应到上面的场景，就是 Model 假定 `Comment` 模型对应到 `User` 模型上的那个外键字段是 `user_id`。
+
+#### 关联查找
+
+关联关系定义好后，我们就可以通过访问 `bankCard` 属性获得评论集合。记住，因为 Model 提供了「动态属性」，所以我们可以像在访问模型中定义的属性一样，访问关联方法：
+
+```PHP
+$bankCards = User::find(1)->bankCard;
+
+foreach ($bankCards as $bankCard) {
+    //
+}
+```
+
+当然，由于所有的关联还可以作为查询语句构造器使用，因此你可以使用链式调用的方式、在 `comments` 方法上添加额外的约束条件：
+
+```PHP
+$comments = User::find(1)->bankCard()->where(['status'=>1])->first();
+```
+
+形如 `hasOne` 方法，您也可以在使用 `hasMany` 方法的时候，通过传递额外参数来覆盖默认使用的外键与本地键。
+
+```php
+return $this->hasMany('\App\Models\BankCard', 'foreign_key');
+
+return $this->hasMany('\App\Models\BankCard', 'foreign_key', 'local_key');
+```
+
+
+
+#### 关联新增
+
+```php
+User::find(1)->bankCard()->insert([
+  'card_id' => '6225766750993868'
+]);
+```
+
+> 系统会自动把当前模型的主键传入BankCard模型表的外键中
+
+
+
+### 远层一对多
+
+「远层一对多」关联提供了方便、简短的方式通过中间的关联来获得远层的关联。例如，一个 Country 模型可以通过中间的 User 模型获得多个 Post 模型。在这个例子中，您可以轻易地收集给定国家的所有博客文章。让我们来看看定义这种关联所需的数据表：
+```
+countries
+    id - integer
+    name - string
+
+users
+    id - integer
+    country_id - integer
+    name - string
+
+posts
+    id - integer
+    user_id - integer
+    title - string
+```
+
+虽然 posts 表中不包含 country_id 字段，但 hasManyThrough 关联能让我们通过 $country->posts 访问到一个国家下所有的用户文章。为了完成这个查询，Model 会先检查中间表 users 的 country_id 字段，找到所有匹配的用户 ID 后，使用这些 ID，在 posts 表中完成查找。
+
+#### 定义
+
+现在，我们已经知道了定义这种关联所需的数据表结构，接下来，让我们在 Country 模型中定义它：
+```php
+<?php
+
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class Country extends Model
+{
+    /**
+     * 获得某个国家下所有的用户文章。
+     */
+    public function posts()
+    {
+        return $this->hasManyThrough('\App\Models\Post', 'App\User');
+    }
+}
+```
+hasManyThrough 方法的第一个参数是我们最终希望访问的模型名称，而第二个参数是中间模型的名称。
+
+当执行关联查询时，通常会使用 Eloquent 约定的外键名。如果您想要自定义关联的键，可以通过给 hasManyThrough 方法传递第三个和第四个参数实现，第三个参数表示中间模型的外键名，第四个参数表示最终模型的外键名。第五个参数表示本地键名，而第六个参数表示中间模型的本地键名：
+
+```php
+
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class Country extends Model
+{
+    public function posts()
+    {
+        return $this->hasManyThrough(
+            '\App\Models\Post',
+            '\App\Models\User',
+            'country_id', // 用户表外键...
+            'user_id', // 文章表外键...
+            'id', // 国家表本地键...
+            'id' // 用户表本地键...
+        );
+    }
+}
+```
+
+
+
+### 多对多
+>例如，我们的用户和角色就是一种多对多的关系，我们在User模型定义如下：
+>belongsToMany('关联模型名','中间表名','关联外键','中间表名关联外键');
+
+```
+<?php
+namespace App\Models;
+
+use YrPHP\Database\Model;
+
+class User extends Model 
+{
+    public function roles()
+    {
+        return $this->belongsToMany('\App\Models\Role');
+    }
+}
+```
+关联关系定义好后，我们就可以通过 roles 动态属性获得用户的角色了：
+```
+$user = App\User::find(1);
+
+foreach ($user->roles as $role) {
+    //
+}
+```
+当然，如同所有其它的关联类型，您可以调用 roles 方法，利用链式调用对查询语句添加约束条件：
+```
+$roles = App\User::find(1)->roles()->orderBy('name')->get();
+```
 ------------
 
 # 表单验证
@@ -2178,7 +2556,7 @@ class TestRequest extends FormRequest
  */
 namespace App\Controllers;
 
-use App;
+use App;s
 use App\TestRequest;
 use YrPHP\Controller;
 
@@ -2193,7 +2571,7 @@ class Index extends Controller
 
     function index(TestRequest $request, $id)
     {
-		//如果TestRequest验证没通过，则会将错误信息写入session 如果是post提交则返回上一页,如果是ajax，则返回{error:{}}, 获取错误信息：session('errors')
+		//如果TestRequest验证没通过，则会将错误信息写入session 如果是post提交则返回上一页,如果是ajax，则返回{error:{}}, 获取错误信息：session('errors') 
     }
 ```
 
@@ -2217,7 +2595,7 @@ function &getInstance(){}
 * @param mixed $default 默认值
 * @return mixed
 */
-   function C($name = null,  $default = null){}
+   function config($name = null,  $default = null){}
 
 /**********************************************************/
 /**
@@ -2322,13 +2700,7 @@ cookie('id',null);
    function myUnSerialize($txt = ''){}
 
  /**********************************************************/
-/**
- *404跳转
-* @param string $msg 提示字符串
-* @param string $url 跳转URL
-* @param int $time 指定时间跳转
-    */
-    function error404($msg = '', $url = '', $time = 3){}
+
 
 /**
  * 下载一个远程文件到客户端
@@ -2424,11 +2796,11 @@ function parseNaming($name = '', $type = 0){}
 ------------
 #创造自己的类库
 将你自己的 .php 文件放入`APP_PATH`/Libs
-文件的命名规则为`类名.php`,类名不能与系统类库（`LIBS_PATH`）下的类重名
+文件的命名规则为`类名.php`采用大驼峰命名法命名方
 
 ####例：
 
->在`APP_PATH`/Libs文件夹中新建一个名问MyPage.class.php的类文件
+>在`APP_PATH`/Libs文件夹中新建一个名问MyPage.php的类文件
 
 ```php
     <?php
@@ -3389,5 +3761,5 @@ $cart->remove($rowId);
 
 ##Email 类   PHPMailer
 ````
-
+  
 ````

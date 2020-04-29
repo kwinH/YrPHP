@@ -1,12 +1,12 @@
    * [简介](#简介)
    * [安装YrPHP](#安装yrphp)
-            * [通过 Composer Create-Project](#通过-composer-create-project)
-            * [Git安装](#git安装)
-            * [测试](#测试)
+      * [通过 Composer Create-Project](#通过-composer-create-project)
+      * [Git安装](#git安装)
+      * [测试](#测试)
    * [目录结构](#目录结构)
    * [人口文件](#人口文件)
    * [应用目录](#应用目录)
-         * [系统核心常量](#系统核心常量)
+      * [系统核心常量](#系统核心常量)
    * [核心](#核心)
       * [路由](#路由)
          * [基本路由](#基本路由)
@@ -16,20 +16,20 @@
          * [正则表达式限制参数](#正则表达式限制参数)
             * [全局限制](#全局限制)
       * [命名路由](#命名路由)
-            * [路由群组和命名路由](#路由群组和命名路由)
-            * [对命名路由生成 URLs](#对命名路由生成-urls)
+         * [路由群组和命名路由](#路由群组和命名路由)
+         * [对命名路由生成 URLs](#对命名路由生成-urls)
       * [路由群组](#路由群组)
          * [中间件](#中间件)
          * [命名空间](#命名空间)
          * [路由前缀](#路由前缀)
       * [RESTful 资源控制器](#restful-资源控制器)
-            * [由资源控制器处理的行为](#由资源控制器处理的行为)
-            * [部分资源路由](#部分资源路由)
-            * [命名资源路由](#命名资源路由)
-            * [嵌套资源](#嵌套资源)
-            * [附加资源控制器](#附加资源控制器)
+         * [由资源控制器处理的行为](#由资源控制器处理的行为)
+         * [部分资源路由](#部分资源路由)
+         * [命名资源路由](#命名资源路由)
+         * [嵌套资源](#嵌套资源)
+         * [附加资源控制器](#附加资源控制器)
       * [隐式控制器](#隐式控制器)
-            * [分派路由名称](#分派路由名称)
+         * [分派路由名称](#分派路由名称)
       * [路由缓存](#路由缓存)
       * [URI](#uri)
       * [添加 URL 后缀](#添加-url-后缀)
@@ -52,42 +52,42 @@
          * [视图缓存](#视图缓存)
    * [模版](#模版)
       * [模版继承](#模版继承)
-            * [控制器中调用](#控制器中调用)
-            * [定义页面布局layout.php](#定义页面布局layoutphp)
-            * [继承页面布局 index.php](#继承页面布局-indexphp)
-            * [test.php](#testphp)
-            * [最后解析成：](#最后解析成)
+         * [控制器中调用](#控制器中调用)
+         * [定义页面布局layout.php](#定义页面布局layoutphp)
+         * [继承页面布局 index.php](#继承页面布局-indexphp)
+         * [test.php](#testphp)
+         * [最后解析成：](#最后解析成)
       * [变量输出](#变量输出)
       * [输出函数返回值](#输出函数返回值)
       * [运算符](#运算符)
       * [包含文件](#包含文件)
       * [赋值](#赋值)
-            * [将函数赋值](#将函数赋值)
+         * [将函数赋值](#将函数赋值)
       * [判断](#判断)
       * [循环](#循环)
          * [for](#for)
          * [while](#while)
       * [使用php代码](#使用php代码)
       * [自定义标签](#自定义标签)
-            * [使用](#使用)
-            * [在模版中调用](#在模版中调用)
+         * [使用](#使用)
+         * [在模版中调用](#在模版中调用)
       * [表单](#表单)
-            * [实例：](#实例)
-            * [开启表单](#开启表单)
-            * [CSRF 保护](#csrf-保护)
-            * [标签（Label）](#标签label)
-            * [文字字段](#文字字段)
-            * [多行文本域](#多行文本域)
-            * [密码字段](#密码字段)
-            * [隐藏域](#隐藏域)
-            * [复选框、单选按钮](#复选框单选按钮)
-            * [下拉框](#下拉框)
-            * [按钮](#按钮)
+         * [实例：](#实例)
+         * [开启表单](#开启表单)
+         * [CSRF 保护](#csrf-保护)
+         * [标签（Label）](#标签label)
+         * [文字字段](#文字字段)
+         * [多行文本域](#多行文本域)
+         * [密码字段](#密码字段)
+         * [隐藏域](#隐藏域)
+         * [复选框、单选按钮](#复选框单选按钮)
+         * [下拉框](#下拉框)
+         * [按钮](#按钮)
    * [模型](#模型)
       * [数据库配置](#数据库配置)
       * [模型定义](#模型定义)
       * [模型实例化](#模型实例化)
-               * [M(['模型名']);](#m模型名)
+         * [M(['模型名']);](#m模型名)
       * [CURL](#curl)
          * [Active Record 模式](#active-record-模式)
             * [删除数据DELETE](#删除数据delete)
@@ -100,8 +100,8 @@
             * [在配置文件中配置数据库相关配置](#在配置文件中配置数据库相关配置)
       * [使用多数据库连接](#使用多数据库连接)
       * [数据预处理——访问器和修改器](#数据预处理访问器和修改器)
-         * [定义一个访问器](#定义一个访问器)
-         * [定义一个修改器](#定义一个修改器)
+            * [定义一个访问器](#定义一个访问器)
+            * [定义一个修改器](#定义一个修改器)
    * [表单验证](#表单验证)
    * [系统函数](#系统函数)
    * [创造自己的类库](#创造自己的类库)
@@ -3514,4 +3514,1006 @@ $cart->remove($rowId);
 ## Email 类   PHPMailer
 ````
 
-````
+````s/{account_id}/detail URL
+    });
+});
+```
+
+
+
+## RESTful 资源控制器
+
+```php
+Route::resource('photos', 'PhotosController');
+```
+
+这一条路由声明会创建多个路由，用来处理各式各样和相片资源相关的的 RESTful 行为。同样地，生成的控制器有着各种和这些行为绑定的方法，包含要处理的 URI 及方法对应的注释。
+
+#### 由资源控制器处理的行为
+
+| 动词      | 路径                   | 行为（方法） | 路由名称      |
+| --------- | ---------------------- | ------------ | ------------- |
+| GET       | `/photos`              | index        | photos.index  |
+| GET       | `/photos/create`       | create       | photos.create |
+| POST      | `/photos`              | save         | photos.save   |
+| GET       | `/photos/{photo}`      | show         | photos.show   |
+| GET       | `/photos/{photo}/edit` | edit         | photos.edit   |
+| PUT/PATCH | `/photos/{photo}`      | update       | photos.update |
+| DELETE    | `/photos/{photo}`      | delete       | photos.delete |
+
+#### 部分资源路由
+
+声明资源路由时，你可以指定让此路由仅处理一部分的行为：
+
+```php
+Route::resource('photos', 'PhotosController',
+                ['only' => ['index', 'show']]);
+
+Route::resource('photos', 'PhotosController',
+                ['except' => ['create', 'store', 'update', 'destroy']]);
+```
+
+#### 命名资源路由
+
+所有的资源控制器行为默认都有路由名称；不过你可以在选项中传递一个 `names` 数组来重写这些名称：
+
+```PHP
+Route::resource('photos', 'PhotosController',
+                ['names' => ['create' => 'photo.build']]);
+```
+
+#### 嵌套资源
+
+有时你可能会需要定义「嵌套」资源路由。例如，相片资源可能会附带多个「评论」。要「嵌套」此资源控制器，可在路由声明中使用「点」记号：
+
+```PHP
+Route::resource('photos.comments', 'PhotoCommentController');
+```
+
+此路由会注册一个「嵌套」资源，可通过类似的 URL 来访问它：`photos/{photos}/comments/{comments}`。
+
+```php
+<?php
+
+namespace App\Controllers;
+
+use YrPHP\Controller;
+
+class PhotoCommentController extends Controller
+{
+    /**
+     * 显示指定相片的评论。
+     *
+     * @param  int  $photoId
+     * @param  int  $commentId
+     * @return Response
+     */
+    public function show($photoId, $commentId)
+    {
+        //
+    }
+}
+```
+
+#### 附加资源控制器
+
+如果想在资源控制器中默认的资源路由之外加入其它额外路由，则应该在调用 `Route::resource` **之前** 定义这些路由。否则，由 `resource` 方法定义的路由可能会不小心覆盖你附加的路由：
+
+```php
+Route::get('photos/popular', 'PhotosController@method');
+
+Route::resource('photos', 'PhotosController');
+```
+
+## 隐式控制器
+
+YrPHP让你能够轻易地通过定义单个路由来处理控制器类中的各种行为。首先，使用 `Route::controller` 方法来定义路由。`controller` 方法接受两个参数。第一个参数是控制器所处理的基本 URI，第二个是控制器的类名称：
+
+```PHP
+Route::controller('users', 'UserController');
+```
+
+接下来，只要在控制器中加入方法。方法的名称应由它们所响应的 HTTP 动词作为开头，紧跟着首字母大写的 URI 所组成：
+
+```PHP
+<?php
+
+namespace App\Controllers;
+
+use YrPHP\Controller;
+
+class UserController extends Controller
+{
+    /**
+     * 响应对 GET /users 的请求
+     * 响应对 GET /users/index 的请求（PS:当有参数时必须带上`/index`）
+     */
+    public function getIndex()
+    {
+        //
+    }
+
+  
+    /**
+     * 响应对 GET /users/info/1 的请求
+     * 		 GET /users/info 默认$id为1
+     */
+    public function getInfo($id=1)
+    {
+        //
+    }
+
+    /**
+     * 响应对 POST /users/info 的请求
+     */
+    public function postInfo()
+    {
+        //
+    }
+  
+     /**
+     * 响应对 put /users/info/1 的请求
+     */
+    public function putInfo($id)
+    {
+        //
+    }
+
+     /**
+     * 响应对 patch /users/info/1 的请求
+     */
+    public function patchInfo($id)
+    {
+        //
+    }
+  
+     /**
+     * 响应对 DETELE /users/info/1 的请求
+     */
+    public function deleteInfo($id)
+    {
+        //
+    }
+  
+     /**
+     * 响应对 GET /users/info 的请求
+     * 响应对 GET /users/info/1 的请求
+     * 响应对 POST /users/info/1 的请求
+     * 响应对 put /users/info/1 的请求
+     * 响应对 patch /users/info/1 的请求
+     * 响应对 delete /users/info/1 的请求
+     */
+    public function anyInfo($id=null)
+    {
+        //
+    }
+}
+```
+
+正如你在上述例子中所看到的，`index` 方法会响应控制器所处理的根 URI，在这个例子中是 `users`。
+
+> YrPHP的Route会从上至下解析，直到找到方法就不会继续解析其他方法，所以要注意方法的顺序。
+
+#### 分派路由名称
+
+如果你想要 `命名` 控制器中的某些路由，你可以在 `controller` 方法中传入一个名称数组作为第三个参数：
+
+```PHP
+Route::controller('users', 'UserController', [
+    'getShow' => 'user.show',
+]);
+```
+
+## 路由缓存
+
+若你的应用程序完全通过控制器使用路由，你可以利用 YrPHP的路由缓存。使用路由缓存可以大幅降低注册全部路由所需的时间。在某些情况下，你的路由注册甚至可以快上一百倍！要生成路由缓存，只要运行 `route cache` 此 Artisan 命令：
+
+```
+php artisan route cache
+```
+
+这就可以了！现在你的缓存路由文件将被用来代替 `Config/routes.php` 这一文件。请记得，若你添加了任何新的路由，就必须生成新的路由缓存。因此你可能希望只在你的项目部署时才运行 `route cache` 这一命令。
+
+要移除缓存路由文件而不生成新的缓存，请使用 `route clear` 命令：
+
+```
+php artisan route clear
+```
+
+## URI
+
+####获得URL
+>getUrl($url,$indexPage);//如果参数为空 则返回现在所在所在的根目录如`http://example.com/index.php/news/index/id`
+>则返回 `http://example.com/`
+>否则返回拼接后的URL
+>`/**`
+>`* @param string $url URL表达式，格式：'[模块/控制器/操作#锚点@域名]?参数1=值1&参数2=值2...'`
+>`* @param bool|true $indexPage 如果是REWRITE重写模式 可以不必理会 否则默认显示index.php`
+>`* @return string`
+>`*/`
+
+
+   默认情况下，index.php 文件将被包含在你的 URL 中：
+   example.com/index.php/news/article/my_article
+
+你可以很容易的通过 .htaccess 文件来设置一些简单的规则删除它。下面是一个例子，使用“negative”方法将非指定内容进行重定向：
+
+```
+RewriteEngine on
+
+ RewriteCond %{REQUEST_FILENAME} !-f
+
+RewriteRule .* index.php
+```
+
+在上面的例子中，可以实现任何非 index.php、images 和 robots.txt 的 HTTP 请求都被指向 index.php。
+
+
+## 添加 URL 后缀
+
+通过设置 config/config.php 文件，你可以为 yrphp 生成的 URL 添加一个指定的文件后缀。举例来说，如果 URL 是这样的：
+
+***example.com/index.php/products/view/shoes***
+
+你可以随意添加一个后缀，例如 .html，使其显示为：
+
+example.com/index.php/products/view/shoes.html
+
+你只需修改config/config.php 文件中
+
+```php
+$config['urlSuffix'] = '.html';
+```
+
+#  cli命令行模式
+
+## 实现代码提示、跟踪和自动补全
+
+```shell
+$ php artisan ide-help generate
+```
+
+> 参数必须是3个及以上，artisan是入口文件，ide-help是config/commands.php中类的key值（也可以说是类别名），也可以是控制器名（多目录用`/`分开）。generate是方法名，其他参数都做为调用的方法的参数
+
+# 中间件
+
+HTTP 中间件提供了一个方便的机制来过滤进入应用程序的 HTTP 请求，在一个请求真正处理前，我们可能会对请求做各种各样的判断，然后才可以让它继续传递到更深层次中。
+
+## 创建一个中间件
+
+> 中间件一般放在App/Middleware目录下，如下就要一个名为App/Middleware/Auth.php的中间件，该中间件实现了如果用户还没登录，则跳转到登录页面，否则调用`$next($request)`继续执行（相当于允许通过中间件）
+
+```php
+<?php
+/**
+ * Project: YrPHP.
+ * Author: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
+namespace App\Middleware;
+
+use Closure;
+use Response;
+use YrPHP\IMiddleware;
+use YrPHP\Request;
+
+class Auth implements IMiddleware
+{
+    public function handler(Request $request, Closure $next)
+    {
+        if (!session('admin')) {
+            Response::errorBackTo('您还没有登录，请先登录', '/admin/manager/login');
+        }
+
+        $next($request);
+    }
+}
+```
+
+## 调用
+
+1、你可以在App/Config/config.php文件中配置
+
+```php
+<?php 
+//.....
+    /*--------------------以下是全局中间件配置---------------------------------------*/
+    'middleware' => [
+        //在实例化控制器之前
+        'before' => [
+            YrPHP\Middleware\VerifyCsrfToken::class,
+        ],
+        //在实例化控制器实例化之后，未调用方法之前
+        'middle' => [
+
+        ],
+        //调用方法之后
+        'after' => [
+
+        ],
+    ],
+
+//....
+```
+
+2、也可以在控制器中单独调用
+
+```php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: TOYOTA
+ * Date: 2017/3/16 0016
+ * Time: 14:05
+ */
+
+namespace App\Controllers\Admin;
+
+use YrPHP\Controller;
+class User extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->middleware('Auth',['except'=>['login']]);
+    }
+  
+  	//....
+  
+    }
+```
+
+> middleware(\$middleware, array \$options = []) \$middleware参数为中间件名，\$options 为过滤条件，['except'=>['login']]代表调用login方法不调用该中间件，其他都要调用该中间件，['only'=>['content']]代表仅调用content方法时调用该中间件，其他都不要调用该中间件。
+
+#控制器
+
+例子：创造一个控制器
+在APP目录下的controls目录下创建一个名为:
+Test.class.php的文件
+
+```php
+<?php
+use YrPHP\Controller;
+
+class Test extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+    }
+
+    function  index()
+    {
+      echo "Hello World";
+    }
+```
+
+
+接着我们用浏览器打开 example.com/index.php/test
+就可以看到 Hello World
+
+##命名空间
+```php
+use YrPHP\Controller;
+```
+
+表示引入 YrPHP\Controller 命名空间便于直接使用。所以，
+
+```php
+use YrPHP\Controller;
+
+class Test extends Controller
+```
+
+等同于使用：
+
+```php
+class Test extends YrPHP\Controller
+```
+
+
+
+## 规则
+1. 文件名必须是：***类名***.class.php
+2. ***类名首字母必须大写***
+3. 必须继承Controller类，可以重写Controller类（这在扩展中再说）
+
+# 依赖注入
+```php
+<?php
+use YrPHP\Controller;
+
+class Test extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+    }
+
+    function  index(Request $request,$id,$name)
+    {
+      $data=$request->get();
+      var_export($data);
+      echo $id.$name;
+    }
+```
+>当调用控制器时会自动填充参数，如上$request为Request类，$id为URL多于字段的第一个，$name为多于字段第二个，以此类推
+>如访问example.com//test/index/1/kwin?s=2&page=3 $data=['s'=>2,'page'=>3],$id=1,$name='kwin'
+
+# 配置
+
+默认的配置文件在BASE_PATH/config/config.php
+如需修改相关配置
+
+如果设置了***APP_MODE***
+则在APP_PATH/config***_APP_MODE***.php中修改相关配置
+否则
+在APP_PATH/config_APP.php中修改相关配置
+
+yrPHP框架中所有配置文件的定义格式均采用返回**PHP数组**的方式，格式为：
+```php
+ //项目配置文件
+return [
+  'urlType'  => '2', //URL访问模式
+   'defaultCtl' => 'Index', // 默认控制器名称
+   //更多配置参数
+   //...
+  ];
+```
+
+## 读取配置
+
+无论何种配置文件，定义了配置文件之后，都统一使用系统提供的C方法（可以借助Config单词来帮助记忆）来读取已有的配置。
+
+获取已经设置的参数值：**C('参数名称')**
+
+> 除config.php文件外，其他文件可以用C('fileName.param')获取
+
+```php
+$charset = C('charset');//获得配置中的编码格式 =>YrPHP\Config::get('charset');两者等同
+```
+
+如果`charset`尚未存在设置，则返回NULL。
+
+> 支持设置默认值例如：
+
+```php
+C('my_config','default_config');
+```
+
+>如果不传参数 则返回所有配置信息
+
+```php
+$config = C();//return array;
+```
+
+## 动态配置
+
+>设置新的值 如果存在则覆盖，否则新建：
+
+```php
+YrPHP\Config::set('参数名称','新的参数值');
+
+YrPHP\Config::set("openCache",false);//关闭数据库缓存，只在该次请求有效
+```
+
+
+
+## 批量设置：
+
+```php
+YrPHP\Config::set(array(key=>value,key1=>value1));
+```
+
+## 加载配置文件
+```php
+YrPHP\Config::load('config_test');//=>APP_PATH . 'config/config_test.php'
+```
+
+
+# 视图
+
+## 配置
+```php
+'modelDir' =>  "Models", //设置模型目录位置
+
+/--------------------以下是模版配置---------------------------------------/
+
+'setTemplateDir' => APP_PATH . "views/", //设置模板目录位置
+
+'setCompileDir' => APP_PATH . "runtime/compile_tpl/", //设置模板被编译成PHP文件后的文件位置
+
+'auto_literal' => false, //忽略限定符周边的空白
+
+'caching' => 1, //缓存开关 1开启，0为关闭
+
+'setCacheDir' => (APP_PATH . "runtime/cache/"), //设置缓存的目录
+
+'cacheLifetime' => 60 * 60 * 24 * 7, //设置缓存的时间 0表示永久
+
+'leftDelimiter' => "{", //模板文件中使用的“左”分隔符号
+
+'rightDelimiter' => "}", //模板文件中使用的“右”分隔符号
+
+```
+
+
+
+
+### 加载视图
+display($fileName, $tplVars = '', $cacheId = '');
+
+>$fileName 提供模板文件的文件名
+>$tpl_var 动态数据
+>$cacheId 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
+
+
+
+
+
+```php
+return \view::display('name');
+```
+
+>上面的 <var>name</var> 便是你的视图文件的名字 如 index.html。
+
+
+
+### 给视图添加动态数据
+```php
+\view::assign('name','yrPHP');//赋值单个数据
+
+//等同于
+
+return \view::display('name',array('name'=>'yrPHP'));
+```
+
+
+
+### 视图缓存
+>以下参数可用于视图缓存
+
+```php
+protected $caching = true;   //bool 设置缓存是否开启 配置中可设置
+
+protected $cacheLifeTime = 3600;  //定义缓存时间 配置中可设置
+
+protected $cacheDir;      //定义生成的缓存文件路径 配置中可设置
+
+protected $cacheSubDir;   //定义生成的缓存文件的子目录默认为控制器名
+
+protected $cacheFileName; //定义生成的缓存文件名 默认为方法名
+
+private $cacheFile;      //最后形成的缓存完整路径 根据前面参数生成
+```
+
+
+# 模版
+## 模版继承
+
+#### 控制器中调用
+
+```
+<?php
+/**
+ * Created by YrPHP.
+ * User: Kwin
+ * QQ:284843370
+ * Email:kwinwong@hotmail.com
+ */
+namespace App\Controllers;
+
+use YrPHP\Controller;
+
+class Index extends Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+
+    }
+
+
+    function index()
+    {
+        $m = M('users');
+        $all =$m->all();
+       return \view::display('index',['data'=>$all]);
+
+    }
+}
+```
+
+
+
+#### 定义页面布局layout.php
+
+```php
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+{yield body}
+
+</body>
+</html>
+```
+
+#### 继承页面布局 index.php
+
+```php
+{extends layout}
+
+{section body}
+{require test}
+{endsection}
+
+
+{section test}
+123456
+{endsection}
+```
+
+>由于layout中没有test内容区块 所以section test中的内容不会显示
+
+####  test.php
+
+```php
+<h1>hello world</h1>
+
+<div>
+    {foreach($data as $k=>$v)}
+    {=$v->userName}
+    {/foreach}
+</div>
+```
+
+
+
+#### 最后解析成：
+
+```php
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+  
+<h1>hello world</h1>
+
+<div>
+    <?php foreach($data as $k=>$v){?>
+    <?php echo $v->userName;?>
+    <?php } ?>
+</div>
+
+</body>
+</html>
+```
+
+
+
+## 变量输出
+
+在模板中输出变量的方法很简单，例如，在控制器中我们给模板变量赋值：
+
+```php
+{=$test}
+```
+
+
+模板编译后的结果就是：
+
+```php
+<?php echo $test;?>
+```
+
+
+
+## 输出函数返回值
+
+```php
+{=getUrl('public/css/style.css')}
+```
+
+>注意模板标签的`{`和`=`之间不能有任何的空格，否则标签无效。
+
+## 运算符
+```php
+{$i++}
+
+{$i--}
+
+{--$i}
+
+{++$i}
+
+```
+
+
+
+## 包含文件
+```php
+{include header.html}
+
+{require footer.html}
+```
+
+
+
+## 赋值
+
+```php
+{assign $name='yrPHP'}
+
+{$name}
+```
+
+>注意模板标签的`assign`和`$`之间必须有空格，否则标签无效。
+
+#### 将函数赋值
+```php
+{assign $config = C()}
+```
+
+
+
+## 判断
+```php
+{assign $i=10}
+
+{if($i>=90)}
+
+优秀
+
+{elseif($i>=80)}
+
+良
+
+{else if( $i >= 60 )}
+
+及格
+
+{else}
+
+不及格
+
+{/if}
+
+```
+
+
+
+
+## 循环
+####foreach
+```php
+{assign $config = C()}
+
+{foreach (config as k=>$v)}
+
+<tr>
+{if ($k=='openCache')}
+{break}
+{/if}
+<td>{=$k}</td>
+<td>{=$v}---</td>
+</tr>
+
+{/foreach}
+
+```
+
+
+
+
+### for
+```php
+{for(i=0;i<10;$i++)}
+
+{if($i==5)}
+
+{continue}
+
+{/if}
+
+{=$i}
+
+<br/>
+
+{/for}
+```
+
+
+
+
+### while
+```php
+{assign $i=10}
+
+{while($i)}
+
+{=$i}
+
+</br>
+
+{$i--}
+
+{/while}
+
+```
+
+
+
+## 使用php代码
+```php
+<?php echo "Hello World";?>
+```
+
+
+
+
+
+## 自定义标签
+####在配置文件tabLib.php文件中自定义标签
+```php
+/*
+
+系统将自动添加定界符，其他同正则表达式
+
+如下 在模版中调用方式为 {=dump $a}
+
+*/
+
+return array(
+
+'=dump\s(.)\s*' => "<?php var_dump( \1);?>",
+
+);
+```
+
+
+
+
+#### 使用
+```php
+<?php
+
+use YrPHP\Controller;
+
+class MyController extends Controller
+
+{
+
+function __construct()
+{
+    parent::__construct();
+}
+
+function index()
+{
+
+$data['arr'] = array(1,2,3,4,5,6);
+
+return \view::display('index.html',$data);
+
+}
+
+}
+
+```
+
+
+#### 在模版中调用
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TEST</title>
+</head>
+
+<body>
+{=dump $a}
+</body>
+
+</html>
+```
+
+## 表单
+
+#### 实例：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TEST</title>
+</head>
+
+<body>
+{=form::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
+{=form::text('name', ['class'=>'input-text'],'默认值')}
+{=form::password('password', ['class'=>'input-text'])}
+{=form::submit('提交')}
+{=form::close()}
+</body>
+
+</html>
+```
+
+#### 开启表单
+
+```
+{=form::open(['url' => 'index.php', 'method' => 'get', 'class' => 'form', 'id' => 'form-article'], $data)}
+
+{=form::close()}
+```
+
+默认表单使用 POST 方法，当然您也可以指定传参其他表单的方法
+
+当填写第二个参数$data（模型）时，当您产生表单元素时，如 text 字段，模型的值将会自动比对到字段名称，并设定此字段值，举例来说，用户模型的 `email` 属性，将会设定到名称为 `email` 的 text 字段的字段值，不仅如此，当 Session 中有与字段名称相符的名称， Session 的值将会优先于模型的值，而优先顺序如下：
+
+1. Session 的数据 (旧的输入值)
+2. 明确传递的数据
+3. 模型属性数据
+
+这样可以允许您快速地建立表单，不仅是绑定模型数据，也可以在服务器端数据验证错误时，轻松的回填用户输入的旧数据！
+
+
+#### CSRF 保护
+
+YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受到 CSRF (跨网站请求伪造) 攻击。首先YrPHP会自动在用户的 session中放置随机的token，别担心这些会自动完成。如果你调用了=form::open方法，这个 CSRF 参数会用隐藏字段的方式自动加到您的表单中。另外，您也可以使用 token 方法去产生这个隐藏的 CSRF 字段的 HTML 标签：
+
+```
+{=form::token()}
+```
+
+#### 标签（Label）
+
+```
+{=form::label('name', '姓名', array('class' => 'name'))}
+```
+
+> **注意：** 在建立标签时，任何您建立的表单元素名称与标签相符时，将会自动在 ID 属性建立与标签名称相同的 ID。
+
+#### 文字字段
+
+```
+{=form::text('name', array('class' => 'input-text'), '默认值')}
+```
+> 默认ID为字段名，如上如果没有在第二个参数中指定ID，则ID为name
+
+#### 多行文本域
+
+```
+{=form::textarea('desc', array('class' => 'input-text','size'=>50,10), '默认值')}
+```
+>size 50为cols,10为rows，cols和rows默认就是50*10
+
+
+
+#### 密码字段
+
+```
+{=form::password('name', array('class' => 'input-text'))}
+```
+
+#### 隐藏域
+
+```
+{=form::hidden('name', '默认值' , array('class' => '

@@ -1,7 +1,13 @@
+   * [简介](#简介)
    * [安装YrPHP](#安装yrphp)
             * [通过 Composer Create-Project](#通过-composer-create-project)
             * [Git安装](#git安装)
             * [测试](#测试)
+   * [目录结构](#目录结构)
+   * [人口文件](#人口文件)
+   * [应用目录](#应用目录)
+         * [系统核心常量](#系统核心常量)
+   * [核心](#核心)
       * [路由](#路由)
          * [基本路由](#基本路由)
             * [为多重动作注册路由](#为多重动作注册路由)
@@ -32,15 +38,39 @@
    * [中间件](#中间件-1)
       * [创建一个中间件](#创建一个中间件)
       * [调用](#调用)
+      * [规则](#规则)
    * [依赖注入](#依赖注入)
+   * [配置](#配置)
+      * [读取配置](#读取配置)
+      * [动态配置](#动态配置)
+      * [批量设置：](#批量设置)
+      * [加载配置文件](#加载配置文件)
+   * [视图](#视图)
+      * [配置](#配置-1)
+         * [加载视图](#加载视图)
          * [给视图添加动态数据](#给视图添加动态数据)
+         * [视图缓存](#视图缓存)
+   * [模版](#模版)
       * [模版继承](#模版继承)
             * [控制器中调用](#控制器中调用)
             * [定义页面布局layout.php](#定义页面布局layoutphp)
             * [继承页面布局 index.php](#继承页面布局-indexphp)
             * [test.php](#testphp)
             * [最后解析成：](#最后解析成)
+      * [变量输出](#变量输出)
+      * [输出函数返回值](#输出函数返回值)
+      * [运算符](#运算符)
       * [包含文件](#包含文件)
+      * [赋值](#赋值)
+            * [将函数赋值](#将函数赋值)
+      * [判断](#判断)
+      * [循环](#循环)
+         * [for](#for)
+         * [while](#while)
+      * [使用php代码](#使用php代码)
+      * [自定义标签](#自定义标签)
+            * [使用](#使用)
+            * [在模版中调用](#在模版中调用)
       * [表单](#表单)
             * [实例：](#实例)
             * [开启表单](#开启表单)
@@ -53,18 +83,50 @@
             * [复选框、单选按钮](#复选框单选按钮)
             * [下拉框](#下拉框)
             * [按钮](#按钮)
+   * [模型](#模型)
+      * [数据库配置](#数据库配置)
+      * [模型定义](#模型定义)
+      * [模型实例化](#模型实例化)
                * [M(['模型名']);](#m模型名)
       * [CURL](#curl)
          * [Active Record 模式](#active-record-模式)
+            * [删除数据DELETE](#删除数据delete)
+            * [修改数据](#修改数据)
+            * [查询数据](#查询数据)
+      * [事务](#事务)
+      * [错误调试](#错误调试)
+      * [数据缓存](#数据缓存)
+      * [数据库缓存](#数据库缓存)
+            * [在配置文件中配置数据库相关配置](#在配置文件中配置数据库相关配置)
       * [使用多数据库连接](#使用多数据库连接)
       * [数据预处理——访问器和修改器](#数据预处理访问器和修改器)
          * [定义一个访问器](#定义一个访问器)
          * [定义一个修改器](#定义一个修改器)
    * [表单验证](#表单验证)
+   * [系统函数](#系统函数)
+   * [创造自己的类库](#创造自己的类库)
+      * [loadClass($className)以单例模式实例化类](#loadclassclassname以单例模式实例化类)
+   * [系统类库(YrPHP/Libs)](#系统类库yrphplibs)
+      * [加密类     Crypt](#加密类-----crypt)
+            * [配置密钥](#配置密钥)
+            * [加密解密](#加密解密)
       * [数组类](#数组类)
+      * [文件处理类 File](#文件处理类-file)
+      * [文件上传类 Uoload](#文件上传类-uoload)
+            * [上传配置设置](#上传配置设置)
+            * [init($config)参数初始化](#initconfig参数初始化)
+            * [uploadFile($field)文件上传](#uploadfilefield文件上传)
+            * [getFileInfo($inputName=null);获得上传文件相关属性](#getfileinfoinputnamenull获得上传文件相关属性)
+            * [getError($errorCode = null)](#geterrorerrorcode--null)
+      * [图像处理类 Image](#图像处理类-image)
+      * [CURL类     Curl](#curl类-----curl)
+      * [验证码类   VerifyCode](#验证码类---verifycode)
+      * [分页类](#分页类)
+      * [验证类     Validate](#验证类-----validate)
+      * [购物车类   Cart](#购物车类---cart)
+      * [Email 类   PHPMailer](#email-类---phpmailer)
 
-
-#简介
+# 简介
 
 yrPHP运用大量的单例及工厂模式，确保用最少的资源做最多的事，采用了composer自动加载，无需手动加载类库文件，还集成了缓存技术及页面静态化技术，确保运行速度及响应速度
 
@@ -115,7 +177,7 @@ http://localhost:8000
 
 至此，YrPHP已经安装成功。
 
-#目录结构
+# 目录结构
 
 www  WEB部署目录（或者子目录）
 
@@ -133,7 +195,7 @@ www  WEB部署目录（或者子目录）
 
 ```
 
-#人口文件
+# 人口文件
 index.php
 ```php
     <?php
@@ -148,7 +210,7 @@ index.php
 > 注意：APP的定义必须是当前目录下的文件名,不需要标明路径
 > 系统会在第一次调用时 自动生成项目目录结构
 
-#应用目录
+# 应用目录
 
 www  WEB部署目录（或者子目录）
 
@@ -171,19 +233,19 @@ www  WEB部署目录（或者子目录）
 
 
 
-###系统核心常量
+### 系统核心常量
 
-| 常量        | 描述                 |
-| --------- | ------------------ |
-| ROOT_PATH | 项目根路径绝对路径          |
-| BASE_PATH | 框架目录绝对路径           |
-| APP_PATH  | 用户项目目录绝对路径         |
+| 常量      | 描述                           |
+| --------- | ------------------------------ |
+| ROOT_PATH | 项目根路径绝对路径             |
+| BASE_PATH | 框架目录绝对路径               |
+| APP_PATH  | 用户项目目录绝对路径           |
 | CORE_PATH | 框架核心类库目录绝对路径       |
-| LIBS_PATH | 框架集成常用类库目录绝对路径     |
-| APP_MODE  | 应用模式               |
+| LIBS_PATH | 框架集成常用类库目录绝对路径   |
+| APP_MODE  | 应用模式                       |
 | DEBUG     | 是否开启调试模式 （默认false） |
 
-#核心
+# 核心
 
 ## 路由
 
@@ -443,15 +505,15 @@ Route::resource('photos', 'PhotosController');
 
 #### 由资源控制器处理的行为
 
-| 动词        | 路径                     | 行为（方法） | 路由名称          |
-| --------- | ---------------------- | ------ | ------------- |
-| GET       | `/photos`              | index  | photos.index  |
-| GET       | `/photos/create`       | create | photos.create |
-| POST      | `/photos`              | save   | photos.save   |
-| GET       | `/photos/{photo}`      | show   | photos.show   |
-| GET       | `/photos/{photo}/edit` | edit   | photos.edit   |
-| PUT/PATCH | `/photos/{photo}`      | update | photos.update |
-| DELETE    | `/photos/{photo}`      | delete | photos.delete |
+| 动词      | 路径                   | 行为（方法） | 路由名称      |
+| --------- | ---------------------- | ------------ | ------------- |
+| GET       | `/photos`              | index        | photos.index  |
+| GET       | `/photos/create`       | create       | photos.create |
+| POST      | `/photos`              | save         | photos.save   |
+| GET       | `/photos/{photo}`      | show         | photos.show   |
+| GET       | `/photos/{photo}/edit` | edit         | photos.edit   |
+| PUT/PATCH | `/photos/{photo}`      | update       | photos.update |
+| DELETE    | `/photos/{photo}`      | delete       | photos.delete |
 
 #### 部分资源路由
 
@@ -826,7 +888,7 @@ class Test extends YrPHP\Controller
 
 
 
-##规则
+## 规则
 1. 文件名必须是：***类名***.class.php
 2. ***类名首字母必须大写***
 3. 必须继承Controller类，可以重写Controller类（这在扩展中再说）
@@ -853,7 +915,7 @@ class Test extends Controller
 >当调用控制器时会自动填充参数，如上$request为Request类，$id为URL多于字段的第一个，$name为多于字段第二个，以此类推
 >如访问example.com//test/index/1/kwin?s=2&page=3 $data=['s'=>2,'page'=>3],$id=1,$name='kwin'
 
-#配置
+# 配置
 
 默认的配置文件在BASE_PATH/config/config.php
 如需修改相关配置
@@ -874,7 +936,7 @@ return [
   ];
 ```
 
-##读取配置
+## 读取配置
 
 无论何种配置文件，定义了配置文件之后，都统一使用系统提供的C方法（可以借助Config单词来帮助记忆）来读取已有的配置。
 
@@ -900,7 +962,7 @@ C('my_config','default_config');
 $config = C();//return array;
 ```
 
-##动态配置
+## 动态配置
 
 >设置新的值 如果存在则覆盖，否则新建：
 
@@ -912,21 +974,21 @@ YrPHP\Config::set("openCache",false);//关闭数据库缓存，只在该次请�
 
 
 
-##批量设置：
+## 批量设置：
 
 ```php
 YrPHP\Config::set(array(key=>value,key1=>value1));
 ```
 
-##加载配置文件
+## 加载配置文件
 ```php
 YrPHP\Config::load('config_test');//=>APP_PATH . 'config/config_test.php'
 ```
 
 
-#视图
+# 视图
 
-##配置
+## 配置
 ```php
 'modelDir' =>  "Models", //设置模型目录位置
 
@@ -953,12 +1015,12 @@ YrPHP\Config::load('config_test');//=>APP_PATH . 'config/config_test.php'
 
 
 
-###加载视图
+### 加载视图
 display($fileName, $tplVars = '', $cacheId = '');
 
 >$fileName 提供模板文件的文件名
-> $tpl_var 动态数据
-> $cacheId 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
+>$tpl_var 动态数据
+>$cacheId 当$cacheId为false时，不会生成缓存文件，其他情况做为缓存ID,当有个文件有多个缓存时，$cacheId不能为空，否则会重复覆盖
 
 
 
@@ -983,7 +1045,7 @@ return \view::display('name',array('name'=>'yrPHP'));
 
 
 
-###视图缓存
+### 视图缓存
 >以下参数可用于视图缓存
 
 ```php
@@ -1001,7 +1063,7 @@ private $cacheFile;      //最后形成的缓存完整路径 根据前面参数�
 ```
 
 
-#模版
+# 模版
 ## 模版继承
 
 #### 控制器中调用
@@ -1118,7 +1180,7 @@ class Index extends Controller
 
 
 
-##变量输出
+## 变量输出
 
 在模板中输出变量的方法很简单，例如，在控制器中我们给模板变量赋值：
 
@@ -1135,7 +1197,7 @@ class Index extends Controller
 
 
 
-##输出函数返回值
+## 输出函数返回值
 
 ```php
 {=getUrl('public/css/style.css')}
@@ -1143,7 +1205,7 @@ class Index extends Controller
 
 >注意模板标签的`{`和`=`之间不能有任何的空格，否则标签无效。
 
-##运算符
+## 运算符
 ```php
 {$i++}
 
@@ -1166,7 +1228,7 @@ class Index extends Controller
 
 
 
-##赋值
+## 赋值
 
 ```php
 {assign $name='yrPHP'}
@@ -1176,14 +1238,14 @@ class Index extends Controller
 
 >注意模板标签的`assign`和`$`之间必须有空格，否则标签无效。
 
-####将函数赋值
+#### 将函数赋值
 ```php
 {assign $config = C()}
 ```
 
 
 
-##判断
+## 判断
 ```php
 {assign $i=10}
 
@@ -1210,7 +1272,7 @@ class Index extends Controller
 
 
 
-##循环
+## 循环
 ####foreach
 ```php
 {assign $config = C()}
@@ -1232,7 +1294,7 @@ class Index extends Controller
 
 
 
-###for
+### for
 ```php
 {for(i=0;i<10;$i++)}
 
@@ -1252,7 +1314,7 @@ class Index extends Controller
 
 
 
-###while
+### while
 ```php
 {assign $i=10}
 
@@ -1270,7 +1332,7 @@ class Index extends Controller
 
 
 
-##使用php代码
+## 使用php代码
 ```php
 <?php echo "Hello World";?>
 ```
@@ -1279,7 +1341,7 @@ class Index extends Controller
 
 
 
-##自定义标签
+## 自定义标签
 ####在配置文件tabLib.php文件中自定义标签
 ```php
 /*
@@ -1300,7 +1362,7 @@ return array(
 
 
 
-####使用
+#### 使用
 ```php
 <?php
 
@@ -1329,7 +1391,7 @@ return \view::display('index.html',$data);
 ```
 
 
-####在模版中调用
+#### 在模版中调用
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -1378,7 +1440,7 @@ return \view::display('index.html',$data);
 
 默认表单使用 POST 方法，当然您也可以指定传参其他表单的方法
 
-当填写第二个参数$data（模型）时，当您产生表单元素时，如 text 字段，模型的值将会自动比对到字段名称，并设定此字段值，举例来说，用户模型的 `email` 属性，将会设定到名称为 `email` 的 text 字段的字段值，不仅如此，当 Session 中有与字段名称相符的名称， Session 的值将会优先于模型的值，而优先顺序如下：
+当填写第二个参数$data（模型）时，当您产生表单元素时，如 text 字段，模型的值将会自动比对到字段名称，并设定此字段值，举例来说，用户模型的 `email` 属性，将会设定到名称为 `email` 的 text 字段的字段值，不仅如此，当 Session 中有与字段名称相符的名称， Session 的值将会优先于模型的值，而优先顺序如下：
 
 1. Session 的数据 (旧的输入值)
 2. 明确传递的数据
@@ -1401,7 +1463,7 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 {=form::label('name', '姓名', array('class' => 'name'))}
 ```
 
-> **注意：** 在建立标签时，任何您建立的表单元素名称与标签相符时，将会自动在 ID 属性建立与标签名称相同的 ID。
+> **注意：** 在建立标签时，任何您建立的表单元素名称与标签相符时，将会自动在 ID 属性建立与标签名称相同的 ID。
 
 #### 文字字段
 
@@ -1453,9 +1515,9 @@ YrPHP提供了一个简易的方法，让您可以保护您的应用程序不受
 {=form::button('name',['class'=>'button'])}
 ```
 
-#模型
+# 模型
 
-##数据库配置
+## 数据库配置
 
 ```php
 <?php
@@ -1525,7 +1587,7 @@ return [
 >否则
 >在APP_PATH/database.php中修改相关配置
 
-##模型定义
+## 模型定义
 
 > 模型类并非必须定义，只有当存在独立的业务逻辑或者属性的时候才需要定义。
 > 文件名为**模型名.class.php**  UserModel的文件名为**UserModel.class.php**
@@ -1549,7 +1611,7 @@ class UserModel extends Model
 ```
 
 
-##模型实例化
+## 模型实例化
 
 ##### M(['模型名']);
 >模型名是为选填 如果为空则实例化父类。
@@ -1603,7 +1665,7 @@ class UserModel extends Model
 ------------
 
 
-####删除数据DELETE
+#### 删除数据DELETE
 
 > **$this->delete(条件);**
 
@@ -1659,7 +1721,7 @@ class UserModel extends Model
         }
 ```
 
-####修改数据
+#### 修改数据
 ```php
 $this->update(array 数据，array 条件);
 //return int 受影响行数
@@ -1668,7 +1730,7 @@ $this->update(array 数据，array 条件);
 
 
 
-####查询数据
+#### 查询数据
 
 **FIND**
 >**find($id = 0, $assoc = false)
@@ -1758,8 +1820,8 @@ $this->limit(1)->all();
 **WHERE**
 >where($where = '', $logical = "and")
 >
-> @param $logical 与前一个条件的连接符
-> @param $where string|array
+>@param $logical 与前一个条件的连接符
+>@param $where string|array
 >string "id>'100'"   `->`     where id>'100'**
 >
 >array($field=>$value)
@@ -1821,10 +1883,10 @@ $this->group('id')->having(array('id >'=>'2000'))->get('users');
 
 **JOIN**
 >**join($table, $cond, $type = '', $auto = true)
-> @param $table 表名
-> @param $cond  连接条件 同where
-> @param string $type 连接方式
-> @param bool $auto 是否自动添加表前缀**
+>@param $table 表名
+>@param $cond  连接条件 同where
+>@param string $type 连接方式
+>@param bool $auto 是否自动添加表前缀**
 
 
 ```php
@@ -1958,7 +2020,7 @@ $re = $db->query("update yrp_users name='nathan' where id=500")->rowCount();
 //修改 返回受影响的行数
 ```
 
-##事务
+## 事务
 
 ####要使用事务来运行你的查询, 你可以使用如下方法:
 1. startTrans(); 开启事务
@@ -2007,14 +2069,14 @@ $m->rollback();
 
 
 
-##错误调试
+## 错误调试
 ```php
 $db = M();
 $error = $db->error();//返回的是一个数组array
 var_export($error);
 ```
 
-##数据缓存
+## 数据缓存
 ```php
 //获得缓存实例 $dbCacheType 缓存驱动，有file memcache、memcached、redis,默认为file
 $cache = core\cache::getInstance($dbCacheType = null);
@@ -2052,9 +2114,9 @@ $cache->set($key, $val, $timeout = null);
 ```
 
 
-##数据库缓存
+## 数据库缓存
 
-####在配置文件中配置数据库相关配置
+#### 在配置文件中配置数据库相关配置
 
 ```php
 return array(
@@ -2090,7 +2152,7 @@ echo $db->lastQuery();
 
 ## 使用多数据库连接
 
-当你使用了多个连接时，则可以通过  `connection` 方法来访问每个连接。传递给 `connection` 方法的 `name` 必须对应至 `config/database.php` 配置文件中的连接列表的其中一个：
+当你使用了多个连接时，则可以通过  `connection` 方法来访问每个连接。传递给 `connection` 方法的 `name` 必须对应至 `config/database.php` 配置文件中的连接列表的其中一个：
 
 ```php
 $users = M()->connection('foo')->select(...);
@@ -2102,7 +2164,7 @@ $users = M()->connection('foo')->select(...);
 
 ### 定义一个访问器
 
-若要定义一个访问器，则必须在你的模型上创建一个 `getFooAttribute` 方法。要访问的 `Foo` 字段需使用「驼峰式」来命名。在这个例子中，我们将为 `first_name` 属性定义一个访问器。当 Eloquent 尝试获取 `first_name` 的值时，将会自动调用此访问器：
+若要定义一个访问器，则必须在你的模型上创建一个 `getFooAttribute` 方法。要访问的 `Foo` 字段需使用「驼峰式」来命名。在这个例子中，我们将为 `first_name` 属性定义一个访问器。当 Eloquent 尝试获取 `first_name` 的值时，将会自动调用此访问器：
 
 ```php
 <?PHP
@@ -2131,7 +2193,7 @@ class User extends Model
 }
 ```
 
-如你所见的，字段原始的值被传递到访问器中，让你可以操作并返回结果。如果要访问被修改的值，则可以像这样来访问 `first_name` 属性：
+如你所见的，字段原始的值被传递到访问器中，让你可以操作并返回结果。如果要访问被修改的值，则可以像这样来访问 `first_name` 属性：
 
 ```php
 $user = M('User')->find(1);
@@ -2146,7 +2208,7 @@ $user = M('User')->closePreProcess()->find(1);
 
 ### 定义一个修改器
 
-若要定义一个修改器，则必须在模型上定义一个 `setFooAttribute` 方法。要访问的 `Foo` 字段需使用「驼峰式」来命名。让我们再来定义 `first_name` 属性的修改器。当我们尝试在模型上设置 `first_name` 的值时，将会自动调用此修改器：
+若要定义一个修改器，则必须在模型上定义一个 `setFooAttribute` 方法。要访问的 `Foo` 字段需使用「驼峰式」来命名。让我们再来定义 `first_name` 属性的修改器。当我们尝试在模型上设置 `first_name` 的值时，将会自动调用此修改器：
 
 ```php
 <?php
@@ -2170,7 +2232,7 @@ class User extends Model
 }
 ```
 
-修改器会获取属性已经被设置的值，让你可以操作该值并将其设置到 Eloquent 模型内部的 `$attributes` 属性上。举个例子，如果我们尝试将 `first_name` 属性设置成 `Sally`：
+修改器会获取属性已经被设置的值，让你可以操作该值并将其设置到 Eloquent 模型内部的 `$attributes` 属性上。举个例子，如果我们尝试将 `first_name` 属性设置成 `Sally`：
 
 ```php
 $user = Model('User')->insert(['first_name'=>'Sally'])；
@@ -2179,7 +2241,7 @@ $user = Model('User')->insert(['first_name'=>'Sally'])；
 $user = M('User')->closePreProcess()->insert(['first_name'=>'Sally'])；
 ```
 
-在这个例子中，`setFirstNameAttribute` 函数将会使用 `Sally` 作为参数来调用。修改器会对该名字使用`strtolower` 函数并将其值返回。
+在这个例子中，`setFirstNameAttribute` 函数将会使用 `Sally` 作为参数来调用。修改器会对该名字使用`strtolower` 函数并将其值返回。
 
 ------------
 
@@ -2260,7 +2322,7 @@ class Index extends Controller
     }
 ```
 
-#系统函数
+# 系统函数
 
 ```php
 <?php
@@ -2485,7 +2547,7 @@ function parseNaming($name = '', $type = 0){}
 ```
 
 ------------
-#创造自己的类库
+# 创造自己的类库
 将你自己的 .php 文件放入`APP_PATH`/Libs
 文件的命名规则为`类名.php`,类名不能与系统类库（`LIBS_PATH`）下的类重名
 
@@ -2532,20 +2594,20 @@ function parseNaming($name = '', $type = 0){}
         }
 ```
 
-##loadClass($className)以单例模式实例化类
+## loadClass($className)以单例模式实例化类
 >请确保类名正确 **区分大小写**
 
 
 
-#系统类库(YrPHP/Libs)
+# 系统类库(YrPHP/Libs)
 > **所有系統类都注冊了别名，可以直接在控制器中用`别名::方法名()`来调用**
 > **如： `crypt::encrypt($str)`**
 >
 > **当然自定义的类，在Config/class_alias.php中注册了别名，也可以这样调用**
 
-##加密类     Crypt
+## 加密类     Crypt
 
-####配置密钥
+#### 配置密钥
 >在`APP_PATH`.config/config.php下配置
 
 ```PHP
@@ -2557,7 +2619,7 @@ function parseNaming($name = '', $type = 0){}
     );
 ```
 
-####加密解密
+#### 加密解密
 ```PHP
 <?PHP
   $crypt = loadClass('YrPHP\Crypt');
@@ -2658,7 +2720,7 @@ class Arr
 
 
 
-##文件处理类 File
+## 文件处理类 File
 
 ```php
 <?php
@@ -2826,28 +2888,28 @@ YrPHP\File::dirNodeTree($dir);
 YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
 ```
 
-##文件上传类 Uoload
+## 文件上传类 Uoload
 >支持多文件上传
 
-####上传配置设置
-| key          | 值选项     | 说明                                       |
-| ------------ | ------- | ---------------------------------------- |
+#### 上传配置设置
+| key          | 值选项  | 说明                                                         |
+| ------------ | ------- | ------------------------------------------------------------ |
 | maxSize      | int     | 最大的上传文件 KB 默认为0 不限制 　　注意：通常PHP也有这项限制，可以在php.ini文件中指定。通常默认为2MB。 |
-| savePath     | `/`     | 上传目录 默认`/`根目录                            |
-| fileName     | None    | 自定义上传文件后的名称，不含文件后缀                       |
-| allowedTypes | array() | 允许上传文件的后缀列表默认空数组为允许所有                    |
-| isRandName   | BOOL    | 设置是否随机重命名文件， false不随机 默认 true            |
-| overwrite    | BOOL    | 是否覆盖。true则覆盖，false则重命名 　默认false          |
+| savePath     | `/`     | 上传目录 默认`/`根目录                                       |
+| fileName     | None    | 自定义上传文件后的名称，不含文件后缀                         |
+| allowedTypes | array() | 允许上传文件的后缀列表默认空数组为允许所有                   |
+| isRandName   | BOOL    | 设置是否随机重命名文件， false不随机 默认 true               |
+| overwrite    | BOOL    | 是否覆盖。true则覆盖，false则重命名 　默认false              |
 
 ------------
 
 
-####init($config)参数初始化
+#### init($config)参数初始化
 
-####uploadFile($field)文件上传
+#### uploadFile($field)文件上传
 >@param 表单名称 $field，上传文件的表单名称  如果为空则上传 $_FILES数组中所有文件
 
-####getFileInfo($inputName=null);获得上传文件相关属性
+#### getFileInfo($inputName=null);获得上传文件相关属性
 >inputName 表单名 如果为多文件上传 则在表单名后面跟下标
 >如果inputName==null 则返回一个以表单名为键的多维数组 return array(inputName1=>array(),inputName2=>array(),...)
 >
@@ -2857,7 +2919,7 @@ YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
 >
 >否则 return 包括以下单元的数组 array ：fileName(最终文件名包含后缀)、fileType(文件mime类型)、filePath(包含文件名的完整路径)、origName(上传前的文件名)、fileExt(文件后缀)、 fileSize(文件大小KB)、isImage(是否是图片bool)、imgWidth(图片宽度)、imgHeight(图片高度)
 
-####getError($errorCode = null)
+#### getError($errorCode = null)
 >$errorCode 根据错误代码获得上传出错信息
 
 ```php
@@ -2878,7 +2940,7 @@ YrPHP\File::dirTree($dir, $parentid = 0, $dirs = array())；
 
 ```
 
-##图像处理类 Image
+## 图像处理类 Image
 >支持连贯操作
 
 ####缩略图
@@ -2977,7 +3039,7 @@ $img = loadClass('YrPHP\Image','D:/test.jpg');//实例化 并打开test.jpg图�
   //其他 显示 下载 保存同上
 ```
 
-##CURL类     Curl
+## CURL类     Curl
 >支持连贯操作
 
 ```php
@@ -3106,31 +3168,31 @@ var_dump($data);
 ```
 
 
-##验证码类   VerifyCode
+## 验证码类   VerifyCode
 ```php
 //配置，以下均为默认值
-$conf= array(
-'width' =>100;//图片宽度
-'height' =>40;//图片高度
-'size' =>21;//字体大小
+$conf= array(
+'width' =>100;//图片宽度
+'height' =>40;//图片高度
+'size' =>21;//字体大小
 'font'=>'yrphp/resource/font/1.ttf';//字体
-'len' =>4;//随机字符串长度
-'type';//默认是大小写数字混合型，1 2 3 分别表示 小写、大写、数字型
-'backColor' => '#eeeeee';     //背景色，默认是浅灰色
-'pixelNum' => 666; //干扰点个数
-'lineNum'=> 10; //干扰线条数
+'len' =>4;//随机字符串长度
+'type';//默认是大小写数字混合型，1 2 3 分别表示 小写、大写、数字型
+'backColor' => '#eeeeee';     //背景色，默认是浅灰色
+'pixelNum' => 666; //干扰点个数
+'lineNum'=> 10; //干扰线条数
 );
 
 /**
-* @param string $code 验证码key,用于session获取，默认verify
-* @param bool $line 是否显示干扰线
-* @param bool $pixel 是否显示干扰点
-    */
-   //参数可以在实例化时传入 也可以调用init方法初始化时调用
-   loadClass('YrPHP\VerifyCode',$conf)->show($code = 'verify', $line = true, $pixel = true);
+* @param string $code 验证码key,用于session获取，默认verify
+* @param bool $line 是否显示干扰线
+* @param bool $pixel 是否显示干扰点
+    */
+   //参数可以在实例化时传入 也可以调用init方法初始化时调用
+   loadClass('YrPHP\VerifyCode',$conf)->show($code = 'verify', $line = true, $pixel = true);
 ```
 
-##分页类
+## 分页类
 
 ```php
 //配置，以下均为默认值
@@ -3190,8 +3252,7 @@ $conf= array(
 **生成样式**
 <div><a href="http://example.com/test/page/?key=hello&amp;p=1">首页</a><a href="http://example.com/test/page/?key=hello&amp;p=4">上一页</a><a href="http://example.com/test/page/?key=hello&amp;p=2">2</a><a href="http://example.com/test/page/?key=hello&amp;p=3">3</a><a href="http://example.com/test/page/?key=hello&amp;p=4">4</a><strong><a href="http://example.com/test/page/?key=hello&amp;p=5">5</a></strong><a href="http://example.com/test/page/?key=hello&amp;p=6">6</a><a href="http://example.com/test/page/?key=hello&amp;p=7">7</a><a href="http://example.com/test/page/?key=hello&amp;p=6">下一页</a><a href="http://example.com/test/page/?key=hello&amp;p=9">尾页</a></div>
 
-
-##验证类     Validate
+## 验证类     Validate
 ```php
 <?php
     /**
@@ -3325,7 +3386,7 @@ $conf= array(
       });
       var_dump(YrPHP\Validate::test(3, 2)); //true
 ```
-##购物车类   Cart
+## 购物车类   Cart
 ```php
 <?php
 //配置参数
@@ -3450,7 +3511,7 @@ $cart->remove($rowId);
   ?>
 ```
 
-##Email 类   PHPMailer
+## Email 类   PHPMailer
 ````
 
 ````

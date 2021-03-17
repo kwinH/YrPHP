@@ -31,5 +31,11 @@
     "files": [
       "YrPHP/Helpers/functions.php"
     ]
-  }
+  },
+      "scripts": {
+        "post-create-project-cmd": [
+            "@php artisan ide-help generate",
+            "@php artisan ide-help classAlias"
+        ]
+    }
 }
